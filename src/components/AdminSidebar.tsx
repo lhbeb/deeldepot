@@ -264,7 +264,7 @@ export default function AdminSidebar() {
                     className={`
                       flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200
                       ${active
-                        ? 'bg-[#F5970C] text-white shadow-lg shadow-[#F5970C]/30'
+                        ? 'bg-[#06092a] text-white shadow-lg shadow-[#06092a]/30'
                         : 'text-gray-600 hover:bg-gray-100 hover:text-[#262626]'
                       }
                     `}
@@ -282,7 +282,7 @@ export default function AdminSidebar() {
                       )}
                     </div>
                     {item.badge !== undefined && item.badge > 0 && (
-                      <span className={`text-xs px-2 py-0.5 rounded-full font-semibold min-w-[1.5rem] text-center ${active ? 'bg-white/20 text-white' : 'bg-red-500 text-white'
+                      <span className={`text-xs px-2 py-0.5 rounded-full font-semibold min-w-[1.5rem] text-center ${active ? 'bg-[#F5970C]/20 text-[#F5970C]' : 'bg-red-500 text-white'
                         }`}>
                         {item.badge}
                       </span>
@@ -354,12 +354,12 @@ export default function AdminSidebar() {
                     className={`
                       flex items-center gap-3 px-3 py-2 rounded-xl transition-all duration-200
                       ${active
-                        ? 'bg-[#F5970C]/10 text-[#F5970C] border border-[#F5970C]/20'
+                        ? 'bg-[#06092a] text-white shadow-lg shadow-[#06092a]/30'
                         : 'text-gray-600 hover:bg-gray-50'
                       }
                     `}
                   >
-                    <Icon className={`h-4 w-4 ${active ? 'text-[#F5970C]' : 'text-gray-400'}`} />
+                    <Icon className={`h-4 w-4 ${active ? 'text-white' : 'text-gray-400'}`} />
                     <span className="font-medium text-sm">{item.name}</span>
                   </Link>
                 );

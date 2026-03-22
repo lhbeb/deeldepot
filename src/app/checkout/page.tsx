@@ -90,61 +90,7 @@ const CheckoutPage: React.FC = () => {
     };
   }, []);
 
-  // Hide Tidio chat widget on checkout page
-  useEffect(() => {
-    const hideTidio = () => {
-      const tidioSelectors = [
-        '#tidio-chat-widget',
-        'iframe[src*="tidio"]',
-        '.tidio-chat-widget',
-        'div[id*="tidio"]',
-        '[id*="tidio"]'
-      ];
 
-      tidioSelectors.forEach(selector => {
-        try {
-          const elements = document.querySelectorAll(selector);
-          elements.forEach((el: Element) => {
-            const htmlEl = el as HTMLElement;
-            htmlEl.style.display = 'none';
-            htmlEl.style.visibility = 'hidden';
-            htmlEl.style.opacity = '0';
-            htmlEl.style.pointerEvents = 'none';
-            htmlEl.style.position = 'absolute';
-            htmlEl.style.left = '-9999px';
-          });
-        } catch (e) {
-          // Ignore errors
-        }
-      });
-    };
-
-    // Hide immediately
-    hideTidio();
-
-    // Hide on DOMContentLoaded if not already hidden
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', hideTidio);
-    }
-
-    // Use MutationObserver to catch dynamically loaded Tidio widget
-    const observer = new MutationObserver(hideTidio);
-    observer.observe(document.body, {
-      childList: true,
-      subtree: true,
-      attributes: true,
-      attributeFilter: ['id', 'class', 'src']
-    });
-
-    // Hide periodically as a fallback
-    const interval = setInterval(hideTidio, 500);
-
-    return () => {
-      document.removeEventListener('DOMContentLoaded', hideTidio);
-      observer.disconnect();
-      clearInterval(interval);
-    };
-  }, []);
 
   // Expanded country codes with country names (deduplicated)
   const countryCodes = [

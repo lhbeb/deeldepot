@@ -3,56 +3,6 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Move Tidio chat widget down */
-#tidio-chat-widget,
-iframe[src*="tidio"],
-.tidio-chat-widget,
-div[id*="tidio"] {
-  bottom: 20px !important;
-}
-
-@media (max-width: 1024px) {
-
-  #tidio-chat-widget,
-  iframe[src*="tidio"],
-  .tidio-chat-widget,
-  div[id*="tidio"] {
-    bottom: 90px !important;
-    z-index: 99 !important;
-  }
-}
-
-/* Hide Tidio chat widget on checkout page */
-body:has([href*="/checkout"]) #tidio-chat-widget,
-body:has([href*="/checkout"]) iframe[src*="tidio"],
-body:has([href*="/checkout"]) .tidio-chat-widget,
-body:has([href*="/checkout"]) div[id*="tidio"],
-html[data-page="/checkout"] #tidio-chat-widget,
-html[data-page="/checkout"] iframe[src*="tidio"],
-html[data-page="/checkout"] .tidio-chat-widget,
-html[data-page="/checkout"] div[id*="tidio"],
-/* Direct pathname-based hiding for checkout */
-#tidio-chat-widget[style*="checkout"],
-iframe[src*="tidio"] {
-  display: none !important;
-  visibility: hidden !important;
-  opacity: 0 !important;
-  pointer-events: none !important;
-  position: absolute !important;
-  left: -9999px !important;
-}
-
-/* Additional selector for checkout page specifically */
-@media screen {
-
-  /* This will apply when the pathname includes checkout */
-  #tidio-chat-widget,
-  iframe[src*="tidio"],
-  .tidio-chat-widget,
-  div[id*="tidio"] {
-    /* Will be overridden by inline styles from useEffect */
-  }
-}
 
 /* Ensure sticky checkout buttons stay on top and never get hidden */
 @media (max-width: 1024px) {

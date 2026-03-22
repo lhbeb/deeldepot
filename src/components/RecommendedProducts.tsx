@@ -30,63 +30,18 @@ const RecommendedProducts: React.FC<RecommendedProductsProps> = ({ currentProduc
         // Filter out current product
         let filteredProducts = allProducts.filter((product: Product) => product.slug !== currentProductSlug);
 
-        // Smart recommendation logic
+        // Simplify recommendation logic to rely directly on database collections
         if (currentProduct && filteredProducts.length > 0) {
-          // Extract keywords from title (common words to ignore)
-          const stopWords = ['the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'from', 'as', 'is', 'was', 'are', 'were', 'been', 'be', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could', 'should', 'may', 'might', 'must', 'can'];
-          const titleWords = (currentProduct.title || '').toLowerCase()
-            .split(/\s+/)
-            .filter(word => word.length > 3 && !stopWords.includes(word));
-
-          // Score products based on relevance
-          const scoredProducts = filteredProducts.map((product: Product) => {
-            let score = 0;
-
-            // Same category gets highest priority
-            if (product.category && currentProduct.category &&
-              product.category.toLowerCase() === currentProduct.category.toLowerCase()) {
-              score += 100;
-            }
-
-            // Same brand gets high priority
-            if (product.brand && currentProduct.brand &&
-              product.brand.toLowerCase() === currentProduct.brand.toLowerCase()) {
-              score += 50;
-            }
-
-            // Title keyword matches
-            const productTitle = (product.title || '').toLowerCase();
-            titleWords.forEach(word => {
-              if (productTitle.includes(word)) {
-                score += 10;
-              }
-            });
-
-            // Description keyword matches (lower weight)
-            const productDesc = (product.description || '').toLowerCase();
-            titleWords.forEach(word => {
-              if (productDesc.includes(word)) {
-                score += 2;
-              }
-            });
-
-            return { product, score };
+          const recommendedProducts = filteredProducts.filter((p: Product) => {
+            const sharesCollection = currentProduct.collections?.some(c => p.collections?.includes(c));
+            const sharesCategory = currentProduct.category && p.category && currentProduct.category === p.category;
+            return sharesCollection || sharesCategory;
           });
 
-          // Sort by score (highest first), then randomize within same score groups
-          scoredProducts.sort((a: { product: Product; score: number }, b: { product: Product; score: number }) => {
-            if (b.score !== a.score) {
-              return b.score - a.score;
-            }
-            return Math.random() - 0.5;
-          });
+          // Sort randomly and take top 4
+          filteredProducts = recommendedProducts.sort(() => Math.random() - 0.5).slice(0, 4);
 
-          // Take top 4 products
-          filteredProducts = scoredProducts
-            .slice(0, 4)
-            .map((item: { product: Product; score: number }) => item.product);
-
-          // If we don't have 4 products with good matches, fill with random
+          // If we don't have 4 products with good matches, fill with random remaining products
           if (filteredProducts.length < 4) {
             const remaining = allProducts
               .filter((p: Product) =>

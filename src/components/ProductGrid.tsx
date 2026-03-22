@@ -101,45 +101,10 @@ const ProductGrid = ({ products, showHeader = true }: ProductGridProps) => {
 
   // Helper function to check if a product is a fashion product
   const isFashionProduct = (product: Product): boolean => {
-    const fashionBrands = [
-      'stone island', 'burberry', 'gucci', 'prada', 'versace', 'balenciaga',
-      'dior', 'chanel', 'louis vuitton', 'hermes', 'fendi', 'givenchy',
-      'saint laurent', 'yves saint laurent', 'ysl', 'moncler', 'canada goose',
-      'arcteryx', 'patagonia', 'north face', 'ralph lauren', 'tommy hilfiger',
-      'calvin klein', 'hugo boss', 'lacoste', 'polo', 'nike', 'adidas',
-      'jordan', 'supreme', 'palace', 'off-white', 'bape', 'stussy'
-    ];
+    const categoryMatch = product.category?.toLowerCase().includes('fashion');
+    const collectionMatch = product.collections?.some(c => c.toLowerCase() === 'fashion');
 
-    const fashionKeywords = [
-      'jacket', 'coat', 'shirt', 't-shirt', 'tee', 'pants', 'jeans', 'trousers',
-      'sweater', 'hoodie', 'sweatshirt', 'cardigan', 'blazer', 'suit',
-      'dress', 'skirt', 'shorts', 'joggers', 'sneakers', 'boots',
-      'hat', 'cap', 'beanie', 'scarf', 'gloves', 'belt', 'handbag', 'backpack',
-      'jewelry', 'clothing', 'apparel'
-    ];
-
-    const category = (product.category || '').toLowerCase();
-    const brand = (product.brand || '').toLowerCase();
-    const title = (product.title || '').toLowerCase();
-    const description = (product.description || '').toLowerCase();
-    
-    // Check if category contains fashion-related terms
-    const isFashionCategory = category.includes('fashion') || 
-                              category.includes('clothing') || 
-                              category.includes('apparel') ||
-                              category.includes('wear');
-    
-    // Check if brand is a known fashion brand
-    const isFashionBrand = fashionBrands.some((fashionBrand: string) => 
-      brand.includes(fashionBrand)
-    );
-    
-    // Check if title or description contains fashion keywords
-    const hasFashionKeywords = fashionKeywords.some((keyword: string) => 
-      title.includes(keyword) || description.includes(keyword)
-    );
-    
-    return isFashionCategory || isFashionBrand || hasFashionKeywords;
+    return Boolean(categoryMatch || collectionMatch);
   };
 
   const activeFilters = useMemo(() => {
@@ -165,7 +130,7 @@ const ProductGrid = ({ products, showHeader = true }: ProductGridProps) => {
         const description = (product.description || '').toLowerCase().trim();
         const brand = (product.brand || '').toLowerCase().trim();
         const category = (product.category || '').toLowerCase().trim();
-        
+
         // Check if query matches any field
         return (
           title.includes(normalizedQuery) ||
@@ -574,11 +539,10 @@ const ProductGrid = ({ products, showHeader = true }: ProductGridProps) => {
                         type="button"
                         onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
                         disabled={currentPage === 1}
-                        className={`px-3 py-2 rounded-lg transition-colors duration-300 flex items-center gap-1 ${
-                          currentPage === 1
+                        className={`px-3 py-2 rounded-lg transition-colors duration-300 flex items-center gap-1 ${currentPage === 1
                             ? "bg-gray-100 text-gray-400 cursor-not-allowed"
                             : "bg-white text-gray-700 border border-gray-300 hover:bg-[#0F1341]/10 hover:text-[#0F1341]"
-                        }`}
+                          }`}
                         aria-label="Previous page"
                       >
                         <ChevronLeft className="h-4 w-4" />
@@ -611,18 +575,17 @@ const ProductGrid = ({ products, showHeader = true }: ProductGridProps) => {
                           const range = 2;
                           const start = Math.max(1, currentPage - range);
                           const end = Math.min(totalPages, currentPage + range);
-                          
+
                           for (let i = start; i <= end; i++) {
                             pages.push(
                               <button
                                 key={i}
                                 type="button"
                                 onClick={() => handlePageChange(i)}
-                                className={`px-3 sm:px-4 py-2 rounded-lg transition-colors duration-300 ${
-                                  currentPage === i
+                                className={`px-3 sm:px-4 py-2 rounded-lg transition-colors duration-300 ${currentPage === i
                                     ? "bg-[#0F1341] text-white font-semibold"
                                     : "bg-white text-gray-700 border border-gray-300 hover:bg-[#0F1341]/10 hover:text-[#0F1341]"
-                                }`}
+                                  }`}
                               >
                                 {i}
                               </button>
@@ -653,11 +616,10 @@ const ProductGrid = ({ products, showHeader = true }: ProductGridProps) => {
                         type="button"
                         onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
                         disabled={currentPage === totalPages}
-                        className={`px-3 py-2 rounded-lg transition-colors duration-300 flex items-center gap-1 ${
-                          currentPage === totalPages
+                        className={`px-3 py-2 rounded-lg transition-colors duration-300 flex items-center gap-1 ${currentPage === totalPages
                             ? "bg-gray-100 text-gray-400 cursor-not-allowed"
                             : "bg-white text-gray-700 border border-gray-300 hover:bg-[#0F1341]/10 hover:text-[#0F1341]"
-                        }`}
+                          }`}
                         aria-label="Next page"
                       >
                         <span className="hidden sm:inline">Next</span>

@@ -206,7 +206,7 @@ function LoginForm() {
             className="w-full py-3.5 bg-[#F5970C] text-[#0F1341] font-bold rounded-xl hover:bg-[#F5970C]/90 focus:outline-none focus:ring-2 focus:ring-[#F5970C] focus:ring-offset-2 focus:ring-offset-gray-900 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 shadow-lg shadow-[#F5970C]/25"
           >
             {loading ? (
-              <div className="w-5 h-5 border-2 border-[#0F1341]/30 border-t-[#0F1341] rounded-full animate-spin"></div>
+              <div className="w-5 h-5 border-2 border-[#06092a]/30 border-t-[#06092a] rounded-full animate-spin"></div>
             ) : (
               <>
                 Sign In

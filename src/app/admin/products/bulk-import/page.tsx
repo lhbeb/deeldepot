@@ -127,81 +127,81 @@ export default function BulkImportPage() {
 
   return (
     <AdminLayout title="Bulk Import" subtitle="Import multiple products from ZIP file">
-        <div className="max-w-4xl mx-auto">
-          {error && (
-            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-              <div className="flex items-start gap-3">
-                <XCircle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
-                <div className="flex-1">
-                  <div className="text-sm font-semibold text-red-800 mb-1">Import Error</div>
-                  <div className="text-sm text-red-700">{error}</div>
-                </div>
+      <div className="max-w-4xl mx-auto">
+        {error && (
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+            <div className="flex items-start gap-3">
+              <XCircle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
+              <div className="flex-1">
+                <div className="text-sm font-semibold text-red-800 mb-1">Import Error</div>
+                <div className="text-sm text-red-700">{error}</div>
               </div>
             </div>
-          )}
+          </div>
+        )}
 
-          {uploadProgress && (
-            <div className="mb-6 p-4 bg-[#0F1341]/5 border border-[#0F1341]/20 rounded-lg">
-              <div className="flex items-center gap-3">
-                <Loader2 className="h-5 w-5 text-[#0F1341] animate-spin flex-shrink-0" />
-                <div className="flex-1">
-                  <div className="text-sm font-semibold text-[#1c2070]">Processing...</div>
-                  <div className="text-sm text-[#1c2070]">{uploadProgress}</div>
-                </div>
+        {uploadProgress && (
+          <div className="mb-6 p-4 bg-[#0F1341]/5 border border-[#0F1341]/20 rounded-lg">
+            <div className="flex items-center gap-3">
+              <Loader2 className="h-5 w-5 text-[#06092a] animate-spin flex-shrink-0" />
+              <div className="flex-1">
+                <div className="text-sm font-semibold text-[#1c2070]">Processing...</div>
+                <div className="text-sm text-[#1c2070]">{uploadProgress}</div>
               </div>
             </div>
-          )}
+          </div>
+        )}
 
-          {importResult && (
-            <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
-              <div className="flex items-start gap-3">
-                <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
-                <div className="flex-1">
-                  <div className="text-sm font-semibold text-green-800 mb-2">Import Complete!</div>
-                  <div className="text-sm text-green-700 space-y-1">
-                    <div>
-                      <strong>Total Products:</strong> {importResult.summary.total}
-                    </div>
-                    <div>
-                      <strong className="text-green-600">Successfully Imported:</strong> {importResult.summary.successful}
-                    </div>
-                    {importResult.summary.failed > 0 && (
-                      <div>
-                        <strong className="text-red-600">Failed:</strong> {importResult.summary.failed}
-                      </div>
-                    )}
+        {importResult && (
+          <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+            <div className="flex items-start gap-3">
+              <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
+              <div className="flex-1">
+                <div className="text-sm font-semibold text-green-800 mb-2">Import Complete!</div>
+                <div className="text-sm text-green-700 space-y-1">
+                  <div>
+                    <strong>Total Products:</strong> {importResult.summary.total}
                   </div>
+                  <div>
+                    <strong className="text-green-600">Successfully Imported:</strong> {importResult.summary.successful}
+                  </div>
+                  {importResult.summary.failed > 0 && (
+                    <div>
+                      <strong className="text-red-600">Failed:</strong> {importResult.summary.failed}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
-          )}
+          </div>
+        )}
 
-          {/* Instructions */}
-          <div className="bg-white rounded-lg shadow p-6 mb-6">
-            <h2 className="text-lg font-semibold mb-4">How to Use Bulk Import</h2>
-            <div className="space-y-3 text-sm text-gray-700">
-              <div className="flex items-start gap-2">
-                <span className="font-semibold text-[#0046be]">1.</span>
-                <div>
-                  <strong>Prepare your ZIP file:</strong> Each product should be in its own folder inside the ZIP.
-                  <div className="mt-2 p-3 bg-gray-50 rounded border font-mono text-xs">
-                    products.zip<br />
-                    ├── product-slug-1/<br />
-                    │   ├── product.json<br />
-                    │   ├── img1.jpg<br />
-                    │   └── img2.png<br />
-                    └── product-slug-2/<br />
-                        ├── product.json<br />
-                        └── img1.webp
-                  </div>
+        {/* Instructions */}
+        <div className="bg-white rounded-lg shadow p-6 mb-6">
+          <h2 className="text-lg font-semibold mb-4">How to Use Bulk Import</h2>
+          <div className="space-y-3 text-sm text-gray-700">
+            <div className="flex items-start gap-2">
+              <span className="font-semibold text-[#0046be]">1.</span>
+              <div>
+                <strong>Prepare your ZIP file:</strong> Each product should be in its own folder inside the ZIP.
+                <div className="mt-2 p-3 bg-gray-50 rounded border font-mono text-xs">
+                  products.zip<br />
+                  ├── product-slug-1/<br />
+                  │   ├── product.json<br />
+                  │   ├── img1.jpg<br />
+                  │   └── img2.png<br />
+                  └── product-slug-2/<br />
+                  ├── product.json<br />
+                  └── img1.webp
                 </div>
               </div>
-              <div className="flex items-start gap-2">
-                <span className="font-semibold text-[#0046be]">2.</span>
-                <div>
-                  <strong>product.json structure:</strong> Must include slug, title, description, price, images (array of filenames), condition, category, brand, checkoutLink.
-                  <div className="mt-2 p-3 bg-gray-50 rounded border font-mono text-xs">
-                    {`{
+            </div>
+            <div className="flex items-start gap-2">
+              <span className="font-semibold text-[#0046be]">2.</span>
+              <div>
+                <strong>product.json structure:</strong> Must include slug, title, description, price, images (array of filenames), condition, category, brand, checkoutLink.
+                <div className="mt-2 p-3 bg-gray-50 rounded border font-mono text-xs">
+                  {`{
   "slug": "product-slug",
   "title": "Product Title",
   "description": "...",
@@ -212,160 +212,159 @@ export default function BulkImportPage() {
   "brand": "BrandX",
   "checkoutLink": "https://..."
 }`}
-                  </div>
-                </div>
-              </div>
-              <div className="flex items-start gap-2">
-                <span className="font-semibold text-[#0046be]">3.</span>
-                <div>
-                  <strong>Upload ZIP file:</strong> Maximum size is 8MB per ZIP. Images will be automatically uploaded to Supabase Storage.
-                </div>
-              </div>
-              <div className="flex items-start gap-2">
-                <span className="font-semibold text-[#0046be]">4.</span>
-                <div>
-                  <strong>Note:</strong> Products with the same slug will be updated (upserted). Images will be renamed to img1, img2, img3, etc.
                 </div>
               </div>
             </div>
+            <div className="flex items-start gap-2">
+              <span className="font-semibold text-[#0046be]">3.</span>
+              <div>
+                <strong>Upload ZIP file:</strong> Maximum size is 8MB per ZIP. Images will be automatically uploaded to Supabase Storage.
+              </div>
+            </div>
+            <div className="flex items-start gap-2">
+              <span className="font-semibold text-[#0046be]">4.</span>
+              <div>
+                <strong>Note:</strong> Products with the same slug will be updated (upserted). Images will be renamed to img1, img2, img3, etc.
+              </div>
+            </div>
           </div>
+        </div>
 
-          {/* Upload Area */}
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-lg font-semibold mb-4">Upload Product ZIP File</h2>
+        {/* Upload Area */}
+        <div className="bg-white rounded-lg shadow p-6">
+          <h2 className="text-lg font-semibold mb-4">Upload Product ZIP File</h2>
 
-            <div
-              onDragEnter={handleDrag}
-              onDragLeave={handleDrag}
-              onDragOver={handleDrag}
-              onDrop={handleDrop}
-              className={`
+          <div
+            onDragEnter={handleDrag}
+            onDragLeave={handleDrag}
+            onDragOver={handleDrag}
+            onDrop={handleDrop}
+            className={`
                 border-2 border-dashed rounded-lg p-12 text-center transition-colors
-                ${
-                  dragActive
-                    ? 'border-[#0F1341] bg-[#0F1341]/5'
-                    : 'border-gray-300 hover:border-gray-400 bg-gray-50'
-                }
+                ${dragActive
+                ? 'border-[#0F1341] bg-[#0F1341]/5'
+                : 'border-gray-300 hover:border-gray-400 bg-gray-50'
+              }
                 ${uploading ? 'opacity-50 pointer-events-none' : 'cursor-pointer'}
               `}
-              onClick={() => !uploading && document.getElementById('zip-file-input')?.click()}
-            >
-              <input
-                id="zip-file-input"
-                type="file"
-                accept=".zip,application/zip,application/x-zip-compressed"
-                onChange={handleFileInput}
-                className="hidden"
-                disabled={uploading}
-              />
+            onClick={() => !uploading && document.getElementById('zip-file-input')?.click()}
+          >
+            <input
+              id="zip-file-input"
+              type="file"
+              accept=".zip,application/zip,application/x-zip-compressed"
+              onChange={handleFileInput}
+              className="hidden"
+              disabled={uploading}
+            />
 
-              {uploading ? (
-                <div className="space-y-4">
-                  <Loader2 className="h-12 w-12 mx-auto text-[#0046be] animate-spin" />
-                  <div>
-                    <p className="text-lg font-medium text-gray-700">Processing...</p>
-                    <p className="text-sm text-gray-500 mt-2">{uploadProgress || 'Please wait'}</p>
-                  </div>
+            {uploading ? (
+              <div className="space-y-4">
+                <Loader2 className="h-12 w-12 mx-auto text-[#06092a] animate-spin" />
+                <div>
+                  <p className="text-lg font-medium text-gray-700">Processing...</p>
+                  <p className="text-sm text-gray-500 mt-2">{uploadProgress || 'Please wait'}</p>
                 </div>
-              ) : (
-                <div className="space-y-4">
-                  <FileArchive className="h-12 w-12 mx-auto text-gray-400" />
-                  <div>
-                    <p className="text-lg font-medium text-gray-700">
-                      Drag and drop your ZIP file here, or click to select
-                    </p>
-                    <p className="text-sm text-gray-500 mt-2">
-                      Maximum file size: 8MB
-                    </p>
-                  </div>
-                  <div className="mt-4">
-                    <button
-                      type="button"
-                      className="inline-flex items-center gap-2 px-6 py-2 bg-[#0046be] text-white rounded-lg hover:bg-[#003494] transition-colors"
-                    >
-                      <Upload className="h-5 w-5" />
-                      Select ZIP File
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Results Table */}
-          {importResult && importResult.results.length > 0 && (
-            <div className="bg-white rounded-lg shadow p-6 mt-6">
-              <h2 className="text-lg font-semibold mb-4">Import Results</h2>
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Product
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Status
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Details
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {importResult.results.map((result, index) => (
-                      <tr key={index} className={result.success ? 'bg-green-50' : 'bg-red-50'}>
-                        <td className="px-4 py-3 text-sm font-medium text-[#262626]">
-                          {result.productSlug || 'Unknown'}
-                        </td>
-                        <td className="px-4 py-3 text-sm">
-                          {result.success ? (
-                            <span className="inline-flex items-center gap-1 text-green-700">
-                              <CheckCircle2 className="h-4 w-4" />
-                              Success
-                            </span>
-                          ) : (
-                            <span className="inline-flex items-center gap-1 text-red-700">
-                              <XCircle className="h-4 w-4" />
-                              Failed
-                            </span>
-                          )}
-                        </td>
-                        <td className="px-4 py-3 text-sm text-gray-700">
-                          {result.error || 'Product imported successfully'}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
               </div>
-            </div>
-          )}
-
-          {/* Actions */}
-          <div className="mt-6 flex gap-4">
-            <Link
-              href="/admin/products"
-              className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-            >
-              Back to Products
-            </Link>
-            {importResult && (
-              <button
-                onClick={() => {
-                  setImportResult(null);
-                  setError('');
-                  setUploadProgress('');
-                  // Reset file input
-                  const input = document.getElementById('zip-file-input') as HTMLInputElement;
-                  if (input) input.value = '';
-                }}
-                className="px-6 py-2 bg-[#0046be] text-white rounded-lg hover:bg-[#003494] transition-colors"
-              >
-                Import Another ZIP
-              </button>
+            ) : (
+              <div className="space-y-4">
+                <FileArchive className="h-12 w-12 mx-auto text-gray-400" />
+                <div>
+                  <p className="text-lg font-medium text-gray-700">
+                    Drag and drop your ZIP file here, or click to select
+                  </p>
+                  <p className="text-sm text-gray-500 mt-2">
+                    Maximum file size: 8MB
+                  </p>
+                </div>
+                <div className="mt-4">
+                  <button
+                    type="button"
+                    className="inline-flex items-center gap-2 px-6 py-2 bg-[#0046be] text-white rounded-lg hover:bg-[#003494] transition-colors"
+                  >
+                    <Upload className="h-5 w-5" />
+                    Select ZIP File
+                  </button>
+                </div>
+              </div>
             )}
           </div>
         </div>
+
+        {/* Results Table */}
+        {importResult && importResult.results.length > 0 && (
+          <div className="bg-white rounded-lg shadow p-6 mt-6">
+            <h2 className="text-lg font-semibold mb-4">Import Results</h2>
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Product
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Status
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Details
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {importResult.results.map((result, index) => (
+                    <tr key={index} className={result.success ? 'bg-green-50' : 'bg-red-50'}>
+                      <td className="px-4 py-3 text-sm font-medium text-[#262626]">
+                        {result.productSlug || 'Unknown'}
+                      </td>
+                      <td className="px-4 py-3 text-sm">
+                        {result.success ? (
+                          <span className="inline-flex items-center gap-1 text-green-700">
+                            <CheckCircle2 className="h-4 w-4" />
+                            Success
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 text-red-700">
+                            <XCircle className="h-4 w-4" />
+                            Failed
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-gray-700">
+                        {result.error || 'Product imported successfully'}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* Actions */}
+        <div className="mt-6 flex gap-4">
+          <Link
+            href="/admin/products"
+            className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+          >
+            Back to Products
+          </Link>
+          {importResult && (
+            <button
+              onClick={() => {
+                setImportResult(null);
+                setError('');
+                setUploadProgress('');
+                // Reset file input
+                const input = document.getElementById('zip-file-input') as HTMLInputElement;
+                if (input) input.value = '';
+              }}
+              className="px-6 py-2 bg-[#0046be] text-white rounded-lg hover:bg-[#003494] transition-colors"
+            >
+              Import Another ZIP
+            </button>
+          )}
+        </div>
+      </div>
     </AdminLayout>
   );
 }
