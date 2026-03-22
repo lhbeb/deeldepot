@@ -52,7 +52,7 @@ const NewsletterSection = () => {
   };
 
   return (
-    <section className="bg-[#1D1A8C] py-16 px-4">
+    <section className="bg-[#06092a] py-16 px-4">
       <div className="container mx-auto max-w-4xl">
         <div className="text-center">
           <div className="flex justify-center mb-6">
@@ -80,7 +80,7 @@ const NewsletterSection = () => {
                     if (error) setError('');
                   }}
                   placeholder="Enter your email address"
-                  className="w-full px-4 py-3 rounded-lg border-0 text-[#262626] placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-[#0F1341] transition-all duration-200"
+                  className="w-full px-4 py-3 rounded-lg border-0 text-[#262626] placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-[#06092a] transition-all duration-200"
                   disabled={isSubmitting || isSuccess}
                 />
               </div>
@@ -88,11 +88,11 @@ const NewsletterSection = () => {
               <button
                 type="submit"
                 disabled={isSubmitting || isSuccess}
-                className="bg-white text-[#0F1341] hover:bg-[#0F1341]/10 disabled:opacity-50 disabled:cursor-not-allowed px-6 py-3 rounded-lg font-semibold transition-all duration-200 flex items-center justify-center gap-2 min-w-[140px]"
+                className="bg-[#F5970C] text-[#06092a] hover:bg-[#F5970C]/90 disabled:opacity-50 disabled:cursor-not-allowed px-6 py-3 rounded-lg font-bold transition-all duration-200 flex items-center justify-center gap-2 min-w-[140px] shadow-lg shadow-[#F5970C]/20"
               >
                 {isSubmitting ? (
                   <>
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-[#0F1341]"></div>
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-[#06092a]"></div>
                     Subscribing...
                   </>
                 ) : isSuccess ? (
@@ -110,15 +110,19 @@ const NewsletterSection = () => {
             </div>
 
             {error && (
-              <p className="text-red-200 text-sm mt-3 text-center">
-                {error}
-              </p>
+              <div className="flex justify-center mt-3">
+                <p className="text-red-300 font-semibold bg-white/10 px-4 py-1.5 rounded-md text-sm shadow-sm backdrop-blur-sm border border-red-300/20">
+                  {error}
+                </p>
+              </div>
             )}
 
             {isSuccess && (
-              <p className="text-green-200 text-sm mt-3 text-center">
-                Thanks for subscribing! Check your email for confirmation.
-              </p>
+              <div className="flex justify-center mt-3">
+                <p className="text-green-300 font-semibold bg-white/10 px-4 py-1.5 rounded-md text-sm shadow-sm backdrop-blur-sm border border-green-300/20">
+                  Thanks for subscribing! Check your email for confirmation.
+                </p>
+              </div>
             )}
           </form>
 

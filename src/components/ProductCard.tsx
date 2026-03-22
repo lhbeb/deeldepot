@@ -33,7 +33,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, cardBackground = 'bg
             sizes="(max-width: 768px) 50vw, 33vw"
             loading="lazy"
             unoptimized
-            onLoadingComplete={() => setImgLoaded(true)}
+            onLoad={() => setImgLoaded(true)}
           />
           {isSoldOut && (
             <div className="absolute inset-0 bg-[rgba(0,0,0,0.65)] flex items-center justify-center rounded-t-md">

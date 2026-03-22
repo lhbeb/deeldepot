@@ -26,7 +26,7 @@ const InstagramSection: React.FC = () => {
 
                 {/* Profile Details */}
                 <div className="flex-grow">
-                  <h3 className="font-bold text-[#262626] text-lg sm:text-xl mb-1">@tryDeelDepot</h3>
+                  <h3 className="font-bold text-[#262626] text-lg sm:text-xl mb-1">@GetDeelDepot</h3>
                   <p className="text-gray-600 text-sm sm:text-base mb-2">DeelDepot</p>
 
                   {/* Statistics */}
@@ -36,7 +36,7 @@ const InstagramSection: React.FC = () => {
                       <div className="text-gray-500 text-xs">posts</div>
                     </div>
                     <div className="text-center">
-                      <div className="font-bold text-[#262626]">15.9K</div>
+                      <div className="font-bold text-[#262626]">15.6K</div>
                       <div className="text-gray-500 text-xs">followers</div>
                     </div>
                     <div className="text-center">

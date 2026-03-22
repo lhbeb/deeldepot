@@ -136,8 +136,8 @@ function LoginForm() {
     <div className="relative w-full max-w-md">
       {/* Logo */}
       <div className="text-center mb-8">
-        <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-[#0F1341] to-indigo-600 rounded-2xl shadow-2xl shadow-[#0F1341]/30 mb-4">
-          <Lock className="h-8 w-8 text-white" />
+        <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-[#F5970C] to-[#E08A09] rounded-2xl shadow-2xl shadow-[#F5970C]/30 mb-4">
+          <Lock className="h-8 w-8 text-[#0F1341]" />
         </div>
         <h1 className="text-2xl font-bold text-white">Admin Portal</h1>
         <p className="text-gray-400 mt-1">Sign in to access your dashboard</p>
@@ -203,10 +203,10 @@ function LoginForm() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3.5 bg-gradient-to-r from-[#0F1341] to-indigo-600 text-white font-semibold rounded-xl hover:from-[#1c2070] hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-[#0F1341] focus:ring-offset-2 focus:ring-offset-gray-900 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 shadow-lg shadow-[#0F1341]/25"
+            className="w-full py-3.5 bg-[#F5970C] text-[#0F1341] font-bold rounded-xl hover:bg-[#F5970C]/90 focus:outline-none focus:ring-2 focus:ring-[#F5970C] focus:ring-offset-2 focus:ring-offset-gray-900 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 shadow-lg shadow-[#F5970C]/25"
           >
             {loading ? (
-              <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+              <div className="w-5 h-5 border-2 border-[#0F1341]/30 border-t-[#0F1341] rounded-full animate-spin"></div>
             ) : (
               <>
                 Sign In
@@ -227,17 +227,17 @@ function LoginForm() {
 
 export default function AdminLoginPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-[#0F1341] flex items-center justify-center p-4">
       {/* Background Pattern */}
-      <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10"></div>
+      <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-5"></div>
 
       {/* Gradient Orbs */}
-      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[#0F1341]/20 rounded-full blur-3xl"></div>
-      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl"></div>
+      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[#F5970C]/10 rounded-full blur-3xl"></div>
+      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-[#F5970C]/10 rounded-full blur-3xl"></div>
 
       <Suspense fallback={
         <div className="relative w-full max-w-md bg-white/10 backdrop-blur-xl rounded-3xl p-8 border border-white/10 shadow-2xl flex items-center justify-center min-h-[400px]">
-          <div className="w-10 h-10 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+          <div className="w-10 h-10 border-4 border-[#F5970C]/20 border-t-[#F5970C] rounded-full animate-spin"></div>
         </div>
       }>
         <LoginForm />

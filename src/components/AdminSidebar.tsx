@@ -230,7 +230,7 @@ export default function AdminSidebar() {
         {/* Admin Profile Card */}
         <div className="mx-4 my-4 p-4 bg-gradient-to-br from-gray-50 to-gray-100/50 rounded-2xl border border-gray-100">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-[#0F1341] to-indigo-700 rounded-full flex items-center justify-center ring-2 ring-white shadow-lg">
+            <div className="w-10 h-10 bg-gradient-to-br from-[#0F1341] to-[#F5970C] rounded-full flex items-center justify-center ring-2 ring-white shadow-lg">
               <span className="text-white font-bold text-sm">A</span>
             </div>
             <div className="flex-1 min-w-0">
@@ -264,7 +264,7 @@ export default function AdminSidebar() {
                     className={`
                       flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200
                       ${active
-                        ? 'bg-[#0F1341] text-white shadow-lg shadow-[#0F1341]/25'
+                        ? 'bg-[#F5970C] text-white shadow-lg shadow-[#F5970C]/30'
                         : 'text-gray-600 hover:bg-gray-100 hover:text-[#262626]'
                       }
                     `}
@@ -310,7 +310,7 @@ export default function AdminSidebar() {
                   alt="Biozy"
                   width={80}
                   height={24}
-                  className="object-contain h-6 w-auto"
+                  className="object-contain w-auto h-6"
                   style={{ filter: 'brightness(0) saturate(100%) invert(69%) sepia(3%) saturate(1210%) hue-rotate(185deg) brightness(97%) contrast(92%)' }}
                 />
               </a>
@@ -329,7 +329,7 @@ export default function AdminSidebar() {
                   alt="GoLinks"
                   width={90}
                   height={24}
-                  className="object-contain h-6 w-auto"
+                  className="object-contain w-auto h-6"
                   style={{ filter: 'brightness(0) saturate(100%) invert(69%) sepia(3%) saturate(1210%) hue-rotate(185deg) brightness(97%) contrast(92%)' }}
                 />
               </a>
@@ -354,12 +354,12 @@ export default function AdminSidebar() {
                     className={`
                       flex items-center gap-3 px-3 py-2 rounded-xl transition-all duration-200
                       ${active
-                        ? 'bg-[#0F1341]/5 text-[#1c2070] border border-[#0F1341]/10'
+                        ? 'bg-[#F5970C]/10 text-[#F5970C] border border-[#F5970C]/20'
                         : 'text-gray-600 hover:bg-gray-50'
                       }
                     `}
                   >
-                    <Icon className={`h-4 w-4 ${active ? 'text-[#0F1341]' : 'text-gray-400'}`} />
+                    <Icon className={`h-4 w-4 ${active ? 'text-[#F5970C]' : 'text-gray-400'}`} />
                     <span className="font-medium text-sm">{item.name}</span>
                   </Link>
                 );

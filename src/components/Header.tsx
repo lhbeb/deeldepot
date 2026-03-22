@@ -26,8 +26,8 @@ const Header = () => {
   const isCheckoutPage = pathname === '/checkout';
 
   const announcements = [
-    "🚚 Free Shipping for North America and Europe",
-    "📦 Free Returns Within 30 days",
+    <span key="nav-1">🚚 <span className="text-[#F5970C] font-bold">Free Shipping</span> for North America and Europe</span>,
+    <span key="nav-2">📦 <span className="text-[#F5970C] font-bold">Free Returns</span> Within <span className="text-[#F5970C] font-bold">30 days</span></span>,
     "whatsapp-contact" // Special marker for WhatsApp announcement
   ];
 
@@ -125,8 +125,8 @@ const Header = () => {
 
   return (
     <>
-      {/* Announcement bar - Orange background with white text */}
-      <div className="bg-[#F5970C] text-[#0F1341] py-2 relative overflow-hidden h-[40px] flex items-center">
+      {/* Announcement bar - Deep Blue background with white text */}
+      <div className="bg-[#06092a] text-white py-2 relative overflow-hidden h-[40px] flex items-center">
         <div className="container mx-auto px-4 flex items-center justify-center relative w-full h-full">
           {/* Announcement Text - PRESERVED */}
           <div className="text-center font-medium px-4 sm:px-16 transition-all duration-500 ease-in-out h-full flex items-center justify-center min-h-[24px]">
@@ -145,10 +145,10 @@ const Header = () => {
                     width={20}
                     height={20}
                     className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0"
-                    style={{ filter: 'brightness(0) saturate(100%) invert(9%) sepia(57%) saturate(2400%) hue-rotate(225deg) brightness(90%) contrast(95%)' }}
+                    style={{ filter: 'brightness(0) saturate(100%) invert(100%)' }}
                   />
-                  <span className="whitespace-nowrap">Questions? WhatsApp us</span>
-                  <span className="underline whitespace-nowrap">+1 (717) 648-4487</span>
+                  <span className="whitespace-nowrap">Questions? <span className="text-[#F5970C] font-bold">WhatsApp us</span></span>
+                  <span className="underline whitespace-nowrap font-bold text-[#F5970C]">+1 (717) 648-4487</span>
                 </a>
               </div>
             ) : (
@@ -161,7 +161,7 @@ const Header = () => {
           {/* Desktop Arrows - Updated hover color for light blue background */}
           <button
             onClick={() => handleAnnouncementNavigation('prev')}
-            className="hidden sm:block absolute left-1/2 transform -translate-x-56 p-1 hover:bg-[#2356A5]/20 rounded-full transition-colors duration-200 z-10"
+            className="hidden sm:block absolute left-1/2 transform -translate-x-56 p-1 hover:bg-white/20 rounded-full transition-colors duration-200 z-10 text-white"
             aria-label="Previous announcement"
           >
             <ChevronLeft className="h-4 w-4" />
@@ -169,7 +169,7 @@ const Header = () => {
 
           <button
             onClick={() => handleAnnouncementNavigation('next')}
-            className="hidden sm:block absolute left-1/2 transform translate-x-52 p-1 hover:bg-[#2356A5]/20 rounded-full transition-colors duration-200 z-10"
+            className="hidden sm:block absolute left-1/2 transform translate-x-52 p-1 hover:bg-white/20 rounded-full transition-colors duration-200 z-10 text-white"
             aria-label="Next announcement"
           >
             <ChevronRight className="h-4 w-4" />
@@ -196,7 +196,7 @@ const Header = () => {
                 width={160}
                 height={36}
                 priority
-                className="w-36 sm:w-40"
+                className="w-36 sm:w-40 h-auto"
               />
             </Link>
 

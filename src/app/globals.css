@@ -173,7 +173,7 @@ button {
 
 @layer base {
   html {
-    font-family: var(--font-nunito), sans-serif;
+    font-family: var(--font-dm-sans), sans-serif;
     overflow-x: hidden;
     overflow-y: scroll;
     /* Force scrollbar to prevent layout shift */
@@ -186,7 +186,7 @@ button {
   }
 
   body {
-    font-family: var(--font-nunito), sans-serif;
+    font-family: var(--font-dm-sans), sans-serif;
     overflow-x: hidden;
     overflow-y: auto;
     position: relative;
@@ -207,7 +207,7 @@ button {
   h4,
   h5,
   h6 {
-    font-family: var(--font-nunito), sans-serif !important;
+    font-family: var(--font-dm-sans), sans-serif !important;
     font-style: normal !important;
     font-weight: 700 !important;
     font-stretch: normal !important;
@@ -508,44 +508,19 @@ select {
 }
 
 html,
-body,
-h1,
-h2,
-h3,
-h4,
-h5,
-h6,
-button,
-.font-heading,
-.font-sans,
-.font-medium,
-.font-bold,
-[class*="font-"] {
-  font-family: var(--font-nunito), sans-serif !important;
-  font-optical-sizing: auto;
-  font-style: normal !important;
-  font-weight: 400 !important;
-  font-stretch: normal !important;
+body {
+  font-family: var(--font-dm-sans), sans-serif;
 }
 
 .font-heading,
-.font-bold,
-.font-medium,
-.font-semibold,
 .product-title,
-nav a,
-button,
 h1,
 h2,
 h3,
 h4,
 h5,
 h6 {
-  font-family: var(--font-nunito), sans-serif !important;
-  font-optical-sizing: auto;
-  font-style: normal !important;
-  font-weight: 700 !important;
-  font-stretch: normal !important;
+  font-family: var(--font-dm-sans), sans-serif;
 }
 
 @keyframes fade-in {

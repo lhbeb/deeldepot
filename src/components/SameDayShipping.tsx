@@ -23,6 +23,7 @@ const SameDayShipping: React.FC<SameDayShippingProps> = ({ fullWidth = false, co
                 src="/delivery-guy.jpg"
                 alt="DeelDepot delivery person"
                 fill
+                sizes="(max-width: 768px) 100vw, 50vw"
                 className="object-cover"
                 priority
               />
@@ -35,9 +36,9 @@ const SameDayShipping: React.FC<SameDayShippingProps> = ({ fullWidth = false, co
               Same Day Shipping
             </h1>
 
-            <h3 className="text-lg leading-relaxed font-normal mb-12">
+            <p className="text-lg leading-relaxed font-normal mb-12">
               Order by 2:00 PM EST and we&apos;ll process, pack, and ship your order the same day. At <strong>DeelDepot</strong>, we deliver speed and reliability you can count on with trusted delivery partners.
-            </h3>
+            </p>
             <Link
               href="/shipping-policy"
               className="text-white/80 hover:text-white text-lg underline underline-offset-2 transition-colors"

@@ -15,7 +15,7 @@ const Footer = () => {
                 alt="DeelDepot Logo"
                 width={134}
                 height={28}
-                className="w-[134px] brightness-0 invert"
+                className="w-[134px] h-auto brightness-0 invert"
               />
             </Link>
             <p className="mb-4">
@@ -23,19 +23,19 @@ const Footer = () => {
             </p>
             <div className="space-y-2">
               <div className="flex items-center">
-                <Phone className="h-5 w-5 text-[#F4C446] mr-2" />
-                <a href="tel:+17176484487" className="hover:text-[#F4C446] transition-colors duration-300">
+                <Phone className="h-5 w-5 text-[#F5970C] mr-2" />
+                <a href="tel:+17176484487" className="hover:text-[#F5970C] transition-colors duration-300">
                   +17176484487
                 </a>
               </div>
               <div className="flex items-center">
-                <Mail className="h-5 w-5 text-[#F4C446] mr-2" />
-                <a href="mailto:support@DeelDepot.com" className="hover:text-[#F4C446] transition-colors duration-300">
+                <Mail className="h-5 w-5 text-[#F5970C] mr-2" />
+                <a href="mailto:support@DeelDepot.com" className="hover:text-[#F5970C] transition-colors duration-300">
                   support@DeelDepot.com
                 </a>
               </div>
               <div className="flex items-start">
-                <MapPin className="h-5 w-5 text-[#F4C446] mr-2 mt-1" />
+                <MapPin className="h-5 w-5 text-[#F5970C] mr-2 mt-1" />
                 <span>1420 N McKinley Ave, Los Angeles, CA 90059, United States</span>
               </div>
               <div className="pt-2">
@@ -43,7 +43,7 @@ const Footer = () => {
                   href="https://go.DeelDepot.com/p170"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center text-white hover:text-[#F4C446] transition-colors duration-300"
+                  className="inline-flex items-center text-white hover:text-[#F5970C] transition-colors duration-300"
                   aria-label="Follow us on Instagram"
                 >
                   <Instagram className="h-5 w-5" />
@@ -55,25 +55,25 @@ const Footer = () => {
           <div>
             <h3 className="text-lg font-semibold text-white mb-4">Navigation</h3>
             <ul className="space-y-2">
-              <li><Link href="/" className="hover:text-[#F4C446] transition-colors duration-300">Home</Link></li>
-              <li><Link href="/#products" className="hover:text-[#F4C446] transition-colors duration-300">Products</Link></li>
-              <li><Link href="/#featured" className="hover:text-[#F4C446] transition-colors duration-300">Featured</Link></li>
-              <li><Link href="/sell" className="hover:text-[#F4C446] transition-colors duration-300">Sell on DeelDepot</Link></li>
-              <li><Link href="/track" className="hover:text-[#F4C446] transition-colors duration-300">Track Order</Link></li>
-              <li><Link href="/contact" className="hover:text-[#F4C446] transition-colors duration-300">Contact Us</Link></li>
+              <li><Link href="/" className="hover:text-[#F5970C] transition-colors duration-300">Home</Link></li>
+              <li><Link href="/#products" className="hover:text-[#F5970C] transition-colors duration-300">Products</Link></li>
+              <li><Link href="/#featured" className="hover:text-[#F5970C] transition-colors duration-300">Featured</Link></li>
+              <li><Link href="/sell" className="hover:text-[#F5970C] transition-colors duration-300">Sell on DeelDepot</Link></li>
+              <li><Link href="/track" className="hover:text-[#F5970C] transition-colors duration-300">Track Order</Link></li>
+              <li><Link href="/contact" className="hover:text-[#F5970C] transition-colors duration-300">Contact Us</Link></li>
             </ul>
           </div>
 
           <div>
             <h3 className="text-lg font-semibold text-white mb-4">Policies & Info</h3>
             <ul className="space-y-2">
-              <li><Link href="/privacy-policy" className="hover:text-[#F4C446] transition-colors duration-300">Privacy Policy</Link></li>
-              <li><Link href="/terms" className="hover:text-[#F4C446] transition-colors duration-300">Terms of Service</Link></li>
-              <li><Link href="/about" className="hover:text-[#F4C446] transition-colors duration-300">About Us</Link></li>
-              <li><Link href="/return-policy" className="hover:text-[#F4C446] transition-colors duration-300">Refund & Return Policy</Link></li>
-              <li><Link href="/shipping-policy" className="hover:text-[#F4C446] transition-colors duration-300">Shipping Policy</Link></li>
-              <li><Link href="/contact" className="hover:text-[#F4C446] transition-colors duration-300">Contact Us</Link></li>
-              <li><Link href="/cookies" className="hover:text-[#F4C446] transition-colors duration-300">Cookies Policy</Link></li>
+              <li><Link href="/privacy-policy" className="hover:text-[#F5970C] transition-colors duration-300">Privacy Policy</Link></li>
+              <li><Link href="/terms" className="hover:text-[#F5970C] transition-colors duration-300">Terms of Service</Link></li>
+              <li><Link href="/about" className="hover:text-[#F5970C] transition-colors duration-300">About Us</Link></li>
+              <li><Link href="/return-policy" className="hover:text-[#F5970C] transition-colors duration-300">Refund & Return Policy</Link></li>
+              <li><Link href="/shipping-policy" className="hover:text-[#F5970C] transition-colors duration-300">Shipping Policy</Link></li>
+              <li><Link href="/contact" className="hover:text-[#F5970C] transition-colors duration-300">Contact Us</Link></li>
+              <li><Link href="/cookies" className="hover:text-[#F5970C] transition-colors duration-300">Cookies Policy</Link></li>
             </ul>
           </div>
         </div>

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Nunito } from "next/font/google";
+import { DM_Sans } from "next/font/google";
 import "./globals.css";
 import ClientHeader from "@/components/ClientHeader";
 import Footer from "@/components/Footer";
@@ -12,11 +12,11 @@ import { Suspense } from "react";
 import VisitNotifier from "@/components/VisitNotifier";
 import { AdminRouteCheck, PublicRouteOnly, AdminRouteOnly, CheckoutRouteOnly } from "@/components/AdminRouteCheck";
 
-const nunito = Nunito({
+const dmSans = DM_Sans({
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700", "800", "900"],
+  weight: ["400", "500", "700"],
   style: ["normal", "italic"],
-  variable: "--font-nunito",
+  variable: "--font-dm-sans",
   display: "swap",
 });
 
@@ -77,12 +77,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${nunito.variable}`}>
+    <html lang="en">
       <head>
         <link rel="icon" href="/favicon.png" type="image/png" />
         <link rel="preload" href="/logosvg.svg" as="image" type="image/svg+xml" />
       </head>
-      <body suppressHydrationWarning className={nunito.className}>
+      <body suppressHydrationWarning className={`${dmSans.variable} font-sans antialiased text-[#262626]`}>
         <PublicRouteOnly>
           <VisitNotifier />
         </PublicRouteOnly>
@@ -184,11 +184,13 @@ export default function RootLayout({
           </AdminRouteOnly>
         </ErrorBoundaryWrapper>
 
-        {/* Tidio Live Chat Widget - loads on all pages, CSS controls visibility */}
-        <Script
-          src="//code.tidio.co/9ximyjwjwmobhbw5vz7ps0vn84xhxtsr.js"
-          async
-        />
+        {/* Tidio Live Chat Widget - strictly for public site */}
+        <AdminRouteCheck>
+          <Script
+            src="//code.tidio.co/9ximyjwjwmobhbw5vz7ps0vn84xhxtsr.js"
+            async
+          />
+        </AdminRouteCheck>
         <AdminRouteCheck>
           <Script
             src="https://www.googletagmanager.com/gtag/js?id=G-6ELCP7YFYP"
@@ -228,12 +230,14 @@ export default function RootLayout({
             }}
           />
         </AdminRouteCheck>
-        {/* Analytics Tracker */}
-        <Script
-          src="https://analyticsapp-five.vercel.app/tracker.js"
-          strategy="afterInteractive"
-          async
-        />
+        {/* Analytics Tracker - strictly for public site */}
+        <AdminRouteCheck>
+          <Script
+            src="https://analyticsapp-five.vercel.app/tracker.js"
+            strategy="afterInteractive"
+            async
+          />
+        </AdminRouteCheck>
       </body>
     </html>
   );
