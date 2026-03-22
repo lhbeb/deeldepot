@@ -1,0 +1,166 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { getProductBySlug, updateProduct, getProducts } from '@/lib/supabase/products';
+import { supabaseAdmin } from '@/lib/supabase/server';
+import { revalidatePath } from 'next/cache';
+
+const FEATURE_LIMIT = 6;
+
+// Helper to get auth from request
+async function getAdminAuth(request: NextRequest) {
+  // Bypass authentication in development if enabled
+  const { shouldBypassAuth } = await import('@/lib/supabase/auth');
+  if (shouldBypassAuth()) {
+    console.log('🔓 [AUTH] Bypassing authentication for API request');
+    return { authenticated: true, role: 'SUPER_ADMIN', email: 'dev@localhost' };
+  }
+
+  // Check for admin_token cookie (JWT token from our login route)
+  const token = request.cookies.get('admin_token')?.value;
+
+  if (token) {
+    try {
+      // Verify JWT token using jose (same as middleware)
+      const { jwtVerify } = await import('jose');
+      const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
+      const getSecretKey = () => new TextEncoder().encode(JWT_SECRET);
+
+      const { payload } = await jwtVerify(token, getSecretKey());
+
+      const decoded = payload as {
+        id: string;
+        email: string;
+        role: string;
+        isActive: boolean;
+      };
+
+      // Check if admin is active
+      if (!decoded.isActive) {
+        console.log('🚫 [AUTH] Admin account is deactivated:', decoded.email);
+        return null;
+      }
+
+      console.log('✅ [AUTH] JWT token verified for:', decoded.email, 'Role:', decoded.role);
+      return { authenticated: true, role: decoded.role, email: decoded.email };
+    } catch (error) {
+      console.error('❌ [AUTH] JWT verification failed:', error);
+      return null;
+    }
+  }
+
+  // Fallback to Authorization header (for backward compatibility)
+  const authHeader = request.headers.get('authorization');
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    const headerToken = authHeader.split('Bearer ')[1];
+
+    try {
+      const { jwtVerify } = await import('jose');
+      const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
+      const getSecretKey = () => new TextEncoder().encode(JWT_SECRET);
+
+      const { payload } = await jwtVerify(headerToken, getSecretKey());
+
+      const decoded = payload as {
+        id: string;
+        email: string;
+        role: string;
+        isActive: boolean;
+      };
+
+      if (!decoded.isActive) {
+        return null;
+      }
+
+      console.log('✅ [AUTH] JWT token verified from header for:', decoded.email, 'Role:', decoded.role);
+      return { authenticated: true, role: decoded.role, email: decoded.email };
+    } catch (error) {
+      console.error('❌ [AUTH] Header JWT verification failed:', error);
+      return null;
+    }
+  }
+
+  return null;
+}
+
+async function assertFeaturedLimit(canFeature: boolean) {
+  if (!canFeature) return;
+
+  const { count, error } = await supabaseAdmin
+    .from('products')
+    .select('*', { count: 'exact', head: true })
+    .eq('is_featured', true);
+
+  if (error) {
+    console.error('Failed to check featured product count:', error);
+    throw new Error('Unable to verify featured product limit. Please try again.');
+  }
+
+  if ((count ?? 0) >= FEATURE_LIMIT) {
+    const limitError = new Error(`Maximum of ${FEATURE_LIMIT} featured products reached. Unfeature another product first.`);
+    (limitError as any).statusCode = 400;
+    throw limitError;
+  }
+}
+
+function revalidateProductPaths(slug: string) {
+  revalidatePath('/');
+  revalidatePath('/products');
+  revalidatePath(`/products/${slug}`);
+}
+
+export async function POST(
+  request: NextRequest,
+  { params }: { params: Promise<{ slug: string }> }
+) {
+  try {
+    // Check authentication
+    const auth = await getAdminAuth(request);
+    if (!auth) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const { slug } = await params;
+
+    // Get current product
+    const product = await getProductBySlug(slug);
+    if (!product) {
+      return NextResponse.json({ error: 'Product not found' }, { status: 404 });
+    }
+
+    const newFeaturedStatus = !(product.isFeatured ?? false);
+
+    // If trying to feature a product, check limit
+    if (newFeaturedStatus) {
+      try {
+        await assertFeaturedLimit(true);
+      } catch (limitError: any) {
+        const status = limitError.statusCode || 500;
+        return NextResponse.json({ error: limitError.message }, { status });
+      }
+    }
+
+    // Update featured status
+    const updated = await updateProduct(slug, {
+      is_featured: newFeaturedStatus,
+      isFeatured: newFeaturedStatus,
+    });
+
+    if (!updated) {
+      return NextResponse.json({ error: 'Failed to update product' }, { status: 500 });
+    }
+
+    revalidateProductPaths(updated.slug);
+
+    return NextResponse.json({
+      success: true,
+      isFeatured: newFeaturedStatus,
+      message: newFeaturedStatus ? 'Product featured' : 'Product unfeatured',
+    });
+  } catch (error) {
+    console.error('Toggle featured error:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}
+
