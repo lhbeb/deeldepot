@@ -341,6 +341,29 @@ export default function AdminOrdersPage() {
       });
   };
 
+  const handleCopyOrder = async (order: Order) => {
+    try {
+      let smartName = order.customer_name;
+      if (!smartName || smartName.trim() === '' || smartName === 'Unknown Customer' || smartName === 'No Name Provided') {
+        smartName = order.customer_email ? order.customer_email.split('@')[0] : 'Unknown';
+      } else if (order.customer_email) {
+        smartName = order.customer_email.split('@')[0];
+      }
+      
+      const address = `${order.shipping_address}, ${order.shipping_city}, ${order.shipping_state} ${order.shipping_zip}`.replace(/, ,/g, ',');
+      const productLink = `${window.location.origin}/products/${order.product_slug}`;
+      
+      const orderDetails = `${order.product_title} : $${(order.product_price || 0).toFixed(2)}\n${order.customer_email}\n${smartName}\n${address}\n${productLink}`;
+
+      await navigator.clipboard.writeText(orderDetails);
+      setCopiedField(`order-${order.id}`);
+      setTimeout(() => setCopiedField(null), 2000);
+    } catch (err) {
+      console.error('Failed to copy order details', err);
+      alert('Failed to copy order details to clipboard');
+    }
+  };
+
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleString('en-US', {
@@ -854,6 +877,20 @@ export default function AdminOrdersPage() {
 
                   {/* Actions */}
                   <div className="mt-4 pt-4 border-t border-gray-100 flex flex-wrap gap-2">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleCopyOrder(order);
+                      }}
+                      className="inline-flex items-center gap-2 px-3 py-2 bg-blue-100 text-blue-700 rounded-lg text-sm font-medium hover:bg-blue-200 transition-all"
+                    >
+                      {copiedField === `order-${order.id}` ? (
+                        <CheckCircle2 className="h-4 w-4 text-green-600" />
+                      ) : (
+                        <Copy className="h-4 w-4" />
+                      )}
+                      Copy Details
+                    </button>
                     {!order.email_sent && (
                       <button
                         onClick={(e) => {
