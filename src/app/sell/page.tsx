@@ -7,7 +7,7 @@ export default function SellPage() {
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       {/* Hero Section - Meet Shaylah */}
-      <section className="bg-gradient-to-br from-[#0F1341] to-[#1c2070] text-white py-16 md:py-24">
+      <section className="bg-gradient-to-br from-[#090A28] to-[#1c2070] text-white py-16 md:py-24">
         <div className="container mx-auto px-4 max-w-6xl">
           <div className="flex flex-col md:flex-row items-center gap-8 md:gap-12">
             <div className="flex-shrink-0">
@@ -30,7 +30,7 @@ export default function SellPage() {
               </p>
               <Link
                 href="/contact"
-                className="inline-flex items-center gap-2 px-8 py-4 bg-white text-[#0F1341] font-semibold rounded-lg shadow-lg hover:bg-gray-100 transition-all duration-300 text-lg"
+                className="inline-flex items-center gap-2 px-8 py-4 bg-white text-[#090A28] font-semibold rounded-lg shadow-lg hover:bg-gray-100 transition-all duration-300 text-lg"
               >
                 Start Selling Today
                 <ArrowRight className="h-5 w-5" />
@@ -50,9 +50,9 @@ export default function SellPage() {
             
             <div className="space-y-8">
               {/* Sell Faster */}
-              <div className="bg-gradient-to-r from-[#e9ffb4]/20 to-transparent rounded-2xl p-8 border-l-4 border-[#0F1341]">
+              <div className="bg-gradient-to-r from-[#e9ffb4]/20 to-transparent rounded-2xl p-8 border-l-4 border-[#090A28]">
                 <div className="flex items-start gap-4">
-                  <div className="p-3 bg-[#0F1341] rounded-lg flex-shrink-0">
+                  <div className="p-3 bg-[#090A28] rounded-lg flex-shrink-0">
                     <Zap className="h-6 w-6 text-white" />
                   </div>
                   <div>
@@ -65,9 +65,9 @@ export default function SellPage() {
               </div>
 
               {/* Big Traffic */}
-              <div className="bg-gradient-to-r from-[#e9ffb4]/20 to-transparent rounded-2xl p-8 border-l-4 border-[#0F1341]">
+              <div className="bg-gradient-to-r from-[#e9ffb4]/20 to-transparent rounded-2xl p-8 border-l-4 border-[#090A28]">
                 <div className="flex items-start gap-4">
-                  <div className="p-3 bg-[#0F1341] rounded-lg flex-shrink-0">
+                  <div className="p-3 bg-[#090A28] rounded-lg flex-shrink-0">
                     <Users className="h-6 w-6 text-white" />
                   </div>
                   <div>
@@ -80,9 +80,9 @@ export default function SellPage() {
               </div>
 
               {/* Easy Shipping */}
-              <div className="bg-gradient-to-r from-[#e9ffb4]/20 to-transparent rounded-2xl p-8 border-l-4 border-[#0F1341]">
+              <div className="bg-gradient-to-r from-[#e9ffb4]/20 to-transparent rounded-2xl p-8 border-l-4 border-[#090A28]">
                 <div className="flex items-start gap-4">
-                  <div className="p-3 bg-[#0F1341] rounded-lg flex-shrink-0">
+                  <div className="p-3 bg-[#090A28] rounded-lg flex-shrink-0">
                     <Truck className="h-6 w-6 text-white" />
                   </div>
                   <div>
@@ -107,13 +107,13 @@ export default function SellPage() {
 
           <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
             {/* Step 1: Meet Sales Rep */}
-            <div className="bg-white rounded-2xl shadow-lg p-8 border-t-4 border-[#0F1341]">
+            <div className="bg-white rounded-2xl shadow-lg p-8 border-t-4 border-[#090A28]">
               <div className="flex items-center gap-4 mb-6">
-                <div className="w-12 h-12 bg-[#0F1341] text-white rounded-full flex items-center justify-center font-bold text-xl flex-shrink-0">
+                <div className="w-12 h-12 bg-[#090A28] text-white rounded-full flex items-center justify-center font-bold text-xl flex-shrink-0">
                   1
                 </div>
-                <div className="p-3 bg-[#0F1341]/10 rounded-lg">
-                  <Handshake className="h-6 w-6 text-[#0F1341]" />
+                <div className="p-3 bg-[#090A28]/10 rounded-lg">
+                  <Handshake className="h-6 w-6 text-[#090A28]" />
                 </div>
               </div>
               <h3 className="text-2xl font-bold text-[#262626] mb-4">Meet One of Our Sales Representatives</h3>
@@ -122,32 +122,32 @@ export default function SellPage() {
               </p>
               <div className="space-y-3 mb-4">
                 <div className="flex items-start gap-3">
-                  <div className="w-2 h-2 bg-[#0F1341] rounded-full mt-2 flex-shrink-0"></div>
+                  <div className="w-2 h-2 bg-[#090A28] rounded-full mt-2 flex-shrink-0"></div>
                   <p className="text-gray-700">
                     <strong>Hand your items directly</strong> to our sales rep for instant valuation and immediate processing.
                   </p>
                 </div>
                 <div className="flex items-start gap-3">
-                  <div className="w-2 h-2 bg-[#0F1341] rounded-full mt-2 flex-shrink-0"></div>
+                  <div className="w-2 h-2 bg-[#090A28] rounded-full mt-2 flex-shrink-0"></div>
                   <p className="text-gray-700">
                     <strong>Ship them later</strong> to our warehouse. Your sales rep will provide the address and handle everything.
                   </p>
                 </div>
               </div>
-              <div className="flex items-center gap-2 text-[#0F1341] font-medium">
+              <div className="flex items-center gap-2 text-[#090A28] font-medium">
                 <MapPin className="h-5 w-5" />
                 <span>Available in cities across the United States</span>
               </div>
             </div>
 
             {/* Step 2: Get Paid */}
-            <div className="bg-white rounded-2xl shadow-lg p-8 border-t-4 border-[#0F1341]">
+            <div className="bg-white rounded-2xl shadow-lg p-8 border-t-4 border-[#090A28]">
               <div className="flex items-center gap-4 mb-6">
-                <div className="w-12 h-12 bg-[#0F1341] text-white rounded-full flex items-center justify-center font-bold text-xl flex-shrink-0">
+                <div className="w-12 h-12 bg-[#090A28] text-white rounded-full flex items-center justify-center font-bold text-xl flex-shrink-0">
                   2
                 </div>
-                <div className="p-3 bg-[#0F1341]/10 rounded-lg">
-                  <Zap className="h-6 w-6 text-[#0F1341]" />
+                <div className="p-3 bg-[#090A28]/10 rounded-lg">
+                  <Zap className="h-6 w-6 text-[#090A28]" />
                 </div>
               </div>
               <h3 className="text-2xl font-bold text-[#262626] mb-4">Get Paid After Successful Sale</h3>
@@ -192,7 +192,7 @@ export default function SellPage() {
       </section>
 
       {/* Long-term Partnership Benefits */}
-      <section className="py-16 bg-gradient-to-br from-[#0F1341] to-[#1c2070] text-white">
+      <section className="py-16 bg-gradient-to-br from-[#090A28] to-[#1c2070] text-white">
         <div className="container mx-auto px-4 max-w-6xl">
           <div className="max-w-4xl mx-auto text-center">
             <div className="flex justify-center mb-6">
@@ -242,7 +242,7 @@ export default function SellPage() {
           </p>
           <Link
             href="/contact"
-            className="inline-flex items-center gap-2 px-10 py-4 bg-[#0F1341] text-white font-semibold rounded-lg shadow-lg hover:bg-[#1c2070] transition-all duration-300 text-lg"
+            className="inline-flex items-center gap-2 px-10 py-4 bg-[#090A28] text-white font-semibold rounded-lg shadow-lg hover:bg-[#1c2070] transition-all duration-300 text-lg"
           >
             Contact Us to Get Started
             <ArrowRight className="h-5 w-5" />
@@ -257,23 +257,23 @@ export default function SellPage() {
             <h2 className="text-2xl font-bold text-[#262626] mb-6 text-center">Get in Touch</h2>
             <div className="grid md:grid-cols-2 gap-8 max-w-3xl mx-auto">
               <div className="flex items-center gap-4">
-                <div className="p-3 bg-[#0F1341]/10 rounded-lg">
-                  <Mail className="h-6 w-6 text-[#0F1341]" />
+                <div className="p-3 bg-[#090A28]/10 rounded-lg">
+                  <Mail className="h-6 w-6 text-[#090A28]" />
                 </div>
                 <div>
                   <h3 className="font-semibold text-[#262626] mb-1">Email</h3>
-                  <a href="mailto:support@DeelDepot.com" className="text-[#0F1341] hover:underline">
+                  <a href="mailto:support@DeelDepot.com" className="text-[#090A28] hover:underline">
                     support@DeelDepot.com
                   </a>
                 </div>
               </div>
               <div className="flex items-center gap-4">
-                <div className="p-3 bg-[#0F1341]/10 rounded-lg">
-                  <Phone className="h-6 w-6 text-[#0F1341]" />
+                <div className="p-3 bg-[#090A28]/10 rounded-lg">
+                  <Phone className="h-6 w-6 text-[#090A28]" />
                 </div>
                 <div>
                   <h3 className="font-semibold text-[#262626] mb-1">Phone</h3>
-                  <a href="tel:+17176484487" className="text-[#0F1341] hover:underline">
+                  <a href="tel:+17176484487" className="text-[#090A28] hover:underline">
                     +1 717 648 4487
                   </a>
                 </div>

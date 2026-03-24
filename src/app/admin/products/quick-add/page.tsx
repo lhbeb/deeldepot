@@ -225,7 +225,7 @@ export default function QuickAddProductPage() {
                 />
               </div>
 
-              <div className="bg-[#0F1341]/5 border border-[#0F1341]/20 rounded-lg p-4">
+              <div className="bg-[#090A28]/5 border border-[#090A28]/20 rounded-lg p-4">
                 <div className="text-sm text-[#1c2070]">
                   <div className="font-semibold mb-2">Required Fields:</div>
                   <ul className="list-disc list-inside space-y-1 text-[#1c2070]">
@@ -234,7 +234,7 @@ export default function QuickAddProductPage() {
                     <li>checkoutLink (or checkout_link)</li>
                     <li>images (array of image URLs)</li>
                   </ul>
-                  <div className="mt-3 text-[#0F1341]">
+                  <div className="mt-3 text-[#090A28]">
                     <strong>Optional:</strong> payeeEmail, reviews, meta, rating, reviewCount, currency, inStock
                   </div>
                 </div>

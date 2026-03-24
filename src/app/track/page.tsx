@@ -65,12 +65,12 @@ const TrackPage = () => {
                 onChange={(e) => setTrackingNumber(e.target.value)}
                 placeholder="Enter tracking number"
                 maxLength={50}
-                className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0F1341] focus:border-transparent"
+                className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#090A28] focus:border-transparent"
               />
               <button
                 onClick={handleTrack}
                 disabled={!isScriptLoaded}
-                className="px-8 py-3 bg-[#0F1341] hover:bg-[#1c2070] text-white font-medium rounded-lg transition-colors duration-300 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                className="px-8 py-3 bg-[#090A28] hover:bg-[#1c2070] text-white font-medium rounded-lg transition-colors duration-300 disabled:bg-gray-400 disabled:cursor-not-allowed"
               >
                 Track Package
               </button>

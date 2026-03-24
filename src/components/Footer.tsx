@@ -5,7 +5,7 @@ import { Mail, Phone, MapPin, Instagram } from 'lucide-react';
 
 const Footer = () => {
   return (
-    <footer className="bg-[#0F1341] text-white">
+    <footer className="bg-[#090A28] text-white">
       <div className="container mx-auto px-4 sm:px-6 md:px-8 lg:px-12 py-12">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
           <div>
@@ -40,7 +40,7 @@ const Footer = () => {
               </div>
               <div className="pt-2">
                 <a
-                  href="https://go.DeelDepot.com/p170"
+                  href="https://instagram.com/getdeeldepot"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center text-white hover:text-[#F5970C] transition-colors duration-300"

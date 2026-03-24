@@ -59,8 +59,8 @@ function Section({
         onClick={() => setIsOpen(!isOpen)}
         className="w-full px-5 py-4 flex items-center gap-4 hover:bg-gray-50 transition-colors"
       >
-        <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${isOpen ? 'bg-[#0F1341]/10' : 'bg-gray-100'}`}>
-          <Icon className={`h-5 w-5 ${isOpen ? 'text-[#0F1341]' : 'text-gray-500'}`} />
+        <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${isOpen ? 'bg-[#090A28]/10' : 'bg-gray-100'}`}>
+          <Icon className={`h-5 w-5 ${isOpen ? 'text-[#090A28]' : 'text-gray-500'}`} />
         </div>
         <div className="flex-1 text-left">
           <div className="flex items-center gap-2">
@@ -386,7 +386,7 @@ export default function EditProductPage() {
         <div className="text-center py-16">
           <Package className="h-12 w-12 text-gray-300 mx-auto mb-4" />
           <p className="text-gray-600 mb-4">Product not found</p>
-          <Link href="/admin/products" className="text-[#0F1341] hover:underline">← Back to products</Link>
+          <Link href="/admin/products" className="text-[#090A28] hover:underline">← Back to products</Link>
         </div>
       </AdminLayout>
     );
@@ -455,7 +455,7 @@ export default function EditProductPage() {
             <button
               onClick={handleSubmit}
               disabled={saving}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-[#0F1341] text-white text-sm font-medium rounded-xl hover:bg-[#1c2070] disabled:opacity-50 shadow-sm"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-[#090A28] text-white text-sm font-medium rounded-xl hover:bg-[#1c2070] disabled:opacity-50 shadow-sm"
             >
               {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
               {saving ? 'Saving...' : 'Save'}
@@ -494,7 +494,7 @@ export default function EditProductPage() {
                     onChange={(e) => updateField('price', e.target.value)}
                     placeholder="0.00"
                     required
-                    className="w-full pl-8 pr-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#0F1341] focus:border-[#0F1341] outline-none transition-all"
+                    className="w-full pl-8 pr-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#090A28] focus:border-[#090A28] outline-none transition-all"
                   />
                 </div>
               </Field>
@@ -509,7 +509,7 @@ export default function EditProductPage() {
                     value={formData.original_price}
                     onChange={(e) => updateField('original_price', e.target.value)}
                     placeholder="0.00"
-                    className="w-full pl-8 pr-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#0F1341] focus:border-[#0F1341] outline-none transition-all"
+                    className="w-full pl-8 pr-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#090A28] focus:border-[#090A28] outline-none transition-all"
                   />
                 </div>
               </Field>
@@ -518,7 +518,7 @@ export default function EditProductPage() {
                 <select
                   value={formData.currency}
                   onChange={(e) => updateField('currency', e.target.value)}
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#0F1341] focus:border-[#0F1341] outline-none transition-all bg-white"
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#090A28] focus:border-[#090A28] outline-none transition-all bg-white"
                 >
                   <option value="USD">USD ($)</option>
                   <option value="EUR">EUR (€)</option>
@@ -545,7 +545,7 @@ export default function EditProductPage() {
                   value={formData.checkout_link}
                   onChange={(e) => updateField('checkout_link', e.target.value)}
                   placeholder="https://..."
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#0F1341] focus:border-[#0F1341] outline-none transition-all"
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#090A28] focus:border-[#090A28] outline-none transition-all"
                 />
               </Field>
 
@@ -553,7 +553,7 @@ export default function EditProductPage() {
                 <select
                   value={formData.checkout_flow}
                   onChange={(e) => updateField('checkout_flow', e.target.value as 'buymeacoffee' | 'kofi' | 'external' | 'stripe' | 'paypal-invoice')}
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#0F1341] focus:border-[#0F1341] outline-none transition-all bg-white"
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#090A28] focus:border-[#090A28] outline-none transition-all bg-white"
                   required
                 >
                   <option value="buymeacoffee">BuyMeACoffee (External - Redirects to payment link)</option>
@@ -603,7 +603,7 @@ export default function EditProductPage() {
                 value={formData.title}
                 onChange={(e) => updateField('title', e.target.value)}
                 placeholder="Enter product title"
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#0F1341] focus:border-[#0F1341] outline-none transition-all"
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#090A28] focus:border-[#090A28] outline-none transition-all"
                 required
               />
             </Field>
@@ -616,7 +616,7 @@ export default function EditProductPage() {
                   value={formData.slug}
                   onChange={(e) => { setSlugDirty(true); updateField('slug', slugify(e.target.value)); }}
                   placeholder="product-url"
-                  className="flex-1 px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#0F1341] focus:border-[#0F1341] outline-none transition-all"
+                  className="flex-1 px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#090A28] focus:border-[#090A28] outline-none transition-all"
                 />
               </div>
             </Field>
@@ -627,7 +627,7 @@ export default function EditProductPage() {
                 onChange={(e) => updateField('description', e.target.value)}
                 placeholder="Describe the product..."
                 rows={4}
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#0F1341] focus:border-[#0F1341] outline-none transition-all resize-none"
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#090A28] focus:border-[#090A28] outline-none transition-all resize-none"
               />
             </Field>
 
@@ -638,7 +638,7 @@ export default function EditProductPage() {
                   value={formData.brand}
                   onChange={(e) => updateField('brand', e.target.value)}
                   placeholder="Brand"
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#0F1341] focus:border-[#0F1341] outline-none transition-all"
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#090A28] focus:border-[#090A28] outline-none transition-all"
                 />
               </Field>
               <Field label="Category">
@@ -647,14 +647,14 @@ export default function EditProductPage() {
                   value={formData.category}
                   onChange={(e) => updateField('category', e.target.value)}
                   placeholder="Category"
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#0F1341] focus:border-[#0F1341] outline-none transition-all"
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#090A28] focus:border-[#090A28] outline-none transition-all"
                 />
               </Field>
               <Field label="Condition">
                 <select
                   value={formData.condition}
                   onChange={(e) => updateField('condition', e.target.value)}
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#0F1341] focus:border-[#0F1341] outline-none transition-all bg-white"
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#090A28] focus:border-[#090A28] outline-none transition-all bg-white"
                 >
                   <option value="">Select</option>
                   <option value="New">New</option>
@@ -670,7 +670,7 @@ export default function EditProductPage() {
               <select
                 value={formData.listed_by}
                 onChange={(e) => updateField('listed_by', e.target.value)}
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#0F1341] focus:border-[#0F1341] outline-none transition-all bg-white"
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#090A28] focus:border-[#090A28] outline-none transition-all bg-white"
                 required
               >
                 <option value="">Select a user</option>
@@ -705,7 +705,7 @@ export default function EditProductPage() {
                           updateField('collections', formData.collections.filter(c => c !== collection.value));
                         }
                       }}
-                      className="w-4 h-4 rounded border-gray-300 text-[#0F1341] focus:ring-[#0F1341]"
+                      className="w-4 h-4 rounded border-gray-300 text-[#090A28] focus:ring-[#090A28]"
                     />
                     <span className="text-sm text-gray-700">{collection.label}</span>
                   </label>
@@ -745,7 +745,7 @@ export default function EditProductPage() {
             onUploadStatusChange={setUploadStatus}
           />
           {uploadStatus.message && (
-            <p className={`mt-3 text-sm ${uploadStatus.uploading ? 'text-[#0F1341]' : 'text-gray-500'}`}>
+            <p className={`mt-3 text-sm ${uploadStatus.uploading ? 'text-[#090A28]' : 'text-gray-500'}`}>
               {uploadStatus.message}
             </p>
           )}
@@ -760,7 +760,7 @@ export default function EditProductPage() {
                 step="0.1"
                 value={formData.rating}
                 onChange={(e) => updateField('rating', e.target.value)}
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#0F1341] focus:border-[#0F1341] outline-none transition-all"
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#090A28] focus:border-[#090A28] outline-none transition-all"
               />
             </Field>
             <Field label="Review Count" hint="Displayed review count">
@@ -769,7 +769,7 @@ export default function EditProductPage() {
                 min="0"
                 value={formData.review_count}
                 onChange={(e) => updateField('review_count', e.target.value)}
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#0F1341] focus:border-[#0F1341] outline-none transition-all"
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#090A28] focus:border-[#090A28] outline-none transition-all"
               />
             </Field>
           </div>
@@ -789,7 +789,7 @@ export default function EditProductPage() {
                   value={formData.metaTitle}
                   onChange={(e) => updateField('metaTitle', e.target.value)}
                   placeholder={formData.title || 'Page title'}
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#0F1341] focus:border-[#0F1341] outline-none transition-all"
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#090A28] focus:border-[#090A28] outline-none transition-all"
                 />
               </Field>
               <Field label="Meta Description" hint={`${formData.metaDescription.length}/160 characters`}>
@@ -798,7 +798,7 @@ export default function EditProductPage() {
                   onChange={(e) => updateField('metaDescription', e.target.value)}
                   placeholder="Brief description for search results"
                   rows={2}
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#0F1341] focus:border-[#0F1341] outline-none transition-all resize-none"
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#090A28] focus:border-[#090A28] outline-none transition-all resize-none"
                 />
               </Field>
               <Field label="Keywords" hint="Comma separated">
@@ -807,7 +807,7 @@ export default function EditProductPage() {
                   value={formData.metaKeywords}
                   onChange={(e) => updateField('metaKeywords', e.target.value)}
                   placeholder="keyword1, keyword2, keyword3"
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#0F1341] focus:border-[#0F1341] outline-none transition-all"
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#090A28] focus:border-[#090A28] outline-none transition-all"
                 />
               </Field>
             </div>
@@ -819,14 +819,14 @@ export default function EditProductPage() {
               </h4>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <Field label="OG Title">
-                  <input type="text" value={formData.metaOgTitle} onChange={(e) => updateField('metaOgTitle', e.target.value)} placeholder={formData.title} className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#0F1341] focus:border-[#0F1341] outline-none" />
+                  <input type="text" value={formData.metaOgTitle} onChange={(e) => updateField('metaOgTitle', e.target.value)} placeholder={formData.title} className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#090A28] focus:border-[#090A28] outline-none" />
                 </Field>
                 <Field label="OG Image URL">
-                  <input type="url" value={formData.metaOgImage} onChange={(e) => updateField('metaOgImage', e.target.value)} placeholder="https://..." className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#0F1341] focus:border-[#0F1341] outline-none" />
+                  <input type="url" value={formData.metaOgImage} onChange={(e) => updateField('metaOgImage', e.target.value)} placeholder="https://..." className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#090A28] focus:border-[#090A28] outline-none" />
                 </Field>
               </div>
               <Field label="OG Description">
-                <textarea value={formData.metaOgDescription} onChange={(e) => updateField('metaOgDescription', e.target.value)} rows={2} className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#0F1341] focus:border-[#0F1341] outline-none resize-none" />
+                <textarea value={formData.metaOgDescription} onChange={(e) => updateField('metaOgDescription', e.target.value)} rows={2} className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#090A28] focus:border-[#090A28] outline-none resize-none" />
               </Field>
             </div>
 
@@ -837,14 +837,14 @@ export default function EditProductPage() {
               </h4>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <Field label="Twitter Title">
-                  <input type="text" value={formData.metaTwitterTitle} onChange={(e) => updateField('metaTwitterTitle', e.target.value)} placeholder={formData.title} className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#0F1341] focus:border-[#0F1341] outline-none" />
+                  <input type="text" value={formData.metaTwitterTitle} onChange={(e) => updateField('metaTwitterTitle', e.target.value)} placeholder={formData.title} className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#090A28] focus:border-[#090A28] outline-none" />
                 </Field>
                 <Field label="Twitter Image URL">
-                  <input type="url" value={formData.metaTwitterImage} onChange={(e) => updateField('metaTwitterImage', e.target.value)} placeholder="https://..." className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#0F1341] focus:border-[#0F1341] outline-none" />
+                  <input type="url" value={formData.metaTwitterImage} onChange={(e) => updateField('metaTwitterImage', e.target.value)} placeholder="https://..." className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#090A28] focus:border-[#090A28] outline-none" />
                 </Field>
               </div>
               <Field label="Twitter Description">
-                <textarea value={formData.metaTwitterDescription} onChange={(e) => updateField('metaTwitterDescription', e.target.value)} rows={2} className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#0F1341] focus:border-[#0F1341] outline-none resize-none" />
+                <textarea value={formData.metaTwitterDescription} onChange={(e) => updateField('metaTwitterDescription', e.target.value)} rows={2} className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#090A28] focus:border-[#090A28] outline-none resize-none" />
               </Field>
             </div>
           </div>
@@ -868,7 +868,7 @@ export default function EditProductPage() {
                       {review.avatar ? (
                         <img src={review.avatar} alt={review.author} className="w-full h-full object-cover" />
                       ) : (
-                        <div className="w-9 h-9 bg-gradient-to-br from-[#0F1341] to-purple-600 rounded-full flex items-center justify-center text-white text-sm font-medium">
+                        <div className="w-9 h-9 bg-gradient-to-br from-[#090A28] to-purple-600 rounded-full flex items-center justify-center text-white text-sm font-medium">
                           {review.author?.charAt(0)?.toUpperCase()}
                         </div>
                       )}
@@ -901,7 +901,7 @@ export default function EditProductPage() {
             <button
               type="button"
               onClick={() => openReviewModal()}
-              className="w-full py-2.5 border-2 border-dashed border-gray-200 rounded-xl text-gray-500 hover:border-[#0F1341]/30 hover:text-[#0F1341] transition-colors flex items-center justify-center gap-2"
+              className="w-full py-2.5 border-2 border-dashed border-gray-200 rounded-xl text-gray-500 hover:border-[#090A28]/30 hover:text-[#090A28] transition-colors flex items-center justify-center gap-2"
             >
               <Plus className="h-4 w-4" />
               Add Review
@@ -925,7 +925,7 @@ export default function EditProductPage() {
               {/* Avatar Upload */}
               <div className="flex items-center gap-4">
                 <label className="relative cursor-pointer group flex-shrink-0">
-                  <div className="w-16 h-16 rounded-full overflow-hidden bg-gray-100 border-2 border-dashed border-gray-300 group-hover:border-[#0F1341] transition-colors flex items-center justify-center">
+                  <div className="w-16 h-16 rounded-full overflow-hidden bg-gray-100 border-2 border-dashed border-gray-300 group-hover:border-[#090A28] transition-colors flex items-center justify-center">
                     {editingReview.data.avatar ? (
                       <img src={editingReview.data.avatar} alt="Avatar" className="w-full h-full object-cover" />
                     ) : (
@@ -966,14 +966,14 @@ export default function EditProductPage() {
                     type="text"
                     value={editingReview.data.author || ''}
                     onChange={(e) => setEditingReview({ ...editingReview, data: { ...editingReview.data, author: e.target.value } })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0F1341] outline-none"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#090A28] outline-none"
                   />
                 </Field>
                 <Field label="Rating">
                   <select
                     value={editingReview.data.rating || 5}
                     onChange={(e) => setEditingReview({ ...editingReview, data: { ...editingReview.data, rating: parseInt(e.target.value) } })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0F1341] outline-none bg-white"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#090A28] outline-none bg-white"
                   >
                     {[5, 4, 3, 2, 1].map(n => <option key={n} value={n}>{n} Stars</option>)}
                   </select>
@@ -984,7 +984,7 @@ export default function EditProductPage() {
                   type="text"
                   value={editingReview.data.title || ''}
                   onChange={(e) => setEditingReview({ ...editingReview, data: { ...editingReview.data, title: e.target.value } })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0F1341] outline-none"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#090A28] outline-none"
                 />
               </Field>
               <Field label="Content" required>
@@ -992,7 +992,7 @@ export default function EditProductPage() {
                   value={editingReview.data.content || ''}
                   onChange={(e) => setEditingReview({ ...editingReview, data: { ...editingReview.data, content: e.target.value } })}
                   rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0F1341] outline-none resize-none"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#090A28] outline-none resize-none"
                 />
               </Field>
               <div className="grid grid-cols-2 gap-4">
@@ -1002,7 +1002,7 @@ export default function EditProductPage() {
                     value={editingReview.data.location || ''}
                     onChange={(e) => setEditingReview({ ...editingReview, data: { ...editingReview.data, location: e.target.value } })}
                     placeholder="City, State"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0F1341] outline-none"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#090A28] outline-none"
                   />
                 </Field>
                 <Field label="Date">
@@ -1010,7 +1010,7 @@ export default function EditProductPage() {
                     type="date"
                     value={editingReview.data.date || ''}
                     onChange={(e) => setEditingReview({ ...editingReview, data: { ...editingReview.data, date: e.target.value } })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0F1341] outline-none"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#090A28] outline-none"
                   />
                 </Field>
               </div>
@@ -1019,7 +1019,7 @@ export default function EditProductPage() {
                   type="checkbox"
                   checked={editingReview.data.verified ?? true}
                   onChange={(e) => setEditingReview({ ...editingReview, data: { ...editingReview.data, verified: e.target.checked } })}
-                  className="w-4 h-4 rounded text-[#0F1341] focus:ring-[#0F1341]"
+                  className="w-4 h-4 rounded text-[#090A28] focus:ring-[#090A28]"
                 />
                 <span className="text-sm text-gray-700">Verified Purchase</span>
               </label>
@@ -1028,7 +1028,7 @@ export default function EditProductPage() {
               <button type="button" onClick={() => setShowReviewModal(false)} className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">
                 Cancel
               </button>
-              <button type="button" onClick={saveReview} className="px-4 py-2 bg-[#0F1341] text-white rounded-lg hover:bg-[#1c2070]">
+              <button type="button" onClick={saveReview} className="px-4 py-2 bg-[#090A28] text-white rounded-lg hover:bg-[#1c2070]">
                 Save
               </button>
             </div>

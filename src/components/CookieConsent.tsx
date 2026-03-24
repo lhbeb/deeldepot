@@ -32,7 +32,7 @@ const CookieConsent: React.FC = () => {
   if (!isVisible) return null;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50" style={{ backgroundColor: '#0F1341' }}>
+    <div className="fixed bottom-0 left-0 right-0 z-50" style={{ backgroundColor: '#090A28' }}>
       <div className="px-4 py-4">
         <div className="flex flex-col sm:flex-row items-center justify-center space-y-3 sm:space-y-0 sm:space-x-6">
           {/* Text */}
@@ -54,7 +54,7 @@ const CookieConsent: React.FC = () => {
             </button>
             <button
               onClick={handleAccept}
-              className="px-4 sm:px-6 py-2 bg-[#F5970C] text-[#0F1341] rounded-md hover:bg-[#F5970C]/90 transition-colors text-sm font-bold"
+              className="px-4 sm:px-6 py-2 bg-[#F5970C] text-[#090A28] rounded-md hover:bg-[#F5970C]/90 transition-colors text-sm font-bold"
             >
               Accept All Cookies
             </button>

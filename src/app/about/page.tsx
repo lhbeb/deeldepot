@@ -8,7 +8,7 @@ export default function AboutPage() {
       <AboutNotifier />
       
       {/* Hero Section */}
-      <div className="bg-gradient-to-r from-[#0F1341] to-[#1c2070] text-white py-16">
+      <div className="bg-gradient-to-r from-[#090A28] to-[#1c2070] text-white py-16">
         <div className="container mx-auto px-4 max-w-4xl text-center">
           <h1 className="text-5xl font-bold mb-6">About DeelDepot</h1>
           <p className="text-xl text-blue-100 leading-relaxed max-w-3xl mx-auto">
@@ -29,9 +29,9 @@ export default function AboutPage() {
           </p>
           
           <div className="space-y-6">
-            <div className="bg-gray-50 rounded-xl p-6 border-l-4 border-[#0F1341]">
+            <div className="bg-gray-50 rounded-xl p-6 border-l-4 border-[#090A28]">
               <div className="flex items-start gap-4">
-                <div className="flex-shrink-0 w-10 h-10 bg-[#0F1341] text-white rounded-full flex items-center justify-center font-bold text-lg">
+                <div className="flex-shrink-0 w-10 h-10 bg-[#090A28] text-white rounded-full flex items-center justify-center font-bold text-lg">
                   1
                 </div>
                 <div>
@@ -43,9 +43,9 @@ export default function AboutPage() {
               </div>
             </div>
 
-            <div className="bg-gray-50 rounded-xl p-6 border-l-4 border-[#0F1341]">
+            <div className="bg-gray-50 rounded-xl p-6 border-l-4 border-[#090A28]">
               <div className="flex items-start gap-4">
-                <div className="flex-shrink-0 w-10 h-10 bg-[#0F1341] text-white rounded-full flex items-center justify-center font-bold text-lg">
+                <div className="flex-shrink-0 w-10 h-10 bg-[#090A28] text-white rounded-full flex items-center justify-center font-bold text-lg">
                   2
                 </div>
                 <div>
@@ -57,9 +57,9 @@ export default function AboutPage() {
               </div>
             </div>
 
-            <div className="bg-gray-50 rounded-xl p-6 border-l-4 border-[#0F1341]">
+            <div className="bg-gray-50 rounded-xl p-6 border-l-4 border-[#090A28]">
               <div className="flex items-start gap-4">
-                <div className="flex-shrink-0 w-10 h-10 bg-[#0F1341] text-white rounded-full flex items-center justify-center font-bold text-lg">
+                <div className="flex-shrink-0 w-10 h-10 bg-[#090A28] text-white rounded-full flex items-center justify-center font-bold text-lg">
                   3
                 </div>
                 <div>
@@ -74,9 +74,9 @@ export default function AboutPage() {
               </div>
             </div>
 
-            <div className="bg-gray-50 rounded-xl p-6 border-l-4 border-[#0F1341]">
+            <div className="bg-gray-50 rounded-xl p-6 border-l-4 border-[#090A28]">
               <div className="flex items-start gap-4">
-                <div className="flex-shrink-0 w-10 h-10 bg-[#0F1341] text-white rounded-full flex items-center justify-center font-bold text-lg">
+                <div className="flex-shrink-0 w-10 h-10 bg-[#090A28] text-white rounded-full flex items-center justify-center font-bold text-lg">
                   4
                 </div>
                 <div>
@@ -88,9 +88,9 @@ export default function AboutPage() {
               </div>
             </div>
 
-            <div className="bg-gray-50 rounded-xl p-6 border-l-4 border-[#0F1341]">
+            <div className="bg-gray-50 rounded-xl p-6 border-l-4 border-[#090A28]">
               <div className="flex items-start gap-4">
-                <div className="flex-shrink-0 w-10 h-10 bg-[#0F1341] text-white rounded-full flex items-center justify-center font-bold text-lg">
+                <div className="flex-shrink-0 w-10 h-10 bg-[#090A28] text-white rounded-full flex items-center justify-center font-bold text-lg">
                   5
                 </div>
                 <div>
@@ -108,7 +108,7 @@ export default function AboutPage() {
         <div className="bg-white rounded-2xl shadow-lg p-8 mb-12">
           <div className="flex items-center gap-4 mb-6">
             <div className="p-3 bg-blue-100 rounded-xl">
-              <Users className="h-8 w-8 text-[#0F1341]" />
+              <Users className="h-8 w-8 text-[#090A28]" />
             </div>
             <h2 className="text-3xl font-bold text-[#262626]">A New Addition to Our Model: Approved Private Sellers</h2>
           </div>
@@ -121,15 +121,15 @@ export default function AboutPage() {
           
           <div className="grid md:grid-cols-3 gap-4 mb-6">
             <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-              <CheckCircle2 className="h-6 w-6 text-[#0F1341] mb-2" />
+              <CheckCircle2 className="h-6 w-6 text-[#090A28] mb-2" />
               <p className="text-gray-700 font-medium">verifying authentic condition</p>
             </div>
             <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-              <Zap className="h-6 w-6 text-[#0F1341] mb-2" />
+              <Zap className="h-6 w-6 text-[#090A28] mb-2" />
               <p className="text-gray-700 font-medium">confirming that the product works perfectly</p>
             </div>
             <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-              <DollarSign className="h-6 w-6 text-[#0F1341] mb-2" />
+              <DollarSign className="h-6 w-6 text-[#090A28] mb-2" />
               <p className="text-gray-700 font-medium">validating that the price reflects real market value</p>
             </div>
           </div>
@@ -140,7 +140,7 @@ export default function AboutPage() {
           
           <div className="bg-gray-50 rounded-lg p-6 border border-gray-200">
             <h3 className="text-xl font-bold text-[#262626] mb-3 flex items-center gap-2">
-              <Sparkles className="h-5 w-5 text-[#0F1341]" />
+              <Sparkles className="h-5 w-5 text-[#090A28]" />
               How it works for customers
             </h3>
             <p className="text-gray-700 mb-3">
@@ -156,7 +156,7 @@ export default function AboutPage() {
         </div>
 
         {/* Our Mission */}
-        <div className="bg-gradient-to-r from-[#0F1341] to-[#1c2070] rounded-2xl shadow-lg p-10 mb-12 text-white text-center">
+        <div className="bg-gradient-to-r from-[#090A28] to-[#1c2070] rounded-2xl shadow-lg p-10 mb-12 text-white text-center">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-white/20 rounded-full mb-6">
             <Target className="h-8 w-8" />
           </div>
@@ -181,7 +181,7 @@ export default function AboutPage() {
           <div className="grid md:grid-cols-2 gap-6">
             <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
               <div className="flex items-center gap-3 mb-3">
-                <Package className="h-6 w-6 text-[#0F1341]" />
+                <Package className="h-6 w-6 text-[#090A28]" />
                 <h3 className="text-xl font-bold text-[#262626]">Curated Inventory</h3>
               </div>
               <p className="text-gray-700">Every product is carefully inspected and verified before it is shipped to the customer.</p>
@@ -189,7 +189,7 @@ export default function AboutPage() {
 
             <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
               <div className="flex items-center gap-3 mb-3">
-                <Eye className="h-6 w-6 text-[#0F1341]" />
+                <Eye className="h-6 w-6 text-[#090A28]" />
                 <h3 className="text-xl font-bold text-[#262626]">Transparent Product Details</h3>
               </div>
               <p className="text-gray-700">We clearly list whether an item is new, open box, refurbished, or pre owned. Customers always know what they are buying.</p>
@@ -197,7 +197,7 @@ export default function AboutPage() {
 
             <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
               <div className="flex items-center gap-3 mb-3">
-                <DollarSign className="h-6 w-6 text-[#0F1341]" />
+                <DollarSign className="h-6 w-6 text-[#090A28]" />
                 <h3 className="text-xl font-bold text-[#262626]">Real Value</h3>
               </div>
               <p className="text-gray-700">We constantly compare and track market prices to ensure every listing is a genuine deal.</p>
@@ -205,7 +205,7 @@ export default function AboutPage() {
 
             <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
               <div className="flex items-center gap-3 mb-3">
-                <Headphones className="h-6 w-6 text-[#0F1341]" />
+                <Headphones className="h-6 w-6 text-[#090A28]" />
                 <h3 className="text-xl font-bold text-[#262626]">Customer Focus</h3>
               </div>
               <p className="text-gray-700">We offer fast and free shipping within the United States and Canada, a 30 day return policy, and reliable human support.</p>
@@ -213,7 +213,7 @@ export default function AboutPage() {
 
             <div className="bg-gray-50 rounded-xl p-6 border border-gray-200 md:col-span-2">
               <div className="flex items-center gap-3 mb-3">
-                <Leaf className="h-6 w-6 text-[#0F1341]" />
+                <Leaf className="h-6 w-6 text-[#090A28]" />
                 <h3 className="text-xl font-bold text-[#262626]">Sustainable Shopping</h3>
               </div>
               <p className="text-gray-700">By reselling returns, overstock, and refurbished goods, you help reduce waste and support a more sustainable buying cycle.</p>
@@ -232,26 +232,26 @@ export default function AboutPage() {
           
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="bg-gray-50 rounded-xl p-6 text-center border border-gray-200">
-              <Shield className="h-10 w-10 text-[#0F1341] mx-auto mb-3" />
+              <Shield className="h-10 w-10 text-[#090A28] mx-auto mb-3" />
               <h3 className="font-bold text-[#262626] text-lg">Integrity</h3>
             </div>
             <div className="bg-gray-50 rounded-xl p-6 text-center border border-gray-200">
-              <Award className="h-10 w-10 text-[#0F1341] mx-auto mb-3" />
+              <Award className="h-10 w-10 text-[#090A28] mx-auto mb-3" />
               <h3 className="font-bold text-[#262626] text-lg">Quality</h3>
             </div>
             <div className="bg-gray-50 rounded-xl p-6 text-center border border-gray-200">
-              <Users className="h-10 w-10 text-[#0F1341] mx-auto mb-3" />
+              <Users className="h-10 w-10 text-[#090A28] mx-auto mb-3" />
               <h3 className="font-bold text-[#262626] text-lg">Customer Trust</h3>
             </div>
             <div className="bg-gray-50 rounded-xl p-6 text-center border border-gray-200">
-              <Zap className="h-10 w-10 text-[#0F1341] mx-auto mb-3" />
+              <Zap className="h-10 w-10 text-[#090A28] mx-auto mb-3" />
               <h3 className="font-bold text-[#262626] text-lg">Innovation and continuous improvement</h3>
             </div>
           </div>
         </div>
 
         {/* Company Stats */}
-        <div className="bg-gradient-to-r from-[#0F1341] to-[#1c2070] rounded-2xl shadow-lg p-10 mb-12 text-white">
+        <div className="bg-gradient-to-r from-[#090A28] to-[#1c2070] rounded-2xl shadow-lg p-10 mb-12 text-white">
           <h3 className="text-3xl font-bold mb-8 text-center">Company Stats</h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             <div className="text-center p-6 bg-white/10 backdrop-blur-sm rounded-xl border border-white/20">
@@ -277,35 +277,35 @@ export default function AboutPage() {
         <div className="bg-white rounded-2xl shadow-lg p-8">
           <div className="flex items-center gap-4 mb-6">
             <div className="p-3 bg-blue-100 rounded-xl">
-              <Phone className="h-8 w-8 text-[#0F1341]" />
+              <Phone className="h-8 w-8 text-[#090A28]" />
             </div>
             <h3 className="text-2xl font-bold text-[#262626]">Contact Information</h3>
           </div>
           <div className="grid md:grid-cols-2 gap-6">
             <div className="bg-gray-50 rounded-xl p-6">
               <div className="flex items-center gap-3 mb-3">
-                <MapPin className="h-5 w-5 text-[#0F1341]" />
+                <MapPin className="h-5 w-5 text-[#090A28]" />
                 <div className="font-medium text-[#262626]">Address:</div>
               </div>
               <div className="text-gray-600 ml-8">1420 N McKinley Ave, Los Angeles, CA 90059, United States</div>
             </div>
             <div className="bg-gray-50 rounded-xl p-6">
               <div className="flex items-center gap-3 mb-3">
-                <Phone className="h-5 w-5 text-[#0F1341]" />
+                <Phone className="h-5 w-5 text-[#090A28]" />
                 <div className="font-medium text-[#262626]">Phone:</div>
               </div>
               <div className="text-gray-600 ml-8">+1 717 648 4487</div>
             </div>
             <div className="bg-gray-50 rounded-xl p-6">
               <div className="flex items-center gap-3 mb-3">
-                <Mail className="h-5 w-5 text-[#0F1341]" />
+                <Mail className="h-5 w-5 text-[#090A28]" />
                 <div className="font-medium text-[#262626]">Email:</div>
               </div>
               <div className="text-gray-600 ml-8">support@DeelDepot.com</div>
             </div>
             <div className="bg-gray-50 rounded-xl p-6">
               <div className="flex items-center gap-3 mb-3">
-                <Clock className="h-5 w-5 text-[#0F1341]" />
+                <Clock className="h-5 w-5 text-[#090A28]" />
                 <div className="font-medium text-[#262626]">Business Hours:</div>
               </div>
               <div className="text-gray-600 ml-8 space-y-1">

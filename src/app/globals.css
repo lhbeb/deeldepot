@@ -85,7 +85,7 @@ span {
 
 /* Improve focus visibility for accessibility */
 *:focus-visible {
-  outline: 2px solid #0F1341;
+  outline: 2px solid #090A28;
   outline-offset: 2px;
 }
 
@@ -187,7 +187,7 @@ button {
 }
 
 .loading-spinner {
-  @apply rounded-full h-12 w-12 border-t-2 border-b-2 border-[#0F1341];
+  @apply rounded-full h-12 w-12 border-t-2 border-b-2 border-[#090A28];
   animation: spin 1s linear infinite;
 }
 
@@ -287,7 +287,7 @@ button {
 
 /* Improve focus visibility for accessibility */
 *:focus-visible {
-  outline: 2px solid #0F1341;
+  outline: 2px solid #090A28;
   outline-offset: 2px;
 }
 

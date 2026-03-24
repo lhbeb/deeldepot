@@ -26,8 +26,8 @@ const Header = () => {
   const isCheckoutPage = pathname === '/checkout';
 
   const announcements = [
-    <span key="nav-1">🚚 <span className="text-[#F5970C] font-bold">Free Shipping</span> for North America and Europe</span>,
-    <span key="nav-2">📦 <span className="text-[#F5970C] font-bold">Free Returns</span> Within <span className="text-[#F5970C] font-bold">30 days</span></span>,
+    <span key="nav-1">🚚 <span className="font-bold">Free Shipping</span> for North America and Europe</span>,
+    <span key="nav-2">📦 <span className="font-bold">Free Returns</span> Within <span className="font-bold">30 days</span></span>,
     "whatsapp-contact" // Special marker for WhatsApp announcement
   ];
 
@@ -126,7 +126,7 @@ const Header = () => {
   return (
     <>
       {/* Announcement bar - Deep Blue background with white text */}
-      <div className="bg-[#06092a] text-white py-2 relative overflow-hidden h-[40px] flex items-center">
+      <div className="bg-[#F5970C] text-[#090A28] py-2 relative overflow-hidden h-[40px] flex items-center">
         <div className="container mx-auto px-4 flex items-center justify-center relative w-full h-full">
           {/* Announcement Text - PRESERVED */}
           <div className="text-center font-medium px-4 sm:px-16 transition-all duration-500 ease-in-out h-full flex items-center justify-center min-h-[24px]">
@@ -145,10 +145,10 @@ const Header = () => {
                     width={20}
                     height={20}
                     className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0"
-                    style={{ filter: 'brightness(0) saturate(100%) invert(100%)' }}
+                    style={{ filter: 'brightness(0) saturate(100%)' }}
                   />
-                  <span className="whitespace-nowrap">Questions? <span className="text-[#F5970C] font-bold">WhatsApp us</span></span>
-                  <span className="underline whitespace-nowrap font-bold text-[#F5970C]">+1 (717) 648-4487</span>
+                  <span className="whitespace-nowrap">Questions? <span className="font-bold">WhatsApp us</span></span>
+                  <span className="underline whitespace-nowrap font-bold">+1 (717) 648-4487</span>
                 </a>
               </div>
             ) : (
@@ -158,10 +158,10 @@ const Header = () => {
             )}
           </div>
 
-          {/* Desktop Arrows - Updated hover color for light blue background */}
+          {/* Desktop Arrows */}
           <button
             onClick={() => handleAnnouncementNavigation('prev')}
-            className="hidden sm:block absolute left-1/2 transform -translate-x-56 p-1 hover:bg-white/20 rounded-full transition-colors duration-200 z-10 text-white"
+            className="hidden sm:block absolute left-1/2 transform -translate-x-56 p-1 hover:bg-black/10 rounded-full transition-colors duration-200 z-10 text-[#090A28]"
             aria-label="Previous announcement"
           >
             <ChevronLeft className="h-4 w-4" />
@@ -169,7 +169,7 @@ const Header = () => {
 
           <button
             onClick={() => handleAnnouncementNavigation('next')}
-            className="hidden sm:block absolute left-1/2 transform translate-x-52 p-1 hover:bg-white/20 rounded-full transition-colors duration-200 z-10 text-white"
+            className="hidden sm:block absolute left-1/2 transform translate-x-52 p-1 hover:bg-black/10 rounded-full transition-colors duration-200 z-10 text-[#090A28]"
             aria-label="Next announcement"
           >
             <ChevronRight className="h-4 w-4" />
@@ -180,7 +180,7 @@ const Header = () => {
       {/* Main Header - Two-tier layout */}
       <header
         ref={headerRef}
-        className={`bg-[#0F1341] transition-all duration-300 ${isSticky
+        className={`bg-[#090A28] transition-all duration-300 ${isSticky
           ? 'fixed top-0 left-0 right-0 z-50'
           : 'relative'
           }`}
@@ -221,7 +221,7 @@ const Header = () => {
               {/* Sell Now Button - Desktop */}
               <Link
                 href="/sell"
-                className="hidden lg:flex items-center justify-center bg-[#F5970C] text-[#0F1341] px-5 py-2 rounded-lg text-sm font-medium hover:bg-[#F5970C]/90 transition-colors duration-300"
+                className="hidden lg:flex items-center justify-center bg-[#F5970C] text-[#090A28] px-5 py-2 rounded-lg text-sm font-medium hover:bg-[#F5970C]/90 transition-colors duration-300"
               >
                 Sell Now
               </Link>
@@ -254,7 +254,7 @@ const Header = () => {
               >
                 <ShoppingCart className="h-5 w-5" />
                 <ClientOnly>
-                  <span className={`absolute -top-2 -right-2 bg-[#F4C446] text-[#0F1341] text-xs rounded-full h-5 w-5 flex items-center justify-center transition-opacity duration-300 ${cartCount > 0 ? 'opacity-100' : 'opacity-0'}`}>
+                  <span className={`absolute -top-2 -right-2 bg-[#F4C446] text-[#090A28] text-xs rounded-full h-5 w-5 flex items-center justify-center transition-opacity duration-300 ${cartCount > 0 ? 'opacity-100' : 'opacity-0'}`}>
                     {cartCount}
                   </span>
                 </ClientOnly>
@@ -337,7 +337,7 @@ const Header = () => {
                 </Link>
                 <Link
                   href="/sell"
-                  className="inline-flex items-center justify-center text-center bg-[#F5970C] text-[#0F1341] px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-[#F5970C]/90 transition-colors duration-300 mt-4"
+                  className="inline-flex items-center justify-center text-center bg-[#F5970C] text-[#090A28] px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-[#F5970C]/90 transition-colors duration-300 mt-4"
                   onClick={handleMobileMenuClose}
                 >
                   Sell Now

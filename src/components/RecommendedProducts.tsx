@@ -134,7 +134,7 @@ const RecommendedProducts: React.FC<RecommendedProductsProps> = ({ currentProduc
               </div>
 
               <div className="p-4 space-y-3">
-                <h3 className="font-semibold text-[#262626] group-hover:text-[#0F1341] transition-colors line-clamp-2 sm:line-clamp-1">
+                <h3 className="font-semibold text-[#262626] group-hover:text-[#090A28] transition-colors line-clamp-2 sm:line-clamp-1">
                   {product.title}
                 </h3>
 
@@ -150,7 +150,7 @@ const RecommendedProducts: React.FC<RecommendedProductsProps> = ({ currentProduc
                     <Eye className="h-4 w-4 mr-1" />
                     <span>View Details</span>
                   </div>
-                  <div className="h-8 w-8 bg-[#0F1341] rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  <div className="h-8 w-8 bg-[#090A28] rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                     <ShoppingCart className="h-4 w-4 text-white" />
                   </div>
                 </div>

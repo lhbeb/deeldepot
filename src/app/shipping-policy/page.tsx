@@ -9,7 +9,7 @@ export default function ShippingPolicyPage() {
           </p>
 
           {/* Same-Day Shipping Highlight Section */}
-          <div className="bg-gradient-to-r from-[#0F1341] to-[#1c2070] text-white p-8 rounded-2xl mb-8 shadow-lg">
+          <div className="bg-gradient-to-r from-[#090A28] to-[#1c2070] text-white p-8 rounded-2xl mb-8 shadow-lg">
             <h2 className="text-3xl font-bold mb-4 text-[#F4C446]">Same-Day Shipping</h2>
             <p className="text-lg mb-4 text-white">
               <strong>Order by 2:00 PM EST and get same-day shipping!</strong> We&apos;ll process, pack, and ship your order on the same day you place it. This means your package begins its journey immediately, getting to you faster than ever.
@@ -37,10 +37,10 @@ export default function ShippingPolicyPage() {
           <div className="bg-gray-50 p-6 rounded-lg mb-8">
             <h3 className="font-medium text-[#262626] mb-4">Estimated Delivery Timeline:</h3>
             <div className="space-y-4">
-              <div className="bg-blue-50 border-l-4 border-[#0F1341] p-4 rounded mb-4">
+              <div className="bg-blue-50 border-l-4 border-[#090A28] p-4 rounded mb-4">
                 <div className="flex justify-between items-center">
                   <span className="font-bold text-[#262626]">Same-Day Orders (Before 2 PM EST):</span>
-                  <span className="font-semibold text-[#0F1341]">Shipped same day</span>
+                  <span className="font-semibold text-[#090A28]">Shipped same day</span>
                 </div>
                 <p className="text-sm text-gray-600 mt-2">
                   Processing and shipping happen the same day when you order before 2:00 PM EST.

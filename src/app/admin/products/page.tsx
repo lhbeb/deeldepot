@@ -526,7 +526,7 @@ export default function AdminProductsPage() {
           <button
             onClick={() => setStatusFilter('all')}
             className={`flex-1 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors ${statusFilter === 'all'
-              ? 'bg-[#0F1341] text-white shadow-sm'
+              ? 'bg-[#090A28] text-white shadow-sm'
               : 'text-gray-600 hover:bg-gray-50'
               }`}
           >
@@ -535,7 +535,7 @@ export default function AdminProductsPage() {
           <button
             onClick={() => setStatusFilter('published')}
             className={`flex-1 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors ${statusFilter === 'published'
-              ? 'bg-[#0F1341] text-white shadow-sm'
+              ? 'bg-[#090A28] text-white shadow-sm'
               : 'text-gray-600 hover:bg-gray-50'
               }`}
           >
@@ -564,7 +564,7 @@ export default function AdminProductsPage() {
               placeholder="Search products..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0F1341] focus:border-transparent"
+              className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#090A28] focus:border-transparent"
             />
           </div>
 
@@ -574,7 +574,7 @@ export default function AdminProductsPage() {
             <select
               value={featuredFilter}
               onChange={(e) => setFeaturedFilter(e.target.value as 'all' | 'featured' | 'not_featured')}
-              className="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0F1341] focus:border-transparent text-sm font-medium"
+              className="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#090A28] focus:border-transparent text-sm font-medium"
             >
               <option value="all">All Products</option>
               <option value="featured">⭐ Featured Only</option>
@@ -588,7 +588,7 @@ export default function AdminProductsPage() {
             <select
               value={stockFilter}
               onChange={(e) => setStockFilter(e.target.value as 'all' | 'in_stock' | 'sold_out')}
-              className="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0F1341] focus:border-transparent text-sm font-medium"
+              className="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#090A28] focus:border-transparent text-sm font-medium"
             >
               <option value="all">All Stock Status</option>
               <option value="in_stock">✅ In Stock</option>
@@ -602,7 +602,7 @@ export default function AdminProductsPage() {
             <select
               value={listedByFilter}
               onChange={(e) => setListedByFilter(e.target.value)}
-              className="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0F1341] focus:border-transparent text-sm font-medium"
+              className="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#090A28] focus:border-transparent text-sm font-medium"
             >
               <option value="all">All Uploaders</option>
               <option value="walid">walid</option>
@@ -624,7 +624,7 @@ export default function AdminProductsPage() {
             <select
               value={checkoutFilter}
               onChange={(e) => setCheckoutFilter(e.target.value as 'all' | 'stripe' | 'kofi' | 'buymeacoffee' | 'external' | 'paypal-invoice')}
-              className="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0F1341] focus:border-transparent text-sm font-medium"
+              className="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#090A28] focus:border-transparent text-sm font-medium"
             >
               <option value="all">All Checkout Methods</option>
               <option value="stripe">💳 Stripe</option>
@@ -680,7 +680,7 @@ export default function AdminProductsPage() {
               <button
                 onClick={handleExport}
                 disabled={exporting}
-                className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#0F1341] text-white rounded-xl hover:bg-[#1c2070] transition-colors shadow-lg shadow-blue-500/25 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#090A28] text-white rounded-xl hover:bg-[#1c2070] transition-colors shadow-lg shadow-blue-500/25 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {exporting ? (
                   <RefreshCw className="h-4 w-4 animate-spin" />
@@ -695,7 +695,7 @@ export default function AdminProductsPage() {
 
             <Link
               href="/admin/products/new"
-              className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#0F1341] text-white rounded-xl hover:bg-[#1c2070] transition-colors shadow-lg shadow-[#0F1341]/25"
+              className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#090A28] text-white rounded-xl hover:bg-[#1c2070] transition-colors shadow-lg shadow-[#090A28]/25"
             >
               <Plus className="h-4 w-4" />
               <span className="font-medium">Add Product</span>
@@ -706,26 +706,26 @@ export default function AdminProductsPage() {
 
       {/* Selection Controls */}
       {selectedProducts.size > 0 && (
-        <div className="mb-4 px-4 py-3 bg-[#0F1341]/5 border border-[#0F1341]/20 rounded-xl flex items-center justify-between">
+        <div className="mb-4 px-4 py-3 bg-[#090A28]/5 border border-[#090A28]/20 rounded-xl flex items-center justify-between">
           <div className="flex items-center gap-4">
             <span className="text-sm font-medium text-[#1c2070]">
               {selectedProducts.size} product{selectedProducts.size !== 1 ? 's' : ''} selected
             </span>
             <button
               onClick={handleSelectAll}
-              className="text-sm text-[#0F1341] hover:text-[#1c2070] font-medium"
+              className="text-sm text-[#090A28] hover:text-[#1c2070] font-medium"
             >
               {selectedProducts.size === paginatedProducts.length ? 'Deselect Page' : 'Select Page'}
             </button>
             <button
               onClick={handleSelectAllFiltered}
-              className="text-sm text-[#0F1341] hover:text-[#1c2070] font-medium"
+              className="text-sm text-[#090A28] hover:text-[#1c2070] font-medium"
             >
               {selectedProducts.size === filteredProducts.length && filteredProducts.length > 0 ? 'Deselect All Filtered' : 'Select All Filtered'}
             </button>
             <button
               onClick={() => setSelectedProducts(new Set())}
-              className="text-sm text-[#0F1341] hover:text-[#1c2070] font-medium"
+              className="text-sm text-[#090A28] hover:text-[#1c2070] font-medium"
             >
               Clear Selection
             </button>
@@ -735,7 +735,7 @@ export default function AdminProductsPage() {
 
       {/* Filter Status */}
       {(searchQuery || statusFilter !== 'all' || featuredFilter !== 'all' || stockFilter !== 'all' || listedByFilter !== 'all' || checkoutFilter !== 'all') && (
-        <div className="mb-4 px-4 py-2 bg-[#0F1341]/5 border border-[#0F1341]/20 rounded-xl">
+        <div className="mb-4 px-4 py-2 bg-[#090A28]/5 border border-[#090A28]/20 rounded-xl">
           <div className="text-sm text-[#1c2070]">
             Showing <strong>{filteredProducts.length}</strong> of <strong>{products.length}</strong> product{products.length !== 1 ? 's' : ''}
             {statusFilter === 'published' && ` (${products.filter(p => p.published).length} published)`}
@@ -762,7 +762,7 @@ export default function AdminProductsPage() {
           <p className="text-gray-500 mb-4">Get started by adding your first product</p>
           <Link
             href="/admin/products/new"
-            className="inline-flex items-center gap-2 px-4 py-2 bg-[#0F1341] text-white rounded-lg hover:bg-[#1c2070]"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-[#090A28] text-white rounded-lg hover:bg-[#1c2070]"
           >
             <Plus className="h-4 w-4" />
             Add Product
@@ -784,12 +784,12 @@ export default function AdminProductsPage() {
                     handleToggleSelect(product.slug);
                   }}
                   className={`p-1.5 rounded-lg bg-white/90 backdrop-blur-sm border-2 transition-all ${selectedProducts.has(product.slug)
-                    ? 'border-[#0F1341] bg-[#0F1341]/5'
+                    ? 'border-[#090A28] bg-[#090A28]/5'
                     : 'border-gray-300 hover:border-gray-400'
                     }`}
                 >
                   {selectedProducts.has(product.slug) ? (
-                    <CheckSquare className="h-4 w-4 text-[#0F1341]" />
+                    <CheckSquare className="h-4 w-4 text-[#090A28]" />
                   ) : (
                     <Square className="h-4 w-4 text-gray-400" />
                   )}
@@ -821,7 +821,7 @@ export default function AdminProductsPage() {
                     </div>
                   )}
                   {(product.isFeatured || product.is_featured) && (
-                    <div className="px-2 py-1 bg-[#0F1341] text-white text-xs font-medium rounded-full flex items-center gap-1">
+                    <div className="px-2 py-1 bg-[#090A28] text-white text-xs font-medium rounded-full flex items-center gap-1">
                       <Star className="h-3 w-3 fill-white" />
                       Featured
                     </div>
@@ -843,7 +843,7 @@ export default function AdminProductsPage() {
                     }}
                     disabled={togglingStock === product.slug}
                     className={`p-2 rounded-lg transition-colors ${product.inStock !== false
-                      ? 'bg-green-500 hover:bg-[#0F1341]'
+                      ? 'bg-green-500 hover:bg-[#090A28]'
                       : 'bg-red-500 hover:bg-red-600'
                       } disabled:opacity-50`}
                     title={product.inStock !== false ? 'Mark as sold out' : 'Mark as in stock'}
@@ -933,7 +933,7 @@ export default function AdminProductsPage() {
                     title={selectedProducts.size === paginatedProducts.length ? 'Deselect all' : 'Select all'}
                   >
                     {selectedProducts.size === paginatedProducts.length && paginatedProducts.length > 0 ? (
-                      <CheckSquare className="h-4 w-4 text-[#0F1341]" />
+                      <CheckSquare className="h-4 w-4 text-[#090A28]" />
                     ) : (
                       <Square className="h-4 w-4 text-gray-400" />
                     )}
@@ -959,12 +959,12 @@ export default function AdminProductsPage() {
                         handleToggleSelect(product.slug);
                       }}
                       className={`p-1.5 rounded-lg border-2 transition-all ${selectedProducts.has(product.slug)
-                        ? 'border-[#0F1341] bg-[#0F1341]/5'
+                        ? 'border-[#090A28] bg-[#090A28]/5'
                         : 'border-gray-300 hover:border-gray-400'
                         }`}
                     >
                       {selectedProducts.has(product.slug) ? (
-                        <CheckSquare className="h-4 w-4 text-[#0F1341]" />
+                        <CheckSquare className="h-4 w-4 text-[#090A28]" />
                       ) : (
                         <Square className="h-4 w-4 text-gray-400" />
                       )}
@@ -1000,7 +1000,7 @@ export default function AdminProductsPage() {
                             </span>
                           )}
                           {(product.isFeatured || product.is_featured) && (
-                            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-[#0F1341]/10 text-[#1c2070] text-[10px] font-medium rounded">
+                            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-[#090A28]/10 text-[#1c2070] text-[10px] font-medium rounded">
                               <Star className="h-2.5 w-2.5 fill-[#1c2070]" />
                               Featured
                             </span>
@@ -1057,7 +1057,7 @@ export default function AdminProductsPage() {
                         href={product.checkoutLink}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 text-sm text-[#0F1341] hover:text-[#1c2070] hover:underline font-medium"
+                        className="inline-flex items-center gap-1.5 text-sm text-[#090A28] hover:text-[#1c2070] hover:underline font-medium"
                         onClick={(e) => e.stopPropagation()}
                       >
                         <ExternalLink className="h-4 w-4" />

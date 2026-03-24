@@ -72,7 +72,7 @@ export default function ContactPage() {
                         value={formData.name}
                         onChange={handleChange}
                         required
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0F1341] focus:border-transparent"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#090A28] focus:border-transparent"
                         disabled={isSending}
                       />
                     </div>
@@ -87,7 +87,7 @@ export default function ContactPage() {
                         value={formData.email}
                         onChange={handleChange}
                         required
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0F1341] focus:border-transparent"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#090A28] focus:border-transparent"
                         disabled={isSending}
                       />
                     </div>
@@ -101,7 +101,7 @@ export default function ContactPage() {
                         value={formData.contactReason}
                         onChange={handleChange}
                         required
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0F1341] focus:border-transparent bg-white"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#090A28] focus:border-transparent bg-white"
                         disabled={isSending}
                       >
                         <option value="">Select a reason</option>
@@ -126,7 +126,7 @@ export default function ContactPage() {
                         value={formData.subject}
                         onChange={handleChange}
                         required
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0F1341] focus:border-transparent"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#090A28] focus:border-transparent"
                         disabled={isSending}
                       />
                     </div>
@@ -141,13 +141,13 @@ export default function ContactPage() {
                         onChange={handleChange}
                         required
                         rows={4}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0F1341] focus:border-transparent"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#090A28] focus:border-transparent"
                         disabled={isSending}
                       />
                     </div>
                     <button
                       type="submit"
-                      className={`w-full bg-[#0F1341] hover:bg-[#1c2070] text-white font-medium py-3 rounded-lg transition-colors duration-300 ${isSending ? 'opacity-60 cursor-not-allowed' : ''}`}
+                      className={`w-full bg-[#090A28] hover:bg-[#1c2070] text-white font-medium py-3 rounded-lg transition-colors duration-300 ${isSending ? 'opacity-60 cursor-not-allowed' : ''}`}
                       disabled={isSending}
                     >
                       {isSending ? 'Sending...' : 'Send Message'}
@@ -162,21 +162,21 @@ export default function ContactPage() {
                   <h2 className="text-xl font-bold text-[#262626] mb-6">Get in Touch</h2>
                   <div className="space-y-6">
                     <div className="flex items-start">
-                      <MapPin className="h-6 w-6 text-[#0F1341] mt-1" />
+                      <MapPin className="h-6 w-6 text-[#090A28] mt-1" />
                       <div className="ml-4">
                         <h3 className="font-medium text-[#262626]">Our Location</h3>
                         <p className="text-gray-600 mt-1">1420 N McKinley Ave, Los Angeles, CA 90059, United States</p>
                       </div>
                     </div>
                     <div className="flex items-start">
-                      <Phone className="h-6 w-6 text-[#0F1341] mt-1" />
+                      <Phone className="h-6 w-6 text-[#090A28] mt-1" />
                       <div className="ml-4">
                         <h3 className="font-medium text-[#262626]">Phone</h3>
                         <p className="text-gray-600 mt-1">+17176484487</p>
                       </div>
                     </div>
                     <div className="flex items-start">
-                      <Mail className="h-6 w-6 text-[#0F1341] mt-1" />
+                      <Mail className="h-6 w-6 text-[#090A28] mt-1" />
                       <div className="ml-4">
                         <h3 className="font-medium text-[#262626]">Email</h3>
                         <p className="text-gray-600 mt-1">support@DeelDepot.com</p>

@@ -88,7 +88,7 @@ const Hero = () => {
         <div className="flex flex-col md:flex-row items-center min-h-[320px] md:min-h-[315px]">
 
           {/* Blue Card Overlay - Left Side */}
-          <div className="w-full max-w-[340px] md:max-w-[420px] lg:max-w-[450px] bg-[#0F1341] rounded-xl shadow-xl p-5 md:p-6 lg:p-8 md:ml-4 lg:ml-12">
+          <div className="w-full max-w-[340px] md:max-w-[420px] lg:max-w-[450px] bg-[#090A28] rounded-xl shadow-xl p-5 md:p-6 lg:p-8 md:ml-4 lg:ml-12">
             {/* Heading with typing animation - PRESERVED */}
             <h1 className="text-2xl md:text-3xl lg:text-[32px] font-bold text-white leading-tight">
               <span
@@ -110,7 +110,7 @@ const Hero = () => {
             {/* Shop Now Button - PRESERVED href */}
             <a
               href="#products"
-              className="mt-5 inline-flex items-center justify-center px-6 py-2.5 bg-[#F5970C] text-[#0F1341] text-sm font-medium rounded-lg shadow-md hover:bg-[#F5970C]/90 transition-all duration-300"
+              className="mt-5 inline-flex items-center justify-center px-6 py-2.5 bg-[#F5970C] text-[#090A28] text-sm font-medium rounded-lg shadow-md hover:bg-[#F5970C]/90 transition-all duration-300"
             >
               Shop Now
             </a>

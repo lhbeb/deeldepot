@@ -137,7 +137,7 @@ function LoginForm() {
       {/* Logo */}
       <div className="text-center mb-8">
         <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-[#F5970C] to-[#E08A09] rounded-2xl shadow-2xl shadow-[#F5970C]/30 mb-4">
-          <Lock className="h-8 w-8 text-[#0F1341]" />
+          <Lock className="h-8 w-8 text-[#090A28]" />
         </div>
         <h1 className="text-2xl font-bold text-white">Admin Portal</h1>
         <p className="text-gray-400 mt-1">Sign in to access your dashboard</p>
@@ -168,7 +168,7 @@ function LoginForm() {
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="Enter your email"
                 required
-                className="w-full pl-12 pr-4 py-3.5 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#0F1341] focus:border-transparent transition-all"
+                className="w-full pl-12 pr-4 py-3.5 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#090A28] focus:border-transparent transition-all"
               />
             </div>
           </div>
@@ -188,7 +188,7 @@ function LoginForm() {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter password"
                 required
-                className="w-full pl-12 pr-12 py-3.5 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#0F1341] focus:border-transparent transition-all"
+                className="w-full pl-12 pr-12 py-3.5 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#090A28] focus:border-transparent transition-all"
               />
               <button
                 type="button"
@@ -203,7 +203,7 @@ function LoginForm() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3.5 bg-[#F5970C] text-[#0F1341] font-bold rounded-xl hover:bg-[#F5970C]/90 focus:outline-none focus:ring-2 focus:ring-[#F5970C] focus:ring-offset-2 focus:ring-offset-gray-900 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 shadow-lg shadow-[#F5970C]/25"
+            className="w-full py-3.5 bg-[#F5970C] text-[#090A28] font-bold rounded-xl hover:bg-[#F5970C]/90 focus:outline-none focus:ring-2 focus:ring-[#F5970C] focus:ring-offset-2 focus:ring-offset-gray-900 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 shadow-lg shadow-[#F5970C]/25"
           >
             {loading ? (
               <div className="w-5 h-5 border-2 border-[#06092a]/30 border-t-[#06092a] rounded-full animate-spin"></div>
@@ -227,7 +227,7 @@ function LoginForm() {
 
 export default function AdminLoginPage() {
   return (
-    <div className="min-h-screen bg-[#0F1341] flex items-center justify-center p-4">
+    <div className="min-h-screen bg-[#090A28] flex items-center justify-center p-4">
       {/* Background Pattern */}
       <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-5"></div>
 

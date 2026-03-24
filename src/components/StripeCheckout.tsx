@@ -125,7 +125,7 @@ function PaymentForm({ product, shippingData, onClose }: StripeCheckoutProps) {
             {/* Payment Element */}
             <div className="bg-white rounded-xl border border-gray-200 p-3 sm:p-6">
                 <h3 className="text-lg font-semibold text-[#262626] mb-4 flex items-center gap-2">
-                    <CreditCard className="h-5 w-5 text-[#0F1341]" />
+                    <CreditCard className="h-5 w-5 text-[#090A28]" />
                     Payment Details
                 </h3>
                 <PaymentElement />
@@ -161,7 +161,7 @@ function PaymentForm({ product, shippingData, onClose }: StripeCheckoutProps) {
             <div className="mt-6 flex flex-row flex-wrap items-center justify-center gap-3 sm:gap-4 text-xs sm:text-sm text-gray-600">
                 <div className="flex items-center gap-1.5 sm:gap-2">
                     <span className="inline-flex items-center justify-center bg-gray-100 rounded-full p-1">
-                        <svg className="h-3 w-3 sm:h-4 sm:w-4 text-[#0F1341]" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                        <svg className="h-3 w-3 sm:h-4 sm:w-4 text-[#090A28]" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                             <rect width="18" height="12" x="3" y="8" rx="2" />
                             <path d="M7 8V6a5 5 0 0 1 10 0v2" />
                         </svg>
@@ -171,7 +171,7 @@ function PaymentForm({ product, shippingData, onClose }: StripeCheckoutProps) {
                 <div className="text-gray-300">•</div>
                 <div className="flex items-center gap-1.5 sm:gap-2">
                     <span className="inline-flex items-center justify-center bg-gray-100 rounded-full p-1">
-                        <Check className="h-3 w-3 sm:h-4 sm:w-4 text-[#0F1341]" />
+                        <Check className="h-3 w-3 sm:h-4 sm:w-4 text-[#090A28]" />
                     </span>
                     <span className="whitespace-nowrap">SSL Encrypted</span>
                 </div>
@@ -232,7 +232,7 @@ export default function StripeCheckout({ product, shippingData, onClose }: Strip
     const appearance = {
         theme: 'stripe' as const,
         variables: {
-            colorPrimary: '#0F1341',
+            colorPrimary: '#090A28',
             colorBackground: '#ffffff',
             colorText: '#262626',
             colorDanger: '#df1b41',
@@ -270,7 +270,7 @@ export default function StripeCheckout({ product, shippingData, onClose }: Strip
                             </div>
                             <div className="flex-1 min-w-0">
                                 <h3 className="font-semibold text-[#262626] text-base line-clamp-1 mb-1">{product.title}</h3>
-                                <p className="text-[#0F1341] font-bold text-xl mb-1">${product.price.toFixed(2)}</p>
+                                <p className="text-[#090A28] font-bold text-xl mb-1">${product.price.toFixed(2)}</p>
                                 <p className="text-gray-400 text-xs leading-tight">Tap To View/Hide Summary</p>
                             </div>
                         </div>
@@ -294,12 +294,12 @@ export default function StripeCheckout({ product, shippingData, onClose }: Strip
                                 </div>
                                 <div className="flex justify-between items-center text-sm">
                                     <span className="text-gray-600">Shipping</span>
-                                    <span className="font-medium text-[#0F1341]">Free</span>
+                                    <span className="font-medium text-[#090A28]">Free</span>
                                 </div>
                                 <div className="border-t border-gray-200 pt-3">
                                     <div className="flex justify-between items-center">
                                         <span className="text-base font-semibold text-[#262626]">Total</span>
-                                        <span className="text-lg font-bold text-[#0F1341]">${product.price.toFixed(2)}</span>
+                                        <span className="text-lg font-bold text-[#090A28]">${product.price.toFixed(2)}</span>
                                     </div>
                                 </div>
                             </div>
@@ -325,7 +325,7 @@ export default function StripeCheckout({ product, shippingData, onClose }: Strip
                                 <span>Qty: 1</span>
                             </div>
                             <div className="flex items-center justify-between mt-1">
-                                <span className="font-bold text-lg text-[#0F1341]">${product.price.toFixed(2)}</span>
+                                <span className="font-bold text-lg text-[#090A28]">${product.price.toFixed(2)}</span>
                             </div>
                         </div>
                     </div>
@@ -337,12 +337,12 @@ export default function StripeCheckout({ product, shippingData, onClose }: Strip
                         </div>
                         <div className="flex justify-between text-sm">
                             <span className="text-gray-600">Shipping</span>
-                            <span className="font-medium text-[#0F1341]">Free</span>
+                            <span className="font-medium text-[#090A28]">Free</span>
                         </div>
                         <div className="border-t border-gray-200 pt-4">
                             <div className="flex justify-between">
                                 <span className="text-base font-semibold text-[#262626]">Total</span>
-                                <span className="text-lg font-bold text-[#0F1341]">${product.price.toFixed(2)}</span>
+                                <span className="text-lg font-bold text-[#090A28]">${product.price.toFixed(2)}</span>
                             </div>
                         </div>
                     </div>
@@ -352,8 +352,8 @@ export default function StripeCheckout({ product, shippingData, onClose }: Strip
                 <div className="p-4 sm:p-6 border-b border-gray-100">
                     <div className="bg-blue-50 border border-blue-100 rounded-2xl shadow-sm p-4 sm:p-5">
                         <div className="flex items-center gap-2 mb-3">
-                            <MapPin className="h-5 w-5 text-[#0F1341]" />
-                            <span className="font-semibold text-[#0F1341] text-base">Shipping Details</span>
+                            <MapPin className="h-5 w-5 text-[#090A28]" />
+                            <span className="font-semibold text-[#090A28] text-base">Shipping Details</span>
                         </div>
 
                         {/* Address */}
@@ -368,8 +368,8 @@ export default function StripeCheckout({ product, shippingData, onClose }: Strip
                         {/* Email */}
                         {shippingData.email && (
                             <div className="flex items-center gap-2 pt-3 border-t border-blue-200">
-                                <Mail className="h-4 w-4 text-[#0F1341]" />
-                                <span className="text-[#0F1341] text-sm sm:text-base">{shippingData.email}</span>
+                                <Mail className="h-4 w-4 text-[#090A28]" />
+                                <span className="text-[#090A28] text-sm sm:text-base">{shippingData.email}</span>
                             </div>
                         )}
                     </div>
@@ -379,7 +379,7 @@ export default function StripeCheckout({ product, shippingData, onClose }: Strip
                 <div className="p-4 sm:p-8">
                     {loading ? (
                         <div className="flex flex-col items-center justify-center py-12">
-                            <Loader2 className="h-12 w-12 text-[#0F1341] animate-spin mb-4" />
+                            <Loader2 className="h-12 w-12 text-[#090A28] animate-spin mb-4" />
                             <p className="text-gray-600">Initializing secure payment...</p>
                         </div>
                     ) : error ? (

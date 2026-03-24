@@ -86,7 +86,7 @@ export default function PaypalInvoiceConfirmation({ shippingData, product, onClo
                             <p className="text-xs text-gray-500 truncate">{shippingData.email}</p>
                         </div>
                         <div className="text-right flex-shrink-0 flex items-center gap-2">
-                            <span className="text-base font-extrabold text-[#0F1341]">{orderTotal}</span>
+                            <span className="text-base font-extrabold text-[#090A28]">{orderTotal}</span>
                             <ChevronDown
                                 className={`h-4 w-4 text-gray-400 transition-transform duration-200 ${detailsOpen ? 'rotate-180' : ''}`}
                             />
@@ -98,12 +98,12 @@ export default function PaypalInvoiceConfirmation({ shippingData, product, onClo
                         <div className="px-4 pb-3 border-t border-gray-100">
                             <div className="mt-3 bg-blue-50 rounded-xl p-3 space-y-2 text-sm">
                                 <div className="flex items-start gap-2">
-                                    <MapPin className="h-3.5 w-3.5 text-[#0F1341] flex-shrink-0 mt-0.5" />
+                                    <MapPin className="h-3.5 w-3.5 text-[#090A28] flex-shrink-0 mt-0.5" />
                                     <span className="text-gray-700 text-xs leading-snug">{address}</span>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                    <Mail className="h-3.5 w-3.5 text-[#0F1341] flex-shrink-0" />
-                                    <span className="text-[#0F1341] text-xs font-medium break-all">{shippingData.email}</span>
+                                    <Mail className="h-3.5 w-3.5 text-[#090A28] flex-shrink-0" />
+                                    <span className="text-[#090A28] text-xs font-medium break-all">{shippingData.email}</span>
                                 </div>
                                 <p className="text-xs text-gray-400 pl-5">
                                     A PayPal invoice will be sent here once confirmed.
@@ -128,7 +128,7 @@ export default function PaypalInvoiceConfirmation({ shippingData, product, onClo
                 >
                     {/* ── Left: order summary (50%) ── */}
                     <div className="w-1/2 flex-shrink-0 border-r border-gray-100 flex flex-col">
-                        <div className="h-1 w-full bg-[#0F1341]" />
+                        <div className="h-1 w-full bg-[#090A28]" />
                         <div className="p-8 flex flex-col flex-1">
 
                             <div className="flex items-center gap-3 mb-6">
@@ -141,20 +141,20 @@ export default function PaypalInvoiceConfirmation({ shippingData, product, onClo
                                 </div>
                             </div>
 
-                            <div className="bg-[#0F1341] text-white rounded-xl px-4 py-3 flex items-center justify-between mb-5">
+                            <div className="bg-[#090A28] text-white rounded-xl px-4 py-3 flex items-center justify-between mb-5">
                                 <span className="text-sm font-medium opacity-80">Order Total</span>
                                 <span className="text-xl font-extrabold">{orderTotal}</span>
                             </div>
 
                             <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 space-y-3 text-sm mb-5">
-                                <p className="text-xs font-semibold text-[#0F1341] uppercase tracking-wide mb-1">Delivery Details</p>
+                                <p className="text-xs font-semibold text-[#090A28] uppercase tracking-wide mb-1">Delivery Details</p>
                                 <div className="flex items-start gap-2">
-                                    <MapPin className="h-4 w-4 text-[#0F1341] flex-shrink-0 mt-0.5" />
+                                    <MapPin className="h-4 w-4 text-[#090A28] flex-shrink-0 mt-0.5" />
                                     <span className="text-gray-700 leading-snug">{address}</span>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                    <Mail className="h-4 w-4 text-[#0F1341] flex-shrink-0" />
-                                    <span className="text-[#0F1341] font-medium break-all">{shippingData.email}</span>
+                                    <Mail className="h-4 w-4 text-[#090A28] flex-shrink-0" />
+                                    <span className="text-[#090A28] font-medium break-all">{shippingData.email}</span>
                                 </div>
                                 <p className="text-xs text-gray-500 pl-6">A PayPal invoice will be sent here once confirmed.</p>
                             </div>
@@ -174,18 +174,18 @@ export default function PaypalInvoiceConfirmation({ shippingData, product, onClo
 
                             <div className="mt-auto flex flex-col gap-2 pt-4 border-t border-gray-100 mb-5">
                                 <div className="flex items-center gap-2 text-xs text-gray-400">
-                                    <ShieldCheck className="h-3.5 w-3.5 text-[#0F1341]" />
+                                    <ShieldCheck className="h-3.5 w-3.5 text-[#090A28]" />
                                     <span>Secured with SSL encryption</span>
                                 </div>
                                 <div className="flex items-center gap-2 text-xs text-gray-400">
-                                    <Clock className="h-3.5 w-3.5 text-[#0F1341]" />
+                                    <Clock className="h-3.5 w-3.5 text-[#090A28]" />
                                     <span>Average response time: under 2 minutes</span>
                                 </div>
                             </div>
 
                             <p className="mt-3 text-center text-xs text-gray-400">
                                 Questions?{' '}
-                                <a href="mailto:support@DeelDepot.com" className="text-[#0F1341] hover:underline">support@DeelDepot.com</a>
+                                <a href="mailto:support@DeelDepot.com" className="text-[#090A28] hover:underline">support@DeelDepot.com</a>
                             </p>
                         </div>
                     </div>

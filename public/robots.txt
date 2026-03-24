@@ -10,7 +10,7 @@ Disallow: /admin/
 Disallow: /private/
 
 # Sitemap location
-Sitemap: https://revibee.com/sitemap.xml
+Sitemap: https://DeelDepot.com/sitemap.xml
 
 # Crawl delay (optional - helps with server load)
 Crawl-delay: 1 
