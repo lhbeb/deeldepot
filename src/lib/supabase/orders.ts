@@ -12,6 +12,7 @@ export interface OrderData {
   shippingCity: string;
   shippingState: string;
   shippingZip: string;
+  checkoutFlow?: string;
   fullOrderData: any; // Complete order object for reference
 }
 
@@ -51,6 +52,7 @@ export async function saveOrder(orderData: OrderData): Promise<{ id: string; suc
       shipping_city: orderData.shippingCity,
       shipping_state: orderData.shippingState,
       shipping_zip: orderData.shippingZip,
+      checkout_flow: orderData.checkoutFlow || null,
       full_order_data: orderData.fullOrderData || {},
       email_sent: false,
       email_error: null,
@@ -242,7 +244,7 @@ export async function getAllOrders() {
       const chunk = productSlugs.slice(i, i + chunkSize);
       const { data, error } = await supabaseAdmin
         .from('products')
-        .select('slug, listed_by, checkout_flow')
+        .select('slug, listed_by')
         .in('slug', chunk);
 
       if (error) {
@@ -260,22 +262,19 @@ export async function getAllOrders() {
       return orders || [];
     }
 
-    // Create maps of slug -> listed_by and slug -> checkout_flow
+    // Create maps of slug -> listed_by
     const productListedByMap = new Map<string, string | null>();
-    const productCheckoutFlowMap = new Map<string, string | null>();
     (products || []).forEach((p: any) => {
       productListedByMap.set(p.slug, p.listed_by || null);
-      productCheckoutFlowMap.set(p.slug, p.checkout_flow || null);
     });
 
-    // Enrich orders with product's listed_by and checkout_flow
+    // Enrich orders with product's listed_by and use the snapshot checkout_flow
     const enrichedOrders = (orders || []).map((order: any) => {
       const listedBy = productListedByMap.get(order.product_slug) || null;
-      const checkoutFlow = productCheckoutFlowMap.get(order.product_slug) || null;
       return {
         ...order,
         product_listed_by: listedBy,
-        product_checkout_flow: checkoutFlow,
+        product_checkout_flow: order.checkout_flow || null, // Use the snapshot from the order itself
       };
     });
 

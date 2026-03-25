@@ -278,7 +278,8 @@ const CheckoutPage: React.FC = () => {
           title: product.title,
           price: product.price,
           slug: product.slug,
-          images: product.images
+          images: product.images,
+          checkoutFlow: product.checkoutFlow
         }
       };
 

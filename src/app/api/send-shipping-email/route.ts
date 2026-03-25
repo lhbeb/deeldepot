@@ -77,6 +77,7 @@ export async function POST(request: NextRequest) {
       shippingCity: shippingData.city,
       shippingState: shippingData.state,
       shippingZip: shippingData.zipCode,
+      checkoutFlow: product.checkoutFlow || product.checkout_flow,
       fullOrderData: { shippingData, product, siteUrl },
     });
 

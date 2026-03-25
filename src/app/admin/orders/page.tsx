@@ -29,6 +29,7 @@ interface Order {
   order_data: any;
   product_listed_by?: string | null;
   product_checkout_flow?: string | null;
+  order_number?: number | null;
 }
 
 export default function AdminOrdersPage() {
@@ -353,7 +354,10 @@ export default function AdminOrdersPage() {
       const address = `${order.shipping_address}, ${order.shipping_city}, ${order.shipping_state} ${order.shipping_zip}`.replace(/, ,/g, ',');
       const productLink = `${window.location.origin}/products/${order.product_slug}`;
       
-      const orderDetails = `${order.product_title} : $${(order.product_price || 0).toFixed(2)}\n${order.customer_email}\n${smartName}\n${address}\n${productLink}`;
+      let orderDetails = `${order.product_title} : $${(order.product_price || 0).toFixed(2)}\n${order.customer_email}\n${smartName}\n${address}\n${productLink}`;
+      if (order.order_number) {
+        orderDetails += `\n#${order.order_number}`;
+      }
 
       await navigator.clipboard.writeText(orderDetails);
       setCopiedField(`order-${order.id}`);
@@ -653,8 +657,11 @@ export default function AdminOrdersPage() {
                   {/* Main Info */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <h3 className="font-semibold text-[#262626] truncate">
-                        {order.customer_name}
+                      <h3 className="font-semibold text-[#262626] truncate flex items-center gap-1.5">
+                        {order.order_number && (
+                          <span className="text-gray-400 font-mono text-sm">#{order.order_number}</span>
+                        )}
+                        <span>{order.customer_name}</span>
                       </h3>
                       {order.is_converted && (
                         <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-green-100 text-green-700 text-xs font-medium rounded-full">
