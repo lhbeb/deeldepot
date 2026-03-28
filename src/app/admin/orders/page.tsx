@@ -46,6 +46,7 @@ export default function AdminOrdersPage() {
   const [retryingOrderId, setRetryingOrderId] = useState<string | null>(null);
   const [retryingAll, setRetryingAll] = useState(false);
   const [markingConverted, setMarkingConverted] = useState<string | null>(null);
+  const [unmarkingConverted, setUnmarkingConverted] = useState<string | null>(null);
   const [deletingOrderId, setDeletingOrderId] = useState<string | null>(null);
   const [expandedOrderId, setExpandedOrderId] = useState<string | null>(null);
   const [copiedField, setCopiedField] = useState<string | null>(null);
@@ -256,6 +257,27 @@ export default function AdminOrdersPage() {
       console.error(err);
     } finally {
       setMarkingConverted(null);
+    }
+  };
+
+  const handleUnmarkConverted = async (orderId: string) => {
+    setUnmarkingConverted(orderId);
+    try {
+      const response = await fetch(`/api/admin/orders/${orderId}/unmark-converted`, {
+        method: 'POST',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to undo conversion');
+      }
+
+      await fetchOrders();
+      setError('');
+    } catch (err) {
+      setError('Failed to undo conversion');
+      console.error(err);
+    } finally {
+      setUnmarkingConverted(null);
     }
   };
 
@@ -933,6 +955,26 @@ export default function AdminOrdersPage() {
                           <CheckCircle2 className="h-4 w-4" />
                         )}
                         Mark Converted
+                      </button>
+                    )}
+
+                    {/* Only SUPER_ADMIN can undo a conversion */}
+                    {order.is_converted && adminRole === 'SUPER_ADMIN' && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleUnmarkConverted(order.id);
+                        }}
+                        disabled={unmarkingConverted === order.id}
+                        className="inline-flex items-center gap-2 px-3 py-2 bg-yellow-100 text-yellow-700 rounded-lg text-sm font-medium hover:bg-yellow-200 disabled:opacity-50 transition-all"
+                        title="Undo conversion (Super Admin only)"
+                      >
+                        {unmarkingConverted === order.id ? (
+                          <RefreshCw className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <X className="h-4 w-4" />
+                        )}
+                        Undo Converted
                       </button>
                     )}
 
