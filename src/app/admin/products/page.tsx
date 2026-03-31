@@ -555,9 +555,9 @@ export default function AdminProductsPage() {
 
       {/* Toolbar */}
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-6">
-        <div className="flex flex-col sm:flex-row gap-4">
-          {/* Search */}
-          <div className="flex-1 relative">
+        <div className="flex flex-col gap-4">
+          {/* Search Route */}
+          <div className="w-full relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
             <input
               type="text"
@@ -568,76 +568,82 @@ export default function AdminProductsPage() {
             />
           </div>
 
-          {/* Featured Filter */}
-          <div className="flex items-center gap-2">
-            <Filter className="h-5 w-5 text-gray-400" />
-            <select
-              value={featuredFilter}
-              onChange={(e) => setFeaturedFilter(e.target.value as 'all' | 'featured' | 'not_featured')}
-              className="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#090A28] focus:border-transparent text-sm font-medium"
-            >
-              <option value="all">All Products</option>
-              <option value="featured">⭐ Featured Only</option>
-              <option value="not_featured">Not Featured</option>
-            </select>
-          </div>
+          {/* Filters & Actions Row */}
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+            
+            {/* Filters */}
+            <div className="flex flex-wrap items-center gap-2">
+              {/* Featured Filter */}
+              <div className="flex items-center gap-2">
+                <Filter className="h-5 w-5 text-gray-400" />
+                <select
+                  value={featuredFilter}
+                  onChange={(e) => setFeaturedFilter(e.target.value as 'all' | 'featured' | 'not_featured')}
+                  className="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#090A28] focus:border-transparent text-sm font-medium"
+                >
+                  <option value="all">All Products</option>
+                  <option value="featured">⭐ Featured Only</option>
+                  <option value="not_featured">Not Featured</option>
+                </select>
+              </div>
 
-          {/* Stock Filter */}
-          <div className="flex items-center gap-2">
-            <Filter className="h-5 w-5 text-gray-400" />
-            <select
-              value={stockFilter}
-              onChange={(e) => setStockFilter(e.target.value as 'all' | 'in_stock' | 'sold_out')}
-              className="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#090A28] focus:border-transparent text-sm font-medium"
-            >
-              <option value="all">All Stock Status</option>
-              <option value="in_stock">✅ In Stock</option>
-              <option value="sold_out">❌ Sold Out</option>
-            </select>
-          </div>
+              {/* Stock Filter */}
+              <div className="flex items-center gap-2">
+                <Filter className="h-5 w-5 text-gray-400" />
+                <select
+                  value={stockFilter}
+                  onChange={(e) => setStockFilter(e.target.value as 'all' | 'in_stock' | 'sold_out')}
+                  className="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#090A28] focus:border-transparent text-sm font-medium"
+                >
+                  <option value="all">All Stock Status</option>
+                  <option value="in_stock">✅ In Stock</option>
+                  <option value="sold_out">❌ Sold Out</option>
+                </select>
+              </div>
 
-          {/* Listed By Filter */}
-          <div className="flex items-center gap-2">
-            <Filter className="h-5 w-5 text-gray-400" />
-            <select
-              value={listedByFilter}
-              onChange={(e) => setListedByFilter(e.target.value)}
-              className="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#090A28] focus:border-transparent text-sm font-medium"
-            >
-              <option value="all">All Uploaders</option>
-              <option value="walid">walid</option>
-              <option value="abdo">abdo</option>
-              <option value="jebbar">jebbar</option>
-              <option value="amine">amine</option>
-              <option value="mehdi">mehdi</option>
-              <option value="othmane">othmane</option>
-              <option value="janah">janah</option>
-              <option value="youssef">youssef</option>
-              <option value="yassine">yassine</option>
-              <option value="none">Not Assigned</option>
-            </select>
-          </div>
+              {/* Listed By Filter */}
+              <div className="flex items-center gap-2">
+                <Filter className="h-5 w-5 text-gray-400" />
+                <select
+                  value={listedByFilter}
+                  onChange={(e) => setListedByFilter(e.target.value)}
+                  className="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#090A28] focus:border-transparent text-sm font-medium"
+                >
+                  <option value="all">All Uploaders</option>
+                  <option value="walid">walid</option>
+                  <option value="abdo">abdo</option>
+                  <option value="jebbar">jebbar</option>
+                  <option value="amine">amine</option>
+                  <option value="mehdi">mehdi</option>
+                  <option value="othmane">othmane</option>
+                  <option value="janah">janah</option>
+                  <option value="youssef">youssef</option>
+                  <option value="yassine">yassine</option>
+                  <option value="none">Not Assigned</option>
+                </select>
+              </div>
 
-          {/* Checkout Flow Filter */}
-          <div className="flex items-center gap-2">
-            <Filter className="h-5 w-5 text-gray-400" />
-            <select
-              value={checkoutFilter}
-              onChange={(e) => setCheckoutFilter(e.target.value as 'all' | 'stripe' | 'kofi' | 'buymeacoffee' | 'external' | 'paypal-invoice')}
-              className="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#090A28] focus:border-transparent text-sm font-medium"
-            >
-              <option value="all">All Checkout Methods</option>
-              <option value="stripe">💳 Stripe</option>
-              <option value="kofi">☕ Ko-fi</option>
-              <option value="buymeacoffee">☕ Buy Me a Coffee</option>
-              <option value="external">🔗 External</option>
-              <option value="paypal-invoice">🔵 PayPal Invoice</option>
-            </select>
-          </div>
+              {/* Checkout Flow Filter */}
+              <div className="flex items-center gap-2">
+                <Filter className="h-5 w-5 text-gray-400" />
+                <select
+                  value={checkoutFilter}
+                  onChange={(e) => setCheckoutFilter(e.target.value as 'all' | 'stripe' | 'kofi' | 'buymeacoffee' | 'external' | 'paypal-invoice')}
+                  className="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#090A28] focus:border-transparent text-sm font-medium"
+                >
+                  <option value="all">All Checkout Methods</option>
+                  <option value="stripe">💳 Stripe</option>
+                  <option value="kofi">☕ Ko-fi</option>
+                  <option value="buymeacoffee">☕ Buy Me a Coffee</option>
+                  <option value="external">🔗 External</option>
+                  <option value="paypal-invoice">🔵 PayPal Invoice</option>
+                </select>
+              </div>
+            </div>
 
-          {/* View Toggle & Actions */}
-          <div className="flex items-center gap-3">
-            <div className="flex items-center bg-gray-100 rounded-lg p-1">
+            {/* View Toggle & Actions */}
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3 w-full sm:w-auto mt-2 sm:mt-0">
+              <div className="flex items-center bg-gray-100 rounded-lg p-1">
               <button
                 onClick={() => setViewMode('grid')}
                 className={`p-2 rounded-md transition-colors ${viewMode === 'grid' ? 'bg-white shadow-sm' : 'hover:bg-gray-200'}`}
@@ -663,16 +669,19 @@ export default function AdminProductsPage() {
             <button
               onClick={handleExportAllCSV}
               disabled={exportingCSV}
-              className="inline-flex items-center gap-2 px-4 py-2.5 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition-colors shadow-lg shadow-emerald-500/25 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition-colors shadow-lg shadow-emerald-500/25 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap text-sm sm:text-base"
               title="Export all products as CSV (images as direct Supabase links)"
             >
               {exportingCSV ? (
-                <RefreshCw className="h-4 w-4 animate-spin" />
+                <RefreshCw className="h-4 w-4 animate-spin shrink-0" />
               ) : (
-                <Download className="h-4 w-4" />
+                <Download className="h-4 w-4 shrink-0" />
               )}
-              <span className="font-medium">
+              <span className="font-medium hidden sm:inline">
                 {exportingCSV ? 'Exporting...' : 'Export All CSV'}
+              </span>
+              <span className="font-medium sm:hidden">
+                CSV
               </span>
             </button>
 
@@ -680,27 +689,32 @@ export default function AdminProductsPage() {
               <button
                 onClick={handleExport}
                 disabled={exporting}
-                className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#090A28] text-white rounded-xl hover:bg-[#1c2070] transition-colors shadow-lg shadow-blue-500/25 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 bg-[#090A28] text-white rounded-xl hover:bg-[#1c2070] transition-colors shadow-lg shadow-blue-500/25 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap text-sm sm:text-base"
               >
                 {exporting ? (
-                  <RefreshCw className="h-4 w-4 animate-spin" />
+                  <RefreshCw className="h-4 w-4 animate-spin shrink-0" />
                 ) : (
-                  <Download className="h-4 w-4" />
+                  <Download className="h-4 w-4 shrink-0" />
                 )}
-                <span className="font-medium">
+                <span className="font-medium hidden sm:inline">
                   {exporting ? 'Exporting...' : `Export (${selectedProducts.size})`}
+                </span>
+                <span className="font-medium sm:hidden">
+                  ({selectedProducts.size})
                 </span>
               </button>
             )}
 
             <Link
               href="/admin/products/new"
-              className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#090A28] text-white rounded-xl hover:bg-[#1c2070] transition-colors shadow-lg shadow-[#090A28]/25"
+              className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 bg-[#090A28] text-white rounded-xl hover:bg-[#1c2070] transition-colors shadow-lg shadow-[#090A28]/25 whitespace-nowrap text-sm sm:text-base"
             >
-              <Plus className="h-4 w-4" />
-              <span className="font-medium">Add Product</span>
+              <Plus className="h-4 w-4 shrink-0" />
+              <span className="font-medium hidden sm:inline">Add Product</span>
+              <span className="font-medium sm:hidden">Add</span>
             </Link>
           </div>
+        </div>
         </div>
       </div>
 
