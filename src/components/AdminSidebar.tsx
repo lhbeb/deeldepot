@@ -295,7 +295,7 @@ export default function AdminSidebar() {
 
           {/* Partner Links — logo-only, side by side compact */}
           <div className="mt-2 pt-4 border-t border-gray-200 px-2 pb-2">
-            <div className="flex gap-2">
+            <div className="grid grid-cols-2 gap-2">
               {/* Biozy */}
               <a
                 href="https://www.biozy.co/admin/login"
@@ -344,6 +344,25 @@ export default function AdminSidebar() {
                 className="flex-1 flex items-center justify-center px-2 py-2.5 bg-gray-50 rounded-xl transition-all duration-200 hover:bg-gray-100"
               >
                 <span className="font-bold text-[11px] tracking-wider uppercase text-gray-500" style={{ filter: 'brightness(0) saturate(100%) invert(69%) sepia(3%) saturate(1210%) hue-rotate(185deg) brightness(97%) contrast(92%)' }}>SMSFuck</span>
+              </a>
+
+              {/* Leynk */}
+              <a
+                href="https://leynk.co/admin"
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => setMobileMenuOpen(false)}
+                title="Open Leynk admin"
+                className="flex-1 flex items-center justify-center px-2 py-2.5 bg-gray-50 rounded-xl transition-all duration-200 hover:bg-gray-100"
+              >
+                <Image
+                  src="/leynk.svg"
+                  alt="Leynk"
+                  width={80}
+                  height={24}
+                  className="object-contain w-auto h-6"
+                  style={{ filter: 'brightness(0) saturate(100%) invert(69%) sepia(3%) saturate(1210%) hue-rotate(185deg) brightness(97%) contrast(92%)' }}
+                />
               </a>
             </div>
           </div>
