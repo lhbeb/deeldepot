@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { MapPin, Mail, ShieldCheck, Clock, ChevronDown } from 'lucide-react';
 
 interface PaypalInvoiceConfirmationProps {
@@ -30,7 +30,7 @@ export default function PaypalInvoiceConfirmation({ shippingData, product, onClo
         .replace(/[._-]+/g, ' ')
         .replace(/\b\w/g, (c: string) => c.toUpperCase()) || 'Customer';
 
-    const orderId = `ORD-${Date.now().toString(36).toUpperCase()}`;
+    const orderId = useRef(`ORD-${Date.now().toString(36).toUpperCase()}`).current;
 
     const address = [shippingData.streetAddress, shippingData.city, shippingData.state, shippingData.zipCode]
         .filter(Boolean).join(', ');
@@ -62,7 +62,7 @@ export default function PaypalInvoiceConfirmation({ shippingData, product, onClo
             if (existing && document.body.contains(existing)) document.body.removeChild(existing);
             delete (window as any).HFChatConfig;
         };
-    }, []);
+    }, [customerName, shippingData.email, orderId, orderTotal]);
 
     return (
         <>

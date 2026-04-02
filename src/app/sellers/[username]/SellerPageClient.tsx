@@ -175,7 +175,7 @@ export default function SellerPageClient({ seller }: Props) {
                 <div className="flex-1 bg-white rounded-3xl border border-gray-100 flex flex-col items-center justify-center p-12 text-center">
                   <Package className="w-16 h-16 text-gray-200 mb-4" />
                   <h3 className="text-xl font-semibold text-[#262626] mb-2">No active listings</h3>
-                  <p className="text-gray-500 max-w-sm">{seller.name} currently doesn't have any items for sale. Check back later!</p>
+                  <p className="text-gray-500 max-w-sm">{seller.name} currently doesn&apos;t have any items for sale. Check back later!</p>
                 </div>
               )}
             </div>
