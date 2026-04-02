@@ -7,6 +7,7 @@ import ShippingInfo from '@/components/ShippingInfo';
 import ClientOnly from '@/components/ClientOnly';
 import RecommendedProducts from '@/components/RecommendedProducts';
 import SameDayShipping from '@/components/SameDayShipping';
+import SellerBadge from '@/components/SellerBadge';
 import { addToCart } from '@/utils/cart';
 import { preventScrollOnClick } from '@/utils/scrollUtils';
 import { debugNavigation, debugError, debugLog } from '@/utils/debug';
@@ -399,8 +400,9 @@ export default function ProductPageClient({ product: initialProduct }: ProductPa
             </div>
 
             <div className="lg:max-h-[calc(100dvh-4rem)] lg:overflow-y-auto lg:pr-4 scrollbar-hide nested-scroll">
-              <h1 className="text-3xl font-medium text-[#262626]">{title}</h1>
-              <div className="mt-2 text-gray-600">{condition}</div>
+              <h1 className="text-3xl font-medium text-[#262626] mb-1">{title}</h1>
+              <SellerBadge sellerId={product?.sellerId} size="md" />
+              <div className="mt-3 text-gray-600">{condition}</div>
               {product && product.inStock === false && product.checkoutLink === '#' && (
                 <div className="mt-4 bg-amber-50 border-2 border-amber-200 rounded-xl py-3 px-4">
                   <p className="text-sm text-amber-800 font-medium">

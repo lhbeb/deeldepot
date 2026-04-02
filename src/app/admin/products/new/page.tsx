@@ -6,7 +6,7 @@ import Link from 'next/link';
 import {
   ArrowLeft, Save, Plus, X, Loader2, Package, DollarSign,
   Tag, Star, Image as ImageIcon, Search, CheckCircle, AlertCircle,
-  ChevronDown, Trash2, Eye, Globe, Twitter, Info, EyeOff
+  ChevronDown, Trash2, Eye, Globe, Twitter, Info, EyeOff, User
 } from 'lucide-react';
 import ImageUploader, { ImageUploaderRef, UploadStatus } from '@/components/admin/ImageUploader';
 import AdminLayout from '@/components/AdminLayout';
@@ -132,6 +132,7 @@ export default function NewProductPage() {
     is_featured: false,
     published: false,
     listed_by: '',
+    seller_id: '',
     collections: [] as string[],
     metaTitle: '',
     metaDescription: '',
@@ -146,6 +147,8 @@ export default function NewProductPage() {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [editingReview, setEditingReview] = useState<{ index: number; data: Partial<Review> } | null>(null);
+
+  const [sellers, setSellers] = useState<{id: string, name: string, username: string}[]>([]);
 
   useEffect(() => {
     const loadFeaturedCount = async () => {
@@ -168,6 +171,24 @@ export default function NewProductPage() {
     };
 
     loadFeaturedCount();
+  }, []);
+
+  useEffect(() => {
+    const fetchSellersList = async () => {
+      try {
+        const adminToken = localStorage.getItem('admin_token');
+        const res = await fetch('/api/admin/sellers', {
+          headers: { ...(adminToken && { 'Authorization': `Bearer ${adminToken}` }) }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setSellers(data || []);
+        }
+      } catch (err) {
+        console.error('Failed to fetch sellers:', err);
+      }
+    };
+    fetchSellersList();
   }, []);
 
   const updateField = (field: string, value: any) => {
@@ -291,6 +312,7 @@ export default function NewProductPage() {
         is_featured: formData.is_featured,
         isFeatured: formData.is_featured,
         listed_by: formData.listed_by,
+        seller_id: formData.seller_id || null,
         collections: formData.collections,
         reviews: processedReviews.length > 0 ? processedReviews : [],
         meta: Object.keys(meta).length > 0 ? meta : {},
@@ -569,6 +591,46 @@ export default function NewProductPage() {
         </Section>
 
         {/* ═══════════════════════════════════════════════════════════════
+            SECTION 1.5: SELLER ASSIGNMENT
+        ═══════════════════════════════════════════════════════════════ */}
+        <Section id="seller" icon={User} title="Seller Assignment" description="Assign product to a seller">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <Field label="Listed by" required hint="Internal only">
+              <select
+                value={formData.listed_by}
+                onChange={(e) => updateField('listed_by', e.target.value)}
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#090A28] focus:border-[#090A28] outline-none transition-all bg-white"
+                required
+              >
+                <option value="">Select a user</option>
+                <option value="walid">walid</option>
+                <option value="abdo">abdo</option>
+                <option value="jebbar">jebbar</option>
+                <option value="amine">amine</option>
+                <option value="mehdi">mehdi</option>
+                <option value="othmane">othmane</option>
+                <option value="janah">janah</option>
+                <option value="youssef">youssef</option>
+                <option value="yassine">yassine</option>
+              </select>
+            </Field>
+
+            <Field label="Public Seller" hint="The storefront seller for this listing">
+              <select
+                value={formData.seller_id}
+                onChange={(e) => updateField('seller_id', e.target.value)}
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#090A28] focus:border-[#090A28] outline-none transition-all bg-white"
+              >
+                <option value="">Unassigned (Fallback: DeelDepot)</option>
+                {sellers.map((s) => (
+                  <option key={s.id} value={s.id}>{s.name} (@{s.username})</option>
+                ))}
+              </select>
+            </Field>
+          </div>
+        </Section>
+
+        {/* ═══════════════════════════════════════════════════════════════
             SECTION 2: BASIC INFO
         ═══════════════════════════════════════════════════════════════ */}
         <Section id="basic" icon={Package} title="Basic Information" description="Title, description, and product details">
@@ -642,25 +704,7 @@ export default function NewProductPage() {
               </Field>
             </div>
 
-            <Field label="Listed by" required>
-              <select
-                value={formData.listed_by}
-                onChange={(e) => updateField('listed_by', e.target.value)}
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#090A28] focus:border-[#090A28] outline-none transition-all bg-white"
-                required
-              >
-                <option value="">Select a user</option>
-                <option value="walid">walid</option>
-                <option value="abdo">abdo</option>
-                <option value="jebbar">jebbar</option>
-                <option value="amine">amine</option>
-                <option value="mehdi">mehdi</option>
-                <option value="othmane">othmane</option>
-                <option value="janah">janah</option>
-                <option value="youssef">youssef</option>
-                <option value="yassine">yassine</option>
-              </select>
-            </Field>
+
 
             <Field label="Collections" required hint="Select at least one collection. Products can belong to multiple collections.">
               {formData.collections.length === 0 && (

@@ -47,6 +47,7 @@ export interface Product {
   published?: boolean; // Extracted from meta.published for easier access
   isFeatured?: boolean;
   inStock?: boolean;
-  listedBy?: string | null; // The user who listed this product
+  listedBy?: string | null; // The user who listed this product (admin-only, internal)
+  sellerId?: string | null; // The public-facing seller associated with this product
   collections?: string[]; // Array of collection tags (electronics, entertainment, hobbies-collectibles, featured, etc.)
 }

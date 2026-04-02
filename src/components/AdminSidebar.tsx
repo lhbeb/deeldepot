@@ -19,7 +19,8 @@ import {
   Terminal,
   BarChart2,
   Mail,
-  TrendingDown
+  TrendingDown,
+  User
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { lockScroll, unlockScroll } from '@/utils/scrollUtils';
@@ -36,6 +37,7 @@ interface NavItem {
 // This will be populated dynamically with orders count
 const getMainNavItems = (ordersCount: number): NavItem[] => [
   { name: 'Products', path: '/admin/products', icon: Package, description: 'Manage inventory' },
+  { name: 'Sellers', path: '/admin/sellers', icon: User, description: 'Manage sellers profiles' },
   { name: 'Orders', path: '/admin/orders', icon: ShoppingCart, description: 'View all orders', badge: ordersCount > 0 ? ordersCount : undefined },
   { name: 'Scripts', path: '/admin/scripts', icon: Terminal, description: 'Run DB scripts' },
   { name: 'Analytics', path: '/admin/analytics', icon: BarChart2, description: 'Traffic & visitors' },

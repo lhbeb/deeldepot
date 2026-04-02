@@ -31,6 +31,7 @@ function transformProduct(row: any): Product {
     isFeatured: Boolean(row.is_featured),
     inStock: row.in_stock !== undefined ? Boolean(row.in_stock) : true,
     listedBy: row.listed_by || null,
+    sellerId: row.seller_id || null,
     collections: row.collections || [], // Array of collection tags
   };
 }
@@ -249,6 +250,7 @@ export async function createProduct(productData: {
   is_featured?: boolean;
   isFeatured?: boolean;
   listed_by?: string;
+  seller_id?: string | null;
   collections?: string[];
 }): Promise<Product | null> {
   try {
@@ -261,35 +263,49 @@ export async function createProduct(productData: {
     // Handle both in_stock and inStock
     const inStock = productData.in_stock !== undefined ? productData.in_stock : (productData.inStock !== undefined ? productData.inStock : true);
 
+    const insertPayload: any = {
+      id: productId,
+      slug: productData.slug,
+      title: productData.title,
+      description: productData.description,
+      price: productData.price,
+      images: productData.images,
+      condition: productData.condition,
+      category: productData.category,
+      brand: productData.brand,
+      payee_email: productData.payee_email || '',
+      checkout_link: productData.checkout_link,
+      checkout_flow: productData.checkout_flow || 'buymeacoffee',
+      currency: productData.currency || 'USD',
+      rating: productData.rating || 0,
+      review_count: reviewCount,
+      reviews: productData.reviews || [],
+      meta: productData.meta || {},
+      in_stock: inStock,
+      is_featured: productData.is_featured !== undefined ? productData.is_featured : (productData.isFeatured ?? false),
+      listed_by: productData.listed_by || null,
+      seller_id: productData.seller_id !== undefined ? productData.seller_id : null,
+      collections: productData.collections || [],
+    };
+
     const { data, error } = await supabaseAdmin
       .from('products')
-      .insert({
-        id: productId,
-        slug: productData.slug,
-        title: productData.title,
-        description: productData.description,
-        price: productData.price,
-        images: productData.images,
-        condition: productData.condition,
-        category: productData.category,
-        brand: productData.brand,
-        payee_email: productData.payee_email || '',
-        checkout_link: productData.checkout_link,
-        checkout_flow: productData.checkout_flow || 'buymeacoffee',
-        currency: productData.currency || 'USD',
-        rating: productData.rating || 0,
-        review_count: reviewCount,
-        reviews: productData.reviews || [],
-        meta: productData.meta || {},
-        in_stock: inStock,
-        is_featured: productData.is_featured !== undefined ? productData.is_featured : (productData.isFeatured ?? false),
-        listed_by: productData.listed_by || null,
-        collections: productData.collections || [],
-      })
+      .insert(insertPayload)
       .select()
       .single();
 
     if (error) {
+      if (error.code === '42703' && error.message.includes('seller_id')) {
+        console.warn('⚠️ [CREATE-PRODUCT] seller_id column missing. Retrying without it...');
+        const fallbackData = { ...insertPayload };
+        delete fallbackData.seller_id;
+        
+        const fallbackResult = await supabaseAdmin.from('products').insert(fallbackData).select().single();
+        if (!fallbackResult.error && fallbackResult.data) {
+          return transformProduct(fallbackResult.data);
+        }
+      }
+
       console.error('Error creating product:', error);
       return null;
     }
@@ -329,6 +345,7 @@ export async function updateProduct(
     is_featured?: boolean;
     isFeatured?: boolean;
     listed_by?: string;
+    seller_id?: string | null;
     collections?: string[];
   }
 ): Promise<Product | null> {
@@ -397,6 +414,9 @@ export async function updateProduct(
     // Handle listed_by
     if (updates.listed_by !== undefined && hasValue(updates.listed_by)) updateData.listed_by = updates.listed_by;
 
+    // Handle seller_id (can be null to unassign)
+    if (updates.seller_id !== undefined) updateData.seller_id = updates.seller_id;
+
     // Handle collections (array, can be empty)
     if (updates.collections !== undefined) updateData.collections = updates.collections;
 
@@ -455,6 +475,24 @@ export async function updateProduct(
       .select();
 
     if (error) {
+      if (error.code === '42703' && error.message.includes('seller_id') && 'seller_id' in updateData) {
+        console.warn('⚠️ [UPDATE-PRODUCT] seller_id column missing. Retrying without it...');
+        const fallbackData = { ...updateData };
+        delete fallbackData.seller_id;
+        
+        const fallbackResult = await supabaseAdmin
+          .from('products')
+          .update(fallbackData)
+          .eq('slug', slug)
+          .select();
+          
+        if (!fallbackResult.error && fallbackResult.data?.length > 0) {
+          console.log('✅ [UPDATE-PRODUCT] Fallback update succeeded');
+          // Update product state since data might have changed
+          return transformProduct(fallbackResult.data[0]);
+        }
+      }
+
       console.error('❌ [UPDATE-PRODUCT] Supabase error:', {
         message: error.message,
         code: error.code,

@@ -127,7 +127,7 @@ export default function EditProductPage() {
     brand: '', category: '', condition: '', payee_email: '', checkout_link: '',
     checkout_flow: 'buymeacoffee' as 'buymeacoffee' | 'kofi' | 'external' | 'stripe' | 'paypal-invoice',
     currency: 'USD', images: '', rating: '0', review_count: '0',
-    in_stock: true, is_featured: false, published: false, listed_by: '',
+    in_stock: true, is_featured: false, published: false, listed_by: '', seller_id: '',
     collections: [] as string[],
     metaTitle: '', metaDescription: '', metaKeywords: '',
     metaOgTitle: '', metaOgDescription: '', metaOgImage: '',
@@ -138,6 +138,9 @@ export default function EditProductPage() {
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [editingReview, setEditingReview] = useState<{ index: number; data: Partial<Review> } | null>(null);
   const [featuredCount, setFeaturedCount] = useState(0);
+
+  // Added sellers state here
+  const [sellers, setSellers] = useState<{id: string, name: string, username: string}[]>([]);
 
   // Fetch product
   const fetchProduct = useCallback(async () => {
@@ -176,6 +179,7 @@ export default function EditProductPage() {
         is_featured: data.isFeatured ?? data.is_featured ?? false,
         published: data.meta?.published ?? false,
         listed_by: data.listedBy || data.listed_by || '',
+        seller_id: data.sellerId || data.seller_id || '',
         collections: data.collections || [],
         metaTitle: data.meta?.title || '',
         metaDescription: data.meta?.description || '',
@@ -213,6 +217,24 @@ export default function EditProductPage() {
   }, [slug]);
 
   useEffect(() => { fetchProduct(); }, [fetchProduct]);
+
+  useEffect(() => {
+    const fetchSellersList = async () => {
+      try {
+        const adminToken = localStorage.getItem('admin_token');
+        const res = await fetch('/api/admin/sellers', {
+          headers: { ...(adminToken && { 'Authorization': `Bearer ${adminToken}` }) }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setSellers(data || []);
+        }
+      } catch (err) {
+        console.error('Failed to fetch sellers:', err);
+      }
+    };
+    fetchSellersList();
+  }, []);
 
   const updateField = (field: string, value: any) => {
     setFormData(prev => {
@@ -304,6 +326,7 @@ export default function EditProductPage() {
           inStock: formData.in_stock ?? true, // Send both for compatibility
           is_featured: formData.is_featured ?? false,
           listed_by: formData.listed_by,
+          seller_id: formData.seller_id || null,
           collections: formData.collections,
           reviews: processedReviews,
           meta: meta, // Always send meta object (even if empty, it will be merged properly on server)
@@ -593,6 +616,46 @@ export default function EditProductPage() {
         </Section>
 
         {/* ═══════════════════════════════════════════════════════════════
+            SECTION 1.5: SELLER ASSIGNMENT
+        ═══════════════════════════════════════════════════════════════ */}
+        <Section id="seller" icon={User} title="Seller Assignment" description="Assign product to a seller">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <Field label="Listed by" required hint="Internal only">
+              <select
+                value={formData.listed_by}
+                onChange={(e) => updateField('listed_by', e.target.value)}
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#090A28] focus:border-[#090A28] outline-none transition-all bg-white"
+                required
+              >
+                <option value="">Select a user</option>
+                <option value="walid">walid</option>
+                <option value="abdo">abdo</option>
+                <option value="jebbar">jebbar</option>
+                <option value="amine">amine</option>
+                <option value="mehdi">mehdi</option>
+                <option value="othmane">othmane</option>
+                <option value="janah">janah</option>
+                <option value="youssef">youssef</option>
+                <option value="yassine">yassine</option>
+              </select>
+            </Field>
+
+            <Field label="Public Seller" hint="The storefront seller for this listing">
+              <select
+                value={formData.seller_id}
+                onChange={(e) => updateField('seller_id', e.target.value)}
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#090A28] focus:border-[#090A28] outline-none transition-all bg-white"
+              >
+                <option value="">Unassigned (Fallback: DeelDepot)</option>
+                {sellers.map((s) => (
+                  <option key={s.id} value={s.id}>{s.name} (@{s.username})</option>
+                ))}
+              </select>
+            </Field>
+          </div>
+        </Section>
+
+        {/* ═══════════════════════════════════════════════════════════════
             SECTION 2: BASIC INFO
         ═══════════════════════════════════════════════════════════════ */}
         <Section id="basic" icon={Package} title="Basic Information" description="Title, description, and product details">
@@ -665,26 +728,6 @@ export default function EditProductPage() {
                 </select>
               </Field>
             </div>
-
-            <Field label="Listed by" required>
-              <select
-                value={formData.listed_by}
-                onChange={(e) => updateField('listed_by', e.target.value)}
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#090A28] focus:border-[#090A28] outline-none transition-all bg-white"
-                required
-              >
-                <option value="">Select a user</option>
-                <option value="walid">walid</option>
-                <option value="abdo">abdo</option>
-                <option value="jebbar">jebbar</option>
-                <option value="amine">amine</option>
-                <option value="mehdi">mehdi</option>
-                <option value="othmane">othmane</option>
-                <option value="janah">janah</option>
-                <option value="youssef">youssef</option>
-                <option value="yassine">yassine</option>
-              </select>
-            </Field>
 
             <Field label="Collections" required hint="Select at least one collection. Products can belong to multiple collections.">
               <div className="space-y-2">
