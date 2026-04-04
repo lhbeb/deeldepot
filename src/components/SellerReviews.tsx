@@ -7,30 +7,24 @@ import { Star, ThumbsUp, CheckCircle2, ChevronDown, X, ZoomIn, ExternalLink } fr
 import type { Review } from '@/types/product';
 import { lockScroll, unlockScroll } from '@/utils/scrollUtils';
 
-interface ProductReviewsProps {
+interface SellerReviewsProps {
   reviews: Review[];
   averageRating: number;
   totalReviews: number;
-  /** If reviews were inherited from the seller, pass their name and username */
-  sellerName?: string;
-  sellerUsername?: string;
+  sellerName: string;
 }
 
-const ProductReviews: React.FC<ProductReviewsProps> = ({
+export default function SellerReviews({
   reviews = [],
   averageRating = 0,
   totalReviews = 0,
   sellerName,
-  sellerUsername,
-}) => {
+}: SellerReviewsProps) {
   const [sortBy, setSortBy] = useState('recent');
   const [helpfulClicks, setHelpfulClicks] = useState<Record<string, boolean>>({});
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
-  // Placeholder avatar for reviews without custom avatars
-  const placeholderAvatar = "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face&auto=format&q=80";
-
-  // Calculate rating distribution with safety check
+  // Calculate rating distribution
   const ratingDistribution = {
     5: reviews.length > 0 ? Math.round((reviews.filter(r => r.rating === 5).length / reviews.length) * 100) : 0,
     4: reviews.length > 0 ? Math.round((reviews.filter(r => r.rating === 4).length / reviews.length) * 100) : 0,
@@ -56,18 +50,17 @@ const ProductReviews: React.FC<ProductReviewsProps> = ({
   const handleHelpfulClick = (reviewId: string) => {
     setHelpfulClicks(prev => ({
       ...prev,
-      [reviewId]: !prev[reviewId]
+      [reviewId]: !prev[reviewId],
     }));
   };
 
-  // Generate random helpful count between 9-27 for each review
+  // Deterministic helpful count per review id
   const getRandomHelpful = (id: string) => {
     let hash = 0;
     for (let i = 0; i < id.length; i++) {
       hash = id.charCodeAt(i) + ((hash << 5) - hash);
     }
-    const min = 9, max = 27;
-    return min + (Math.abs(hash) % (max - min + 1));
+    return 9 + (Math.abs(hash) % 19); // 9–27
   };
 
   const formatDate = (dateString: string) => {
@@ -75,49 +68,36 @@ const ProductReviews: React.FC<ProductReviewsProps> = ({
       return new Date(dateString).toLocaleDateString('en-US', {
         year: 'numeric',
         month: 'long',
-        day: 'numeric'
+        day: 'numeric',
       });
     } catch {
       return dateString;
     }
   };
 
-  const openImageModal = (imageSrc: string) => {
-    setSelectedImage(imageSrc);
-  };
-
-  const closeImageModal = () => {
-    setSelectedImage(null);
-  };
-
-  // Centralized scroll lock for modal - prevents race conditions
+  // Scroll lock for image modal
   useEffect(() => {
     if (typeof window === 'undefined') return;
-
     if (selectedImage) {
       lockScroll();
     } else {
       unlockScroll();
     }
-
-    return () => {
-      unlockScroll();
-    };
+    return () => { unlockScroll(); };
   }, [selectedImage]);
 
-  // If no reviews, show a message
   if (reviews.length === 0) {
     return (
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100">
-        <div className="p-8 text-center">
-          <div className="flex justify-center mb-4">
-            {[...Array(5)].map((_, i) => (
-              <Star key={i} className="h-8 w-8 text-gray-300" />
-            ))}
-          </div>
-          <h3 className="text-xl font-semibold text-[#262626] mb-2">No Reviews Yet</h3>
-          <p className="text-gray-600">Be the first to share your experience with our products!</p>
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8 text-center">
+        <div className="flex justify-center mb-4">
+          {[...Array(5)].map((_, i) => (
+            <Star key={i} className="h-8 w-8 text-gray-300" />
+          ))}
         </div>
+        <h3 className="text-xl font-semibold text-[#262626] mb-2">No Reviews Yet</h3>
+        <p className="text-gray-600">
+          {sellerName} doesn&apos;t have any customer reviews yet. Check back after purchasing!
+        </p>
       </div>
     );
   }
@@ -125,28 +105,17 @@ const ProductReviews: React.FC<ProductReviewsProps> = ({
   return (
     <>
       <div className="bg-white rounded-xl shadow-sm border border-gray-100">
-        {/* Reviews Header */}
+        {/* Header */}
         <div className="border-b border-gray-200 p-6">
           <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
             {/* Rating Summary */}
             <div>
               <h2 className="text-2xl font-bold text-[#262626] mb-2">
-                {sellerName && sellerUsername ? (
-                  <>
-                    Reviews from{' '}
-                    <Link
-                      href={`/sellers/${sellerUsername}`}
-                      className="text-[#090A28] hover:underline inline-flex items-center gap-1"
-                    >
-                      {sellerName}
-                      <ExternalLink className="h-4 w-4" />
-                    </Link>
-                    &apos;s listings
-                  </>
-                ) : (
-                  'Reviews from this listing or similar other listings on DeelDepot'
-                )}
+                Seller Reviews
               </h2>
+              <p className="text-sm text-gray-500 mb-3">
+                Reviews from all listings by {sellerName}
+              </p>
               <div className="flex items-center gap-4">
                 <div className="text-4xl font-bold text-[#262626]">{averageRating.toFixed(1)}</div>
                 <div>
@@ -170,7 +139,7 @@ const ProductReviews: React.FC<ProductReviewsProps> = ({
                   <span className="text-sm text-gray-600 w-8">{rating}★</span>
                   <div className="flex-grow bg-gray-200 rounded-full h-2">
                     <div
-                      className="bg-[#090A28] rounded-full h-2"
+                      className="bg-[#090A28] rounded-full h-2 transition-all duration-500"
                       style={{ width: `${percentage}%` }}
                     />
                   </div>
@@ -181,7 +150,7 @@ const ProductReviews: React.FC<ProductReviewsProps> = ({
           </div>
         </div>
 
-        {/* Sort Options */}
+        {/* Sort bar */}
         <div className="border-b border-gray-200 p-4">
           <div className="flex items-center justify-between">
             <span className="text-sm text-gray-600">
@@ -190,7 +159,7 @@ const ProductReviews: React.FC<ProductReviewsProps> = ({
             <div className="relative">
               <select
                 value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
+                onChange={e => setSortBy(e.target.value)}
                 className="appearance-none bg-white border border-gray-300 rounded-lg px-4 py-2 pr-8 text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#090A28] focus:border-transparent"
               >
                 <option value="recent">Most Recent</option>
@@ -198,19 +167,19 @@ const ProductReviews: React.FC<ProductReviewsProps> = ({
                 <option value="highest">Highest Rated</option>
                 <option value="lowest">Lowest Rated</option>
               </select>
-              <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 pointer-events-none text-gray-400" />
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 pointer-events-none text-gray-400" />
             </div>
           </div>
         </div>
 
-        {/* Reviews List */}
+        {/* Review list */}
         <div className="divide-y divide-gray-200">
           {sortedReviews.map((review, index) => (
             <div key={`${review.id}-${index}`} className="p-6">
               <div className="flex items-start gap-4">
+                {/* Avatar */}
                 <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100 flex items-center justify-center border border-gray-200">
                   {review.avatar ? (
-                    // Use plain <img> to support both https:// URLs and data: base64 strings
                     <img
                       src={review.avatar}
                       alt={review.author}
@@ -222,8 +191,10 @@ const ProductReviews: React.FC<ProductReviewsProps> = ({
                     </svg>
                   )}
                 </div>
+
                 <div className="flex-grow">
-                  <div className="flex items-start justify-between mb-2">
+                  {/* Author row */}
+                  <div className="flex items-start justify-between mb-1">
                     <div>
                       <h3 className="font-medium text-[#262626] flex items-center gap-2 flex-wrap sm:flex-nowrap">
                         {review.author}
@@ -239,9 +210,23 @@ const ProductReviews: React.FC<ProductReviewsProps> = ({
                         {review.purchaseDate && `Purchased ${review.purchaseDate}`}
                       </div>
                     </div>
-                    <span className="text-sm text-gray-500">{formatDate(review.date)}</span>
+                    <span className="text-sm text-gray-500 whitespace-nowrap ml-2">
+                      {formatDate(review.date)}
+                    </span>
                   </div>
 
+                  {/* Product attribution */}
+                  {review.productTitle && review.productSlug && (
+                    <Link
+                      href={`/products/${review.productSlug}`}
+                      className="inline-flex items-center gap-1 text-xs text-[#090A28]/70 hover:text-[#090A28] hover:underline mb-2 group"
+                    >
+                      <ExternalLink className="h-3 w-3 opacity-60 group-hover:opacity-100" />
+                      {review.productTitle}
+                    </Link>
+                  )}
+
+                  {/* Stars */}
                   <div className="flex mb-2">
                     {[...Array(5)].map((_, i) => (
                       <Star
@@ -254,14 +239,14 @@ const ProductReviews: React.FC<ProductReviewsProps> = ({
                   <h4 className="font-medium text-[#262626] mb-2">{review.title}</h4>
                   <p className="text-gray-600 mb-4">{review.content}</p>
 
-                  {/* Review Images */}
+                  {/* Images */}
                   {review.images && review.images.length > 0 && (
                     <div className="mb-4">
                       <div className="flex flex-wrap gap-2">
                         {review.images.map((image, imgIndex) => (
                           <button
                             key={imgIndex}
-                            onClick={() => openImageModal(image)}
+                            onClick={() => setSelectedImage(image)}
                             className="relative group overflow-hidden rounded-lg border border-gray-200 hover:border-[#090A28] transition-colors duration-200"
                           >
                             <Image
@@ -270,6 +255,7 @@ const ProductReviews: React.FC<ProductReviewsProps> = ({
                               width={80}
                               height={80}
                               className="w-20 h-20 object-cover group-hover:scale-105 transition-transform duration-200"
+                              unoptimized
                             />
                             <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-200 flex items-center justify-center">
                               <ZoomIn className="h-5 w-5 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
@@ -283,18 +269,24 @@ const ProductReviews: React.FC<ProductReviewsProps> = ({
                     </div>
                   )}
 
+                  {/* Helpful button */}
                   {review.helpful !== undefined && (
                     <div className="mt-4">
                       <button
                         onClick={() => handleHelpfulClick(review.id)}
-                        className={`flex items-center text-sm px-3 py-1.5 rounded-md transition-colors duration-200 ${helpfulClicks[review.id]
-                          ? 'bg-[#090A28] text-white'
-                          : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                          }`}
+                        className={`flex items-center text-sm px-3 py-1.5 rounded-md transition-colors duration-200 ${
+                          helpfulClicks[review.id]
+                            ? 'bg-[#090A28] text-white'
+                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                        }`}
                       >
                         <ThumbsUp className="h-4 w-4 mr-1" />
                         <span>
-                          Helpful ({helpfulClicks[review.id] ? getRandomHelpful(review.id) + 1 : getRandomHelpful(review.id)})
+                          Helpful (
+                          {helpfulClicks[review.id]
+                            ? getRandomHelpful(review.id) + 1
+                            : getRandomHelpful(review.id)}
+                          )
                         </span>
                       </button>
                     </div>
@@ -306,16 +298,16 @@ const ProductReviews: React.FC<ProductReviewsProps> = ({
         </div>
       </div>
 
-      {/* Image Modal */}
+      {/* Image lightbox */}
       {selectedImage && (
         <div
           className="fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center"
-          onClick={closeImageModal}
+          onClick={() => setSelectedImage(null)}
           style={{ overflow: 'hidden' }}
         >
           <div className="relative flex items-center justify-center w-full h-full">
             <button
-              onClick={closeImageModal}
+              onClick={() => setSelectedImage(null)}
               className="absolute top-4 right-4 z-10 p-2 bg-black bg-opacity-50 text-white rounded-full hover:bg-opacity-70 transition-colors duration-200"
             >
               <X className="h-6 w-6" />
@@ -327,12 +319,11 @@ const ProductReviews: React.FC<ProductReviewsProps> = ({
               height={1000}
               className="max-w-[90vw] max-h-[90vh] object-contain rounded-lg"
               onClick={e => e.stopPropagation()}
+              unoptimized
             />
           </div>
         </div>
       )}
     </>
   );
-};
-
-export default ProductReviews;
+}

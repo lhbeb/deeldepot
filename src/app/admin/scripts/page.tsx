@@ -33,12 +33,14 @@ interface ScriptCard {
     danger: boolean;
     params: Record<string, string>;
     paramLabels: Record<string, string>;
+    paramPlaceholders?: Record<string, string>;
     paramOptions?: Record<string, string[]>;
     paramOptionLabels?: Record<string, Record<string, string>>; // human-readable labels for dropdown values
 }
 
 // ─── Available scripts ────────────────────────────────────────────────────────
 const CHECKOUT_FLOWS = ['buymeacoffee', 'stripe', 'kofi', 'external', 'paypal-invoice'];
+const LISTED_BY_ADMINS = ['walid', 'abdo', 'jebbar', 'amine', 'mehdi', 'othmane', 'janah', 'youssef', 'yassine'];
 
 const SCRIPTS: ScriptCard[] = [
     {
@@ -104,6 +106,33 @@ const SCRIPTS: ScriptCard[] = [
         paramOptionLabels: {
             action: { mark_sold_out: '🔴 Mark as sold out', mark_available: '🟢 Mark as available' },
             targetFilter: { matching_only: 'Matching products only (recommended)', all: 'All products' },
+        },
+    },
+    {
+        id: 'bulk-assign-seller-by-admin',
+        name: 'Bulk Assign Seller by Admin',
+        description:
+            'Finds all products listed by a specific admin and assigns them to a public seller. ' +
+            'Sets the seller_id field on every matching product. ' +
+            'Enter the seller\'s username (e.g. official-deeldepot) or their database ID. ' +
+            'Use Preview first to see how many products will be affected before running.',
+        danger: false,
+        params: {
+            listedBy: 'walid',
+            sellerId: '',
+        },
+        paramLabels: {
+            listedBy: 'Listed by (admin name)',
+            sellerId: 'Seller username or ID',
+        },
+        paramPlaceholders: {
+            sellerId: 'e.g. official-deeldepot',
+        },
+        paramOptions: {
+            listedBy: LISTED_BY_ADMINS,
+        },
+        paramOptionLabels: {
+            listedBy: Object.fromEntries(LISTED_BY_ADMINS.map(n => [n, n])),
         },
     },
 ];
@@ -216,6 +245,7 @@ function ScriptCardComponent({ script }: { script: ScriptCard }) {
                                         value={params[key] || ''}
                                         onChange={(e) => setParams((prev) => ({ ...prev, [key]: e.target.value }))}
                                         disabled={isBusy || state === 'done'}
+                                        placeholder={script.paramPlaceholders?.[key] || ''}
                                         className="w-full px-3 py-2 text-sm bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#090A28] focus:border-transparent disabled:opacity-60"
                                     />
                                 )}
@@ -314,7 +344,12 @@ function ScriptCardComponent({ script }: { script: ScriptCard }) {
                                 <thead className="bg-gray-50 border-t border-b border-gray-100">
                                     <tr>
                                         <th className="text-left px-6 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Product</th>
-                                        {'oldFlow' in (response.results[0] ?? {}) ? (
+                                        {'oldSellerId' in (response.results[0] ?? {}) ? (
+                                            <>
+                                                <th className="text-left px-4 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Previous Seller</th>
+                                                <th className="text-left px-4 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">New Seller ID</th>
+                                            </>
+                                        ) : 'oldFlow' in (response.results[0] ?? {}) ? (
                                             <>
                                                 <th className="text-left px-4 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Old Flow</th>
                                                 <th className="text-left px-4 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">New Flow</th>
@@ -337,7 +372,20 @@ function ScriptCardComponent({ script }: { script: ScriptCard }) {
                                                 <div className="font-medium text-[#262626]">{row.title}</div>
                                                 <div className="text-xs text-gray-400">{row.slug}</div>
                                             </td>
-                                            {'oldFlow' in row ? (
+                                            {'oldSellerId' in row ? (
+                                            <>
+                                                <td className="px-4 py-3">
+                                                    <span className="inline-block px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-xs font-mono">
+                                                        {row.oldSellerId || '—'}
+                                                    </span>
+                                                </td>
+                                                <td className="px-4 py-3">
+                                                    <span className="inline-block px-2 py-0.5 bg-[#090A28]/10 text-[#090A28] rounded text-xs font-mono">
+                                                        {row.newSellerId}
+                                                    </span>
+                                                </td>
+                                            </>
+                                        ) : 'oldFlow' in row ? (
                                                 <>
                                                     <td className="px-4 py-3">
                                                         <span className="inline-block px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-xs font-mono">{row.oldFlow}</span>

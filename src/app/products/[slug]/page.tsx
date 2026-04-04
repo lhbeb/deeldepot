@@ -1,5 +1,6 @@
 import { getProductBySlug } from '@/lib/data';
 import { getReviewProduct, isReviewProduct } from '@/lib/reviewProducts';
+import { getSellerById } from '@/lib/supabase/sellers';
 import { notFound } from 'next/navigation';
 import ProductPageClient from './ProductPageClient';
 import type { Metadata, ResolvingMetadata } from 'next';
@@ -85,13 +86,44 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
       notFound();
     }
 
+    // ── Review inheritance ─────────────────────────────────────────────────
+    // If this product has no own reviews but belongs to a seller,
+    // inherit the seller's aggregated reviews from all their products.
+    const hasOwnReviews = Array.isArray(product.reviews) && product.reviews.length > 0;
+    if (!hasOwnReviews && product.sellerId) {
+      try {
+        const seller = await getSellerById(product.sellerId);
+        if (seller && seller.reviews && seller.reviews.length > 0) {
+          // Merge seller reviews into product so ProductPageClient renders them
+          product = {
+            ...product,
+            reviews: seller.reviews,
+            rating: product.rating || seller.averageRating || 0,
+            reviewCount: product.reviewCount || seller.totalReviews || 0,
+            // Mark that these reviews are inherited from seller (for display label)
+            meta: {
+              ...product.meta,
+              _sellerReviews: true,
+              _sellerName: seller.name,
+              _sellerUsername: seller.username,
+            } as any,
+          };
+        }
+      } catch {
+        // Silently ignore – don't break product page if seller fetch fails
+      }
+    }
+
+    // At this point product is guaranteed non-null (notFound() was called above)
+    const p = product!;
+
     // Generate Product Schema for Rich Snippets
     const productSchema = {
       "@context": "https://schema.org",
       "@type": "Product",
-      "name": product.title || 'Product',
-      "description": product.description || '',
-      "image": (product.images || []).map((img: string) => {
+      "name": p.title || 'Product',
+      "description": p.description || '',
+      "image": (p.images || []).map((img: string) => {
         try {
           return new URL(img, BASE_URL).toString();
         } catch {
@@ -100,26 +132,26 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
       }),
       "brand": {
         "@type": "Brand",
-        "name": product.brand || ''
+        "name": p.brand || ''
       },
-      "category": product.category || '',
-      "sku": product.slug || slug,
-      "condition": product.condition || '',
+      "category": p.category || '',
+      "sku": p.slug || slug,
+      "condition": p.condition || '',
       "offers": {
         "@type": "Offer",
-        "price": product.price || 0,
-        "priceCurrency": product.currency || "USD",
+        "price": p.price || 0,
+        "priceCurrency": p.currency || "USD",
         "availability": "https://schema.org/InStock",
-        "url": `${BASE_URL}/products/${product.slug}`
+        "url": `${BASE_URL}/products/${p.slug}`
       },
       "aggregateRating": {
         "@type": "AggregateRating",
-        "ratingValue": product.rating || 0,
-        "reviewCount": product.reviewCount || 0,
+        "ratingValue": p.rating || 0,
+        "reviewCount": p.reviewCount || 0,
         "bestRating": 5,
         "worstRating": 1
       },
-      "review": ((product.reviews || []) as any[]).slice(0, 5).map((review: any) => ({
+      "review": ((p.reviews || []) as any[]).slice(0, 5).map((review: any) => ({
         "@type": "Review",
         "author": {
           "@type": "Person",
@@ -143,8 +175,8 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
       "itemListElement": [
         { "@type": "ListItem", "position": 1, "name": "Home", "item": BASE_URL },
         { "@type": "ListItem", "position": 2, "name": "Products", "item": `${BASE_URL}/#products` },
-        { "@type": "ListItem", "position": 3, "name": product.category || 'Category', "item": `${BASE_URL}/#products?category=${encodeURIComponent(product.category || '')}` },
-        { "@type": "ListItem", "position": 4, "name": product.title || 'Product', "item": `${BASE_URL}/products/${product.slug}` }
+        { "@type": "ListItem", "position": 3, "name": p.category || 'Category', "item": `${BASE_URL}/#products?category=${encodeURIComponent(p.category || '')}` },
+        { "@type": "ListItem", "position": 4, "name": p.title || 'Product', "item": `${BASE_URL}/products/${p.slug}` }
       ]
     };
 
@@ -158,7 +190,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
         />
-        <ProductPageClient product={product} />
+        <ProductPageClient product={p} />
       </>
     );
   } catch (error) {

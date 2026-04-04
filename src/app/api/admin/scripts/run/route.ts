@@ -223,6 +223,55 @@ async function runBulkMarkSoldOut(
     return { affected: affected.length, results: affected };
 }
 
+/**
+ * Script: bulk-assign-seller-by-admin
+ * Finds all products listed by a given admin name and sets their seller_id.
+ */
+interface SellerAssignResult {
+    slug: string;
+    title: string;
+    oldSellerId: string | null;
+    newSellerId: string;
+    updated: boolean;
+}
+
+async function runBulkAssignSellerByAdmin(
+    listedBy: string,
+    sellerId: string,
+    dryRun: boolean
+): Promise<{ affected: number; results: SellerAssignResult[] }> {
+    const { data, error } = await supabaseAdmin
+        .from('products')
+        .select('slug, title, seller_id')
+        .eq('listed_by', listedBy);
+
+    if (error) throw new Error(`Failed to fetch products: ${error.message}`);
+
+    const products = data || [];
+    const affected: SellerAssignResult[] = products.map(p => ({
+        slug: p.slug,
+        title: p.title,
+        oldSellerId: p.seller_id || null,
+        newSellerId: sellerId,
+        updated: false,
+    }));
+
+    if (!dryRun && affected.length > 0) {
+        const { error: updateError } = await supabaseAdmin
+            .from('products')
+            .update({ seller_id: sellerId, updated_at: new Date().toISOString() })
+            .eq('listed_by', listedBy);
+
+        if (updateError) {
+            console.error('❌ Bulk seller assign failed:', updateError.message);
+        } else {
+            affected.forEach(item => (item.updated = true));
+        }
+    }
+
+    return { affected: affected.length, results: affected };
+}
+
 // ─── POST handler ──────────────────────────────────────────────────────────────
 export async function POST(request: NextRequest) {
     try {
@@ -312,6 +361,65 @@ export async function POST(request: NextRequest) {
                     message: dryRun
                         ? `Preview: ${result.affected} product(s) would be marked as ${actionLabel}`
                         : `Done: ${result.results.filter(r => r.updated).length} product(s) marked as ${actionLabel}`,
+                });
+            }
+
+            case 'bulk-assign-seller-by-admin': {
+                const listedBy = params.listedBy;
+                const sellerId = (params.sellerId || '').trim();
+
+                if (!listedBy || !sellerId) {
+                    return NextResponse.json(
+                        { error: 'Both listedBy and sellerId are required' },
+                        { status: 400 }
+                    );
+                }
+
+                // Verify the seller exists — try username first, then UUID id
+                // (can't use .or() because Postgres rejects non-UUID strings for the id column)
+                const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+                let sellerRow: { id: string; name: string; username: string } | null = null;
+
+                // 1. Always try username first (works for any string)
+                const { data: byUsername } = await supabaseAdmin
+                    .from('sellers')
+                    .select('id, name, username')
+                    .eq('username', sellerId)
+                    .maybeSingle();
+
+                if (byUsername) {
+                    sellerRow = byUsername;
+                } else if (uuidPattern.test(sellerId)) {
+                    // 2. Only try id lookup when input is a valid UUID
+                    const { data: byId } = await supabaseAdmin
+                        .from('sellers')
+                        .select('id, name, username')
+                        .eq('id', sellerId)
+                        .maybeSingle();
+                    sellerRow = byId ?? null;
+                }
+
+                if (!sellerRow) {
+                    return NextResponse.json(
+                        { error: `No seller found with username or ID "${sellerId}". Go to the Sellers section and copy the username from the profile URL.` },
+                        { status: 400 }
+                    );
+                }
+
+                // Always use the canonical DB id for the update
+                const resolvedSellerId = sellerRow.id;
+
+                const result = await runBulkAssignSellerByAdmin(listedBy, resolvedSellerId, dryRun);
+
+                return NextResponse.json({
+                    scriptId,
+                    dryRun,
+                    affected: result.affected,
+                    results: result.results,
+                    message: dryRun
+                        ? `Preview: ${result.affected} product(s) listed by "${listedBy}" would be assigned to seller "${sellerRow.name}" (${resolvedSellerId})`
+                        : `Done: ${result.results.filter(r => r.updated).length} product(s) by "${listedBy}" assigned to seller "${sellerRow.name}"`,
                 });
             }
 

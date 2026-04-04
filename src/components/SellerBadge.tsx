@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { User, ShieldCheck } from 'lucide-react';
+import { User, ShieldCheck, Star } from 'lucide-react';
 import type { Seller } from '@/types/seller';
 
 interface SellerBadgeProps {
@@ -15,104 +15,95 @@ export default function SellerBadge({ sellerId, size = 'sm' }: SellerBadgeProps)
   const [loading, setLoading] = useState(!!sellerId);
 
   useEffect(() => {
-    if (!sellerId) {
-      setLoading(false);
-      return;
-    }
-
-    const fetchSeller = async () => {
-      try {
-        // Use the admin route initially (since it's a UUID).
-        // A dedicated public route would be better, but we can just use the admin one
-        // and add a public by-id route later, or simply handle it here.
-        // Wait, admin API requires auth. We need a public endpoint for sellerId if we fetch client-side.
-        // Actually, we can just fetch all products with the seller joined, but we don't have join set up.
-        // Let's create a quick public route for getting seller by ID, or just use the seller data if passed.
-        // For now, let's create a new public route in `/api/sellers/id/[id]` and call it.
-        const res = await fetch(`/api/sellers/id/${sellerId}`);
-        if (res.ok) {
-          const data = await res.json();
-          setSeller(data);
-        }
-      } catch (error) {
-        console.error('Failed to fetch seller for badge:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchSeller();
+    if (!sellerId) { setLoading(false); return; }
+    fetch(`/api/sellers/id/${sellerId}`)
+      .then(r => r.ok ? r.json() : null)
+      .then(data => { if (data) setSeller(data); })
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }, [sellerId]);
 
   if (loading) {
     return (
-      <div className={`flex items-center gap-2 mt-2 animate-pulse ${size === 'md' ? 'opacity-70' : 'opacity-60'}`}>
-        <div className={`rounded-full bg-gray-200 ${size === 'sm' ? 'w-5 h-5' : 'w-6 h-6'}`}></div>
-        <div className={`bg-gray-200 rounded ${size === 'sm' ? 'h-3 w-20' : 'h-4 w-24'}`}></div>
+      <div className="flex items-center gap-1.5 mt-2 animate-pulse">
+        <div className="w-4 h-4 rounded-full bg-gray-200" />
+        <div className="h-3 w-24 bg-gray-200 rounded" />
       </div>
     );
   }
 
-  // Define DeelDepot as the default fallback
   const displaySeller = seller || {
     id: 'deeldepot',
     name: 'DeelDepot',
     username: 'deeldepot',
-    avatarUrl: '/images/deeldepot-logo.png', // Or null for default icon
+    avatarUrl: '/images/deeldepot-logo.png',
   };
 
   const isDeelDepot = displaySeller.username === 'deeldepot';
+  const href = isDeelDepot ? '/' : `/sellers/${displaySeller.username}`;
+  const hasAvatar = displaySeller.avatarUrl && displaySeller.avatarUrl !== '/images/deeldepot-logo.png';
 
+  /* ── sm (product cards) ─────────────────────────────────────────────────── */
   if (size === 'sm') {
     return (
-      <Link 
-        href={isDeelDepot ? '/' : `/sellers/${displaySeller.username}`}
+      <Link
+        href={href}
+        onClick={(e) => e.stopPropagation()}
         className="inline-flex items-center gap-1.5 mt-2 group w-fit"
-        onClick={(e) => e.stopPropagation()} // Prevent card clicks if nested
       >
-        <span className="text-[11px] text-gray-500 font-medium">Sold by</span>
-        <div className="flex items-center gap-1.5">
-          <div className="w-4 h-4 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden border border-gray-200 group-hover:border-[#090A28] transition-colors">
-            {displaySeller.avatarUrl && displaySeller.avatarUrl !== '/images/deeldepot-logo.png' ? (
-               // eslint-disable-next-line @next/next/no-img-element
-              <img src={displaySeller.avatarUrl} alt={displaySeller.name} className="w-full h-full object-cover" />
-            ) : isDeelDepot ? (
-              <ShieldCheck className="w-3 h-3 text-[#090A28] bg-white rounded-full p-0.5" />
-            ) : (
-              <User className="h-2.5 w-2.5 text-gray-400" />
-            )}
-          </div>
-          <span className="text-xs font-semibold text-[#262626] group-hover:text-blue-600 transition-colors line-clamp-1">
-            {displaySeller.name}
-          </span>
-        </div>
+        <span className="text-[11px] text-gray-400">Sold by</span>
+        <span className="text-[11px] font-medium text-gray-600 group-hover:text-[#090A28] transition-colors">
+          {displaySeller.name}
+        </span>
+        {isDeelDepot ? (
+          <ShieldCheck className="w-3 h-3 flex-shrink-0 text-[#090A28]/50" />
+        ) : (
+          <Star className="w-3 h-3 flex-shrink-0 text-orange-400 fill-orange-400" />
+        )}
       </Link>
     );
   }
 
-  // Medium size (for product detail page)
+  /* ── md (product detail page) ───────────────────────────────────────────── */
   return (
-    <Link 
-      href={isDeelDepot ? '/' : `/sellers/${displaySeller.username}`}
-      className="inline-flex items-center gap-2 mt-3 group w-fit p-1.5 pr-3 rounded-full bg-gray-50 border border-gray-100 hover:border-gray-200 hover:bg-gray-100 transition-all"
+    <Link
+      href={href}
+      className="inline-flex items-center gap-2 mt-2 group w-fit"
     >
-      <div className="w-6 h-6 rounded-full bg-white flex items-center justify-center overflow-hidden border border-gray-200 shadow-sm">
-        {displaySeller.avatarUrl && displaySeller.avatarUrl !== '/images/deeldepot-logo.png' ? (
-           // eslint-disable-next-line @next/next/no-img-element
+      {/* Avatar / icon */}
+      <div className="w-5 h-5 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center flex-shrink-0 ring-1 ring-gray-200 group-hover:ring-[#090A28]/30 transition-all">
+        {hasAvatar ? (
+          // eslint-disable-next-line @next/next/no-img-element
           <img src={displaySeller.avatarUrl} alt={displaySeller.name} className="w-full h-full object-cover" />
         ) : isDeelDepot ? (
-          <ShieldCheck className="w-4 h-4 text-[#090A28]" />
+          <ShieldCheck className="w-3 h-3 text-[#090A28]" />
         ) : (
-          <User className="h-3.5 w-3.5 text-gray-400" />
+          <User className="w-3 h-3 text-gray-400" />
         )}
       </div>
-      <div className="flex items-center gap-1.5">
-        <span className="text-[13px] text-gray-500">Sold by</span>
-        <span className="text-sm font-semibold text-[#262626] group-hover:text-blue-600 transition-colors">
-          {displaySeller.name}
-        </span>
-        {isDeelDepot && (
-          <ShieldCheck className="w-3.5 h-3.5 text-[#F5970C] ml-0.5" />
+
+      {/* Label + name */}
+      <span className="text-sm text-gray-400">Sold by</span>
+      <span className="text-sm font-medium text-gray-700 group-hover:text-[#090A28] transition-colors">
+        {displaySeller.name}
+      </span>
+
+      {/* Verified tick */}
+      <div className="relative group flex items-center">
+        {isDeelDepot ? (
+          <ShieldCheck className="w-3.5 h-3.5 flex-shrink-0 text-[#090A28]/50" />
+        ) : (
+          <Star className="w-3.5 h-3.5 flex-shrink-0 text-orange-400 fill-orange-400 cursor-help" />
+        )}
+        
+        {/* Tooltip for md size only if not DeelDepot */}
+        {!isDeelDepot && (
+          <div className="absolute top-full mt-3 left-1/2 -translate-x-1/2 w-72 p-4 bg-white text-gray-600 text-sm leading-relaxed rounded-2xl shadow-xl border border-gray-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 transform origin-top translate-y-2 group-hover:translate-y-0 text-left">
+            <div className="font-bold mb-1.5 flex items-center gap-1.5 text-[#262626]">
+              <Star className="w-4 h-4 text-orange-500 fill-orange-500" /> Star Seller
+            </div>
+            Star Sellers have an outstanding track record for providing a great customer experience – they consistently earned 5-star reviews, dispatched orders on time, and replied quickly to any messages they received.
+          </div>
         )}
       </div>
     </Link>

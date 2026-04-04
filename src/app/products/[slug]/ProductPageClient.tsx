@@ -543,7 +543,17 @@ export default function ProductPageClient({ product: initialProduct }: ProductPa
           <div className="mt-8">
             <SameDayShipping fullWidth={true} contained={true} />
           </div>
-          {reviews && reviews.length > 0 && <div className="mt-16"><ProductReviews reviews={reviews} averageRating={product.rating} totalReviews={product.reviewCount} /></div>}
+          {reviews && reviews.length > 0 && (
+            <div className="mt-16">
+              <ProductReviews
+                reviews={reviews}
+                averageRating={product.rating}
+                totalReviews={product.reviewCount}
+                sellerName={(product.meta as any)?._sellerName}
+                sellerUsername={(product.meta as any)?._sellerUsername}
+              />
+            </div>
+          )}
           <RecommendedProducts currentProductSlug={slug} currentProduct={product} />
         </div>
       </main>

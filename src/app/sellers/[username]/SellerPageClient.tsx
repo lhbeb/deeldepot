@@ -2,10 +2,11 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { MapPin, Calendar, ShieldCheck, Mail, Star, Package, HelpCircle } from 'lucide-react';
+import { MapPin, Calendar, ShieldCheck, Mail, Star, Package, HelpCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 import type { Seller } from '@/types/seller';
 import type { Product } from '@/types/product';
 import ProductCard from '@/components/ProductCard';
+import SellerReviews from '@/components/SellerReviews';
 
 interface Props {
   seller: Seller;
@@ -14,6 +15,8 @@ interface Props {
 export default function SellerPageClient({ seller }: Props) {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const PRODUCTS_PER_PAGE = 12;
 
   useEffect(() => {
     const fetchSellerProducts = async () => {
@@ -45,6 +48,12 @@ export default function SellerPageClient({ seller }: Props) {
     fetchSellerProducts();
   }, [seller.id]);
 
+  const totalPages = Math.ceil(products.length / PRODUCTS_PER_PAGE);
+  const displayedProducts = products.slice(
+    (currentPage - 1) * PRODUCTS_PER_PAGE,
+    currentPage * PRODUCTS_PER_PAGE
+  );
+
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
       
@@ -72,9 +81,19 @@ export default function SellerPageClient({ seller }: Props) {
             <div className="flex-1 text-center md:text-left">
               <div className="flex flex-col md:flex-row items-center md:items-end gap-3 mb-2">
                 <h1 className="text-3xl md:text-4xl font-bold tracking-tight">{seller.name}</h1>
-                <div className="flex items-center gap-1.5 bg-green-500/20 text-green-400 px-2.5 py-1 rounded-full text-xs font-semibold backdrop-blur-sm border border-green-500/30">
-                  <ShieldCheck className="w-3 h-3" />
-                  Verified Seller
+                <div className="relative group flex">
+                  <div className="cursor-help flex items-center gap-1.5 bg-orange-500/20 text-orange-400 px-2.5 py-1 rounded-full text-xs font-semibold backdrop-blur-sm border border-orange-500/30 transition-colors hover:bg-orange-500/30">
+                    <Star className="w-3 h-3 fill-current" />
+                    Star Seller
+                  </div>
+                  
+                  {/* Tooltip */}
+                  <div className="absolute top-full mt-3 left-0 md:left-auto md:right-auto w-72 p-4 bg-white text-gray-600 text-sm leading-relaxed rounded-2xl shadow-2xl border border-gray-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 transform origin-top translate-y-2 group-hover:translate-y-0">
+                    <div className="font-bold mb-1.5 flex items-center gap-1.5 text-[#262626]">
+                      <Star className="w-4 h-4 text-orange-500 fill-orange-500" /> Star Seller
+                    </div>
+                    Star Sellers have an outstanding track record for providing a great customer experience – they consistently earned 5-star reviews, dispatched orders on time, and replied quickly to any messages they received.
+                  </div>
                 </div>
               </div>
               
@@ -102,6 +121,30 @@ export default function SellerPageClient({ seller }: Props) {
               {seller.bio && (
                 <div className="bg-white/10 p-4 rounded-2xl backdrop-blur-md border border-white/10 text-gray-200 text-sm md:text-base leading-relaxed max-w-2xl">
                   {seller.bio}
+                </div>
+              )}
+
+              {/* Seller aggregate rating (from product reviews) */}
+              {(seller.totalReviews ?? 0) > 0 && (
+                <div className="mt-4 flex items-center gap-3">
+                  <div className="flex items-center gap-1">
+                    {[...Array(5)].map((_, i) => (
+                      <Star
+                        key={i}
+                        className={`h-4 w-4 ${
+                          i < Math.floor(seller.averageRating ?? 0)
+                            ? 'text-yellow-400 fill-yellow-400'
+                            : 'text-white/30'
+                        }`}
+                      />
+                    ))}
+                  </div>
+                  <span className="text-white/80 text-sm font-medium">
+                    {(seller.averageRating ?? 0).toFixed(1)}
+                  </span>
+                  <span className="text-white/50 text-sm">
+                    ({seller.totalReviews} review{seller.totalReviews !== 1 ? 's' : ''})
+                  </span>
                 </div>
               )}
             </div>
@@ -151,33 +194,95 @@ export default function SellerPageClient({ seller }: Props) {
               </div>
             </div>
 
-            {/* Main Content / Listings */}
-            <div className="w-full lg:w-2/3 xl:w-3/4 flex flex-col min-h-[50vh]">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-[#262626]">
-                  Listings <span className="text-gray-400 text-lg font-medium ml-2">({products.length})</span>
-                </h2>
+            {/* Main Content / Listings + Reviews */}
+            <div className="w-full lg:w-2/3 xl:w-3/4 flex flex-col min-h-[50vh] gap-12">
+              {/* Listings */}
+              <div>
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-2xl font-bold text-[#262626]">
+                    Listings <span className="text-gray-400 text-lg font-medium ml-2">({products.length})</span>
+                  </h2>
+                </div>
+                
+                {loading ? (
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 animate-pulse">
+                    {[...Array(6)].map((_, i) => (
+                      <div key={i} className="bg-white h-72 rounded-2xl border border-gray-100"></div>
+                    ))}
+                  </div>
+                ) : products.length > 0 ? (
+                  <>
+                    <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+                      {displayedProducts.map((product) => (
+                        <ProductCard key={product.id} product={product} />
+                      ))}
+                    </div>
+                    
+                    {/* Pagination Controls */}
+                    {totalPages > 1 && (
+                      <div className="mt-10 flex items-center justify-center gap-2">
+                        <button
+                          onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                          disabled={currentPage === 1}
+                          className="flex items-center justify-center w-10 h-10 rounded-full border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 hover:text-[#090A28] disabled:opacity-50 disabled:hover:bg-white disabled:hover:text-gray-600 transition-colors"
+                          aria-label="Previous page"
+                        >
+                          <ChevronLeft className="w-5 h-5" />
+                        </button>
+                        
+                        <div className="flex items-center gap-1.5 mx-2">
+                          {[...Array(totalPages)].map((_, i) => (
+                            <button
+                              key={i}
+                              onClick={() => setCurrentPage(i + 1)}
+                              className={`w-8 h-8 rounded-full text-sm font-medium transition-colors ${
+                                currentPage === i + 1
+                                  ? 'bg-[#090A28] text-white'
+                                  : 'text-gray-600 hover:bg-gray-100'
+                              }`}
+                            >
+                              {i + 1}
+                            </button>
+                          ))}
+                        </div>
+
+                        <button
+                          onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                          disabled={currentPage === totalPages}
+                          className="flex items-center justify-center w-10 h-10 rounded-full border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 hover:text-[#090A28] disabled:opacity-50 disabled:hover:bg-white disabled:hover:text-gray-600 transition-colors"
+                          aria-label="Next page"
+                        >
+                          <ChevronRight className="w-5 h-5" />
+                        </button>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <div className="flex-1 bg-white rounded-3xl border border-gray-100 flex flex-col items-center justify-center p-12 text-center">
+                    <Package className="w-16 h-16 text-gray-200 mb-4" />
+                    <h3 className="text-xl font-semibold text-[#262626] mb-2">No active listings</h3>
+                    <p className="text-gray-500 max-w-sm">{seller.name} currently doesn&apos;t have any items for sale. Check back later!</p>
+                  </div>
+                )}
               </div>
-              
-              {loading ? (
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 animate-pulse">
-                  {[...Array(6)].map((_, i) => (
-                    <div key={i} className="bg-white h-72 rounded-2xl border border-gray-100"></div>
-                  ))}
-                </div>
-              ) : products.length > 0 ? (
-                <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
-                  {products.map((product) => (
-                    <ProductCard key={product.id} product={product} />
-                  ))}
-                </div>
-              ) : (
-                <div className="flex-1 bg-white rounded-3xl border border-gray-100 flex flex-col items-center justify-center p-12 text-center">
-                  <Package className="w-16 h-16 text-gray-200 mb-4" />
-                  <h3 className="text-xl font-semibold text-[#262626] mb-2">No active listings</h3>
-                  <p className="text-gray-500 max-w-sm">{seller.name} currently doesn&apos;t have any items for sale. Check back later!</p>
-                </div>
-              )}
+
+              {/* Seller Reviews Section */}
+              <div>
+                <h2 className="text-2xl font-bold text-[#262626] mb-6">
+                  Customer Reviews
+                  {(seller.totalReviews ?? 0) > 0 && (
+                    <span className="text-gray-400 text-lg font-medium ml-2">
+                      ({seller.totalReviews})
+                    </span>
+                  )}
+                </h2>
+                <SellerReviews
+                  reviews={seller.reviews ?? []}
+                  averageRating={seller.averageRating ?? 0}
+                  totalReviews={seller.totalReviews ?? 0}
+                  sellerName={seller.name}
+                />
+              </div>
             </div>
             
           </div>

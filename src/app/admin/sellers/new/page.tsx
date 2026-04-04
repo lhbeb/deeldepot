@@ -6,6 +6,8 @@ import Link from 'next/link';
 import { ArrowLeft, Save, Loader2, User, Globe, AlertCircle, CheckCircle, Upload } from 'lucide-react';
 import AdminLayout from '@/components/AdminLayout';
 import { uploadImageWithRetry } from '@/utils/robustUpload';
+import AdminSellerReviewsEditor from '@/components/AdminSellerReviewsEditor';
+import type { Review } from '@/types/product';
 
 export default function NewSellerPage() {
   const router = useRouter();
@@ -20,6 +22,7 @@ export default function NewSellerPage() {
     avatar_url: '',
     location: '',
     member_since: '',
+    nativeReviews: [] as Review[],
   });
 
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
@@ -261,7 +264,14 @@ export default function NewSellerPage() {
             </div>
           </div>
         </div>
+
+        {/* Reviews Section */}
+        <AdminSellerReviewsEditor
+          reviews={formData.nativeReviews}
+          onChange={(reviews) => setFormData(prev => ({ ...prev, nativeReviews: reviews }))}
+        />
       </form>
     </AdminLayout>
+
   );
 }

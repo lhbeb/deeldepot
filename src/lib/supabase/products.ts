@@ -4,7 +4,7 @@ import type { Product } from '@/types/product';
 import type { Review } from '@/types/product';
 
 // Transform Supabase row to Product type
-function transformProduct(row: any): Product {
+export function transformProduct(row: any): Product {
   const meta = row.meta || {};
   // Default to published=true for backward compatibility (existing products without meta.published should be considered published)
   // Only explicitly set to false if meta.published === false
