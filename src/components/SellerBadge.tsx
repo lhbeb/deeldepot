@@ -106,6 +106,16 @@ export default function SellerBadge({ sellerId, size = 'sm' }: SellerBadgeProps)
           </div>
         )}
       </div>
+
+      {/* Review Count Info */}
+      {seller && (seller.totalReviews ?? 0) > 0 && (
+        <div className="flex items-center text-xs text-gray-500 font-medium ml-1">
+          <span className="mr-1.5 opacity-50">•</span>
+          <span className="text-[#262626] font-bold mr-0.5">{(seller.averageRating ?? 5).toFixed(1)}</span>
+          <Star className="w-3 h-3 text-[#F5970C] fill-[#F5970C] mr-1" />
+          <span>({seller.totalReviews})</span>
+        </div>
+      )}
     </Link>
   );
 }
