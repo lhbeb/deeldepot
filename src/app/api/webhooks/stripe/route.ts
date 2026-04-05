@@ -2,16 +2,18 @@ import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { headers } from 'next/headers';
 
-// Initialize Stripe
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
-    apiVersion: '2026-01-28.clover',
-});
+// Stripe initialization deferred to handler to avoid build-time crashes
 
 // Webhook secret from Stripe Dashboard
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET || '';
 
 export async function POST(request: NextRequest) {
     try {
+        // Initialize Stripe inside handler to defer until runtime (avoids Vercel build crash)
+        const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || 'sk_test_placeholder', {
+            apiVersion: '2026-01-28.clover' as any,
+        });
+
         const body = await request.text();
         const headersList = await headers();
         const signature = headersList.get('stripe-signature');
