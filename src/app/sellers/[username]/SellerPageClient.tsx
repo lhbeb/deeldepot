@@ -12,6 +12,18 @@ interface Props {
   seller: Seller;
 }
 
+const getPageNumbers = (current: number, total: number) => {
+  if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
+  const pages: (number | string)[] = [1];
+  if (current > 3) pages.push('...');
+  const start = Math.max(2, current - 1);
+  const end = Math.min(total - 1, current + 1);
+  for (let i = start; i <= end; i++) pages.push(i);
+  if (current < total - 2) pages.push('...');
+  if (total > 1) pages.push(total);
+  return pages;
+};
+
 export default function SellerPageClient({ seller }: Props) {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -231,17 +243,20 @@ export default function SellerPageClient({ seller }: Props) {
                         </button>
                         
                         <div className="flex items-center gap-1.5 mx-2">
-                          {[...Array(totalPages)].map((_, i) => (
+                          {getPageNumbers(currentPage, totalPages).map((page, i) => (
                             <button
                               key={i}
-                              onClick={() => setCurrentPage(i + 1)}
-                              className={`w-8 h-8 rounded-full text-sm font-medium transition-colors ${
-                                currentPage === i + 1
+                              onClick={() => typeof page === 'number' && setCurrentPage(page)}
+                              disabled={page === '...'}
+                              className={`w-8 h-8 rounded-full text-sm font-medium transition-colors flex items-center justify-center ${
+                                page === '...'
+                                  ? 'text-gray-400 cursor-default bg-transparent'
+                                  : currentPage === page
                                   ? 'bg-[#090A28] text-white'
                                   : 'text-gray-600 hover:bg-gray-100'
                               }`}
                             >
-                              {i + 1}
+                              {page}
                             </button>
                           ))}
                         </div>
