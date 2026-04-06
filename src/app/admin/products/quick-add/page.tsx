@@ -47,13 +47,14 @@ export default function QuickAddProductPage() {
       }
 
       // Validate required fields
-      const requiredFields = ['slug', 'title', 'description', 'price', 'images', 'condition', 'category', 'brand', 'checkoutLink'];
+      const requiredFields = ['slug', 'title', 'description', 'price', 'images', 'condition', 'category', 'brand', 'checkoutLink', 'listedBy', 'collections'];
       const missingFields = requiredFields.filter(field => {
         // Handle camelCase and snake_case variations
         const camelField = field;
         const snakeField = field === 'payeeEmail' ? 'payee_email' : 
                           field === 'checkoutLink' ? 'checkout_link' : 
                           field === 'reviewCount' ? 'review_count' : 
+                          field === 'listedBy' ? 'listed_by' : 
                           field === 'inStock' ? 'in_stock' : field;
         return !productData[camelField] && !productData[snakeField];
       });
@@ -83,6 +84,8 @@ export default function QuickAddProductPage() {
         meta: productData.meta || {},
         in_stock: productData.inStock !== undefined ? productData.inStock : (productData.in_stock !== undefined ? productData.in_stock : true),
         inStock: productData.inStock !== undefined ? productData.inStock : (productData.in_stock !== undefined ? productData.in_stock : true),
+        listed_by: productData.listedBy || productData.listed_by,
+        collections: Array.isArray(productData.collections) ? productData.collections : [],
       };
 
       // Create product
@@ -131,6 +134,8 @@ export default function QuickAddProductPage() {
       images: [
         "/products/example-product/img1.webp"
       ],
+      listedBy: "walid",
+      collections: ["electronics"],
       rating: 4.5,
       reviewCount: 10,
       inStock: true,
@@ -232,6 +237,8 @@ export default function QuickAddProductPage() {
                     <li>slug, title, description, price</li>
                     <li>brand, category, condition</li>
                     <li>checkoutLink (or checkout_link)</li>
+                    <li>listedBy (or listed_by)</li>
+                    <li>collections (array of strings)</li>
                     <li>images (array of image URLs)</li>
                   </ul>
                   <div className="mt-3 text-[#090A28]">

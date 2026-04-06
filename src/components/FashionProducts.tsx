@@ -9,18 +9,13 @@ interface FashionProductsProps {
 }
 
 const FashionProducts: React.FC<FashionProductsProps> = ({ products }) => {
-  // Filter to only show fashion products based directly on database collections
-  const fashionProducts = products.filter(product => {
-    return product.collections?.some(c => c.toLowerCase() === 'fashion') || false;
-  });
-
   // If no fashion products, don't render the section
-  if (fashionProducts.length === 0) {
+  if (!products || products.length === 0) {
     return null;
   }
 
   // Show up to 8 fashion products
-  const displayedProducts = fashionProducts.slice(0, 8);
+  const displayedProducts = products.slice(0, 8);
 
   return (
     <section id="fashion" className="py-16 bg-white">
