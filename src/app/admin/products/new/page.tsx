@@ -903,7 +903,7 @@ export default function NewProductPage() {
                 {reviews.map((review, i) => (
                   <div key={review.id || i} className="flex items-start gap-3 p-3 bg-gray-50 rounded-xl group">
                     <div className="w-9 h-9 rounded-full flex-shrink-0 overflow-hidden bg-gray-200 flex items-center justify-center">
-                      {review.avatar ? (
+                      {typeof review.avatar === 'string' && review.avatar.length > 0 ? (
                         <img src={review.avatar} alt={review.author} className="w-full h-full object-cover" />
                       ) : (
                         <div className="w-9 h-9 bg-gradient-to-br from-[#090A28] to-purple-600 rounded-full flex items-center justify-center text-white text-sm font-medium">
@@ -964,7 +964,7 @@ export default function NewProductPage() {
               <div className="flex items-center gap-4">
                 <label className="relative cursor-pointer group flex-shrink-0">
                   <div className="w-16 h-16 rounded-full overflow-hidden bg-gray-100 border-2 border-dashed border-gray-300 group-hover:border-[#090A28] transition-colors flex items-center justify-center">
-                    {editingReview.data.avatar ? (
+                    {typeof editingReview.data.avatar === 'string' && editingReview.data.avatar.length > 0 ? (
                       <img src={editingReview.data.avatar} alt="Avatar" className="w-full h-full object-cover" />
                     ) : (
                       <svg className="w-8 h-8 text-gray-400" fill="currentColor" viewBox="0 0 24 24">

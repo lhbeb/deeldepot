@@ -11,11 +11,7 @@ interface FashionProductsProps {
 const FashionProducts: React.FC<FashionProductsProps> = ({ products }) => {
   // Filter to only show fashion products based directly on database collections
   const fashionProducts = products.filter(product => {
-    // Determine product collection directly from database
-    const categoryMatch = product.category?.toLowerCase().includes('fashion');
-    const collectionMatch = product.collections?.some(c => c.toLowerCase() === 'fashion');
-
-    return categoryMatch || collectionMatch;
+    return product.collections?.some(c => c.toLowerCase() === 'fashion') || false;
   });
 
   // If no fashion products, don't render the section

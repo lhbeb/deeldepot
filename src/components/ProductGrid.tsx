@@ -12,7 +12,8 @@ type SortOption = "featured" | "price-high" | "price-low" | "rating";
 
 interface ProductGridProps {
   products: Product[];
-  showHeader?: boolean; // If false, hides the "Endless accessories. Epic prices." header and simplifies the layout
+  showHeader?: boolean;
+  title?: string;
 }
 
 interface PriceRangeState {
@@ -75,7 +76,7 @@ function applySorting(products: Product[], sortBy: SortOption): Product[] {
   return sorted;
 }
 
-const ProductGrid = ({ products, showHeader = true }: ProductGridProps) => {
+const ProductGrid = ({ products, showHeader = true, title = "Endless accessories. Epic prices." }: ProductGridProps) => {
   const searchParams = useSearchParams();
 
   const [sortBy, setSortBy] = useState<SortOption>("featured");
@@ -99,14 +100,6 @@ const ProductGrid = ({ products, showHeader = true }: ProductGridProps) => {
     [products],
   );
 
-  // Helper function to check if a product is a fashion product
-  const isFashionProduct = (product: Product): boolean => {
-    const categoryMatch = product.category?.toLowerCase().includes('fashion');
-    const collectionMatch = product.collections?.some(c => c.toLowerCase() === 'fashion');
-
-    return Boolean(categoryMatch || collectionMatch);
-  };
-
   const activeFilters = useMemo(() => {
     let count = 0;
 
@@ -119,8 +112,7 @@ const ProductGrid = ({ products, showHeader = true }: ProductGridProps) => {
   }, [priceRange, selectedBrands, selectedConditions]);
 
   const filteredProducts = useMemo(() => {
-    // First, exclude all fashion products
-    let result = products.filter(product => !isFashionProduct(product));
+    let result = products;
 
     if (searchQuery) {
       const normalizedQuery = searchQuery.trim().toLowerCase();
@@ -423,7 +415,7 @@ const ProductGrid = ({ products, showHeader = true }: ProductGridProps) => {
           <div className="flex-grow">
             {showHeader && (
               <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                <h2 className="text-2xl font-medium text-[#262626]">Endless accessories. Epic prices.</h2>
+                <h2 className="text-2xl font-medium text-[#262626]">{title}</h2>
 
                 <div className="flex items-center gap-3">
                   <button

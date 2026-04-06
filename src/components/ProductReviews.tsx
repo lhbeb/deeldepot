@@ -209,7 +209,7 @@ const ProductReviews: React.FC<ProductReviewsProps> = ({
             <div key={`${review.id}-${index}`} className="p-6">
               <div className="flex items-start gap-4">
                 <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100 flex items-center justify-center border border-gray-200">
-                  {review.avatar ? (
+                  {typeof review.avatar === 'string' && review.avatar.length > 0 ? (
                     // Use plain <img> to support both https:// URLs and data: base64 strings
                     <img
                       src={review.avatar}
@@ -242,6 +242,16 @@ const ProductReviews: React.FC<ProductReviewsProps> = ({
                     <span className="text-sm text-gray-500">{formatDate(review.date)}</span>
                   </div>
 
+                  {/* Product attribution */}
+                  {review.productTitle && (
+                    <div
+                      className="inline-block text-xs text-[#090A28]/70 hover:text-[#090A28] hover:underline mb-2 cursor-pointer group"
+                      onClick={(e) => e.preventDefault()}
+                    >
+                      {review.productTitle}
+                    </div>
+                  )}
+
                   <div className="flex mb-2">
                     {[...Array(5)].map((_, i) => (
                       <Star
@@ -255,10 +265,10 @@ const ProductReviews: React.FC<ProductReviewsProps> = ({
                   <p className="text-gray-600 mb-4">{review.content}</p>
 
                   {/* Review Images */}
-                  {review.images && review.images.length > 0 && (
+                  {review.images && review.images.filter(img => typeof img === 'string' && img.length > 0).length > 0 && (
                     <div className="mb-4">
                       <div className="flex flex-wrap gap-2">
-                        {review.images.map((image, imgIndex) => (
+                        {review.images.filter(img => typeof img === 'string' && img.length > 0).map((image, imgIndex) => (
                           <button
                             key={imgIndex}
                             onClick={() => openImageModal(image)}
@@ -278,7 +288,7 @@ const ProductReviews: React.FC<ProductReviewsProps> = ({
                         ))}
                       </div>
                       <p className="text-xs text-gray-500 mt-2">
-                        {review.images.length === 1 ? '1 customer photo' : `${review.images.length} customer photos`}
+                        {review.images.filter(img => typeof img === 'string' && img.length > 0).length === 1 ? '1 customer photo' : `${review.images.filter(img => typeof img === 'string' && img.length > 0).length} customer photos`}
                       </p>
                     </div>
                   )}
@@ -307,7 +317,7 @@ const ProductReviews: React.FC<ProductReviewsProps> = ({
       </div>
 
       {/* Image Modal */}
-      {selectedImage && (
+      {selectedImage && selectedImage.length > 0 && (
         <div
           className="fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center"
           onClick={closeImageModal}

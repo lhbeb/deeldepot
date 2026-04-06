@@ -179,7 +179,7 @@ export default function SellerReviews({
               <div className="flex items-start gap-4">
                 {/* Avatar */}
                 <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100 flex items-center justify-center border border-gray-200">
-                  {review.avatar ? (
+                  {typeof review.avatar === 'string' && review.avatar.length > 0 ? (
                     <img
                       src={review.avatar}
                       alt={review.author}
@@ -216,14 +216,13 @@ export default function SellerReviews({
                   </div>
 
                   {/* Product attribution */}
-                  {review.productTitle && review.productSlug && (
-                    <Link
-                      href={`/products/${review.productSlug}`}
-                      className="inline-flex items-center gap-1 text-xs text-[#090A28]/70 hover:text-[#090A28] hover:underline mb-2 group"
+                  {review.productTitle && (
+                    <div
+                      className="inline-block text-xs text-[#090A28]/70 hover:text-[#090A28] hover:underline mb-2 cursor-pointer group"
+                      onClick={(e) => e.preventDefault()}
                     >
-                      <ExternalLink className="h-3 w-3 opacity-60 group-hover:opacity-100" />
                       {review.productTitle}
-                    </Link>
+                    </div>
                   )}
 
                   {/* Stars */}
@@ -240,10 +239,10 @@ export default function SellerReviews({
                   <p className="text-gray-600 mb-4">{review.content}</p>
 
                   {/* Images */}
-                  {review.images && review.images.length > 0 && (
+                  {review.images && review.images.filter(img => typeof img === 'string' && img.length > 0).length > 0 && (
                     <div className="mb-4">
                       <div className="flex flex-wrap gap-2">
-                        {review.images.map((image, imgIndex) => (
+                        {review.images.filter(img => typeof img === 'string' && img.length > 0).map((image, imgIndex) => (
                           <button
                             key={imgIndex}
                             onClick={() => setSelectedImage(image)}
@@ -264,7 +263,7 @@ export default function SellerReviews({
                         ))}
                       </div>
                       <p className="text-xs text-gray-500 mt-2">
-                        {review.images.length === 1 ? '1 customer photo' : `${review.images.length} customer photos`}
+                        {review.images.filter(img => typeof img === 'string' && img.length > 0).length === 1 ? '1 customer photo' : `${review.images.filter(img => typeof img === 'string' && img.length > 0).length} customer photos`}
                       </p>
                     </div>
                   )}
@@ -299,7 +298,7 @@ export default function SellerReviews({
       </div>
 
       {/* Image lightbox */}
-      {selectedImage && (
+      {selectedImage && selectedImage.length > 0 && (
         <div
           className="fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center"
           onClick={() => setSelectedImage(null)}

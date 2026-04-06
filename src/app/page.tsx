@@ -48,6 +48,11 @@ export default async function HomePage() {
       ? featuredFromAdmin.slice(0, 6)
       : getRandomProducts(allProducts || [], 6);
 
+  const allProductsList = allProducts || [];
+  const electronicsProducts = allProductsList.filter(product => 
+    product.collections?.some(c => c.toLowerCase() === 'electronics') || false
+  );
+
   return (
     <>
       <Suspense fallback={null}>
@@ -69,11 +74,16 @@ export default async function HomePage() {
       
       <SameDayShipping />
       
-      <FashionProducts products={allProducts || []} />
+      <FashionProducts products={allProductsList} />
       
-      <Suspense fallback={null}>
-        <ProductGrid products={allProducts} />
-      </Suspense>
+      {electronicsProducts.length > 0 && (
+        <Suspense fallback={null}>
+          <ProductGrid 
+            products={electronicsProducts} 
+            title="Gadgets & Electronics"
+          />
+        </Suspense>
+      )}
       
       <HomeReviews 
         reviews={homeReviews}

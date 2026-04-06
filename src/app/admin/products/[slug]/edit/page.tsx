@@ -10,27 +10,15 @@ import {
   Calendar, ThumbsUp, EyeOff
 } from 'lucide-react';
 import type { Product } from '@/types/product';
+import type { Review } from '@/types/product';
 import ImageUploader, { ImageUploaderRef, UploadStatus } from '@/components/admin/ImageUploader';
 import AdminLayout from '@/components/AdminLayout';
 import AdminLoading from '@/components/AdminLoading';
+import AdminSellerReviewsEditor from '@/components/AdminSellerReviewsEditor';
 
 const slugify = (value: string) =>
   value.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
 
-interface Review {
-  id: string;
-  author: string;
-  avatar?: string;
-  rating: number;
-  date: string;
-  title: string;
-  content: string;
-  helpful?: number;
-  verified?: boolean;
-  location?: string;
-  purchaseDate?: string;
-  images?: string[] | string;
-}
 
 // Reusable Section Component
 function Section({
@@ -135,8 +123,6 @@ export default function EditProductPage() {
   });
 
   const [reviews, setReviews] = useState<Review[]>([]);
-  const [showReviewModal, setShowReviewModal] = useState(false);
-  const [editingReview, setEditingReview] = useState<{ index: number; data: Partial<Review> } | null>(null);
   const [featuredCount, setFeaturedCount] = useState(0);
 
   // Added sellers state here
@@ -195,7 +181,12 @@ export default function EditProductPage() {
       if (data.reviews?.length) {
         setReviews(data.reviews.map((r: any) => ({
           ...r,
-          images: Array.isArray(r.images) ? r.images.join(', ') : r.images || '',
+          // Normalise images to an array for AdminSellerReviewsEditor
+          images: Array.isArray(r.images)
+            ? r.images.filter((img: any) => typeof img === 'string' && img.length > 0)
+            : typeof r.images === 'string' && r.images.trim()
+              ? r.images.split(',').map((s: string) => s.trim()).filter(Boolean)
+              : [],
         })));
       }
 
@@ -289,12 +280,15 @@ export default function EditProductPage() {
           if (val) meta[key.charAt(0).toLowerCase() + key.slice(1)] = val;
         });
 
-      const processedReviews = reviews.map(r => ({
-        ...r,
-        images: typeof r.images === 'string'
-          ? r.images.split(',').map(s => s.trim()).filter(Boolean)
-          : r.images || []
-      }));
+      const processedReviews = reviews.map(r => {
+        const rr = r as any;
+        return {
+          ...r,
+          images: typeof rr.images === 'string'
+            ? rr.images.split(',').map((s: string) => s.trim()).filter(Boolean)
+            : Array.isArray(rr.images) ? rr.images.filter((img: any) => typeof img === 'string' && img.length > 0) : []
+        };
+      });
 
       const finalSlug = slugify(formData.slug || formData.title);
       if (!finalSlug) throw new Error('URL slug is required');
@@ -367,39 +361,6 @@ export default function EditProductPage() {
     }
   };
 
-  const openReviewModal = (index?: number) => {
-    if (index !== undefined) {
-      setEditingReview({ index, data: { ...reviews[index] } });
-    } else {
-      setEditingReview({
-        index: -1,
-        data: { id: `r-${Date.now()}`, author: '', rating: 5, date: new Date().toISOString().split('T')[0], title: '', content: '', verified: true }
-      });
-    }
-    setShowReviewModal(true);
-  };
-
-  const saveReview = () => {
-    if (!editingReview?.data.author || !editingReview?.data.content) return;
-
-    const review = editingReview.data as Review;
-    if (editingReview.index === -1) {
-      setReviews([...reviews, review]);
-    } else {
-      const updated = [...reviews];
-      updated[editingReview.index] = review;
-      setReviews(updated);
-    }
-    setShowReviewModal(false);
-    setHasChanges(true);
-  };
-
-  const deleteReview = (index: number) => {
-    if (confirm('Delete this review?')) {
-      setReviews(reviews.filter((_, i) => i !== index));
-      setHasChanges(true);
-    }
-  };
 
   if (loading) return <AdminLoading message="Loading product..." />;
 
@@ -897,187 +858,14 @@ export default function EditProductPage() {
             SECTION 5: REVIEWS (collapsed by default)
         ═══════════════════════════════════════════════════════════════ */}
         <Section id="reviews" icon={Star} title="Reviews" description="Manage customer reviews" defaultOpen={false} badge={reviews.length}>
-          <div className="space-y-4">
-            {reviews.length === 0 ? (
-              <div className="text-center py-8 text-gray-400">
-                <Star className="h-10 w-10 mx-auto mb-2 opacity-50" />
-                <p>No reviews yet</p>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {reviews.map((review, i) => (
-                  <div key={review.id || i} className="flex items-start gap-3 p-3 bg-gray-50 rounded-xl group">
-                    <div className="w-9 h-9 rounded-full flex-shrink-0 overflow-hidden bg-gray-200 flex items-center justify-center">
-                      {review.avatar ? (
-                        <img src={review.avatar} alt={review.author} className="w-full h-full object-cover" />
-                      ) : (
-                        <div className="w-9 h-9 bg-gradient-to-br from-[#090A28] to-purple-600 rounded-full flex items-center justify-center text-white text-sm font-medium">
-                          {review.author?.charAt(0)?.toUpperCase()}
-                        </div>
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium text-[#262626] text-sm">{review.author}</span>
-                        <div className="flex">
-                          {[1, 2, 3, 4, 5].map(s => (
-                            <Star key={s} className={`h-3 w-3 ${s <= review.rating ? 'text-amber-400 fill-amber-400' : 'text-gray-300'}`} />
-                          ))}
-                        </div>
-                        {review.verified && <CheckCircle className="h-3 w-3 text-green-500" />}
-                      </div>
-                      <p className="text-sm text-gray-600 mt-1 line-clamp-2">{review.content}</p>
-                    </div>
-                    <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button type="button" onClick={() => openReviewModal(i)} className="p-1.5 hover:bg-white rounded-lg">
-                        <Info className="h-4 w-4 text-gray-400" />
-                      </button>
-                      <button type="button" onClick={() => deleteReview(i)} className="p-1.5 hover:bg-red-50 rounded-lg">
-                        <Trash2 className="h-4 w-4 text-red-400" />
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            <button
-              type="button"
-              onClick={() => openReviewModal()}
-              className="w-full py-2.5 border-2 border-dashed border-gray-200 rounded-xl text-gray-500 hover:border-[#090A28]/30 hover:text-[#090A28] transition-colors flex items-center justify-center gap-2"
-            >
-              <Plus className="h-4 w-4" />
-              Add Review
-            </button>
-          </div>
+          <AdminSellerReviewsEditor
+            reviews={reviews as any}
+            onChange={(updated) => { setReviews(updated as any); setHasChanges(true); }}
+          />
         </Section>
 
       </form>
-
-      {/* Review Modal */}
-      {showReviewModal && editingReview && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" onClick={() => setShowReviewModal(false)}>
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md" onClick={e => e.stopPropagation()}>
-            <div className="p-5 border-b border-gray-100 flex items-center justify-between">
-              <h3 className="font-semibold text-[#262626]">{editingReview.index === -1 ? 'Add Review' : 'Edit Review'}</h3>
-              <button onClick={() => setShowReviewModal(false)} className="p-1 hover:bg-gray-100 rounded-lg">
-                <X className="h-5 w-5 text-gray-400" />
-              </button>
-            </div>
-            <div className="p-5 space-y-4 max-h-[70vh] overflow-y-auto">
-              {/* Avatar Upload */}
-              <div className="flex items-center gap-4">
-                <label className="relative cursor-pointer group flex-shrink-0">
-                  <div className="w-16 h-16 rounded-full overflow-hidden bg-gray-100 border-2 border-dashed border-gray-300 group-hover:border-[#090A28] transition-colors flex items-center justify-center">
-                    {editingReview.data.avatar ? (
-                      <img src={editingReview.data.avatar} alt="Avatar" className="w-full h-full object-cover" />
-                    ) : (
-                      <svg className="w-8 h-8 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z" />
-                      </svg>
-                    )}
-                  </div>
-                  <div className="absolute inset-0 rounded-full bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" /></svg>
-                  </div>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (!file) return;
-                      const reader = new FileReader();
-                      reader.onload = () => {
-                        setEditingReview({ ...editingReview, data: { ...editingReview.data, avatar: reader.result as string } });
-                      };
-                      reader.readAsDataURL(file);
-                    }}
-                  />
-                </label>
-                <div className="flex-1">
-                  <p className="text-sm font-medium text-gray-700">Profile Picture <span className="text-gray-400 font-normal">(optional)</span></p>
-                  <p className="text-xs text-gray-400 mt-0.5">Click the circle to upload. If skipped, a default person icon is used.</p>
-                  {editingReview.data.avatar && (
-                    <button type="button" onClick={() => setEditingReview({ ...editingReview, data: { ...editingReview.data, avatar: '' } })} className="text-xs text-red-500 hover:text-red-700 mt-1">Remove photo</button>
-                  )}
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <Field label="Author" required>
-                  <input
-                    type="text"
-                    value={editingReview.data.author || ''}
-                    onChange={(e) => setEditingReview({ ...editingReview, data: { ...editingReview.data, author: e.target.value } })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#090A28] outline-none"
-                  />
-                </Field>
-                <Field label="Rating">
-                  <select
-                    value={editingReview.data.rating || 5}
-                    onChange={(e) => setEditingReview({ ...editingReview, data: { ...editingReview.data, rating: parseInt(e.target.value) } })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#090A28] outline-none bg-white"
-                  >
-                    {[5, 4, 3, 2, 1].map(n => <option key={n} value={n}>{n} Stars</option>)}
-                  </select>
-                </Field>
-              </div>
-              <Field label="Title">
-                <input
-                  type="text"
-                  value={editingReview.data.title || ''}
-                  onChange={(e) => setEditingReview({ ...editingReview, data: { ...editingReview.data, title: e.target.value } })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#090A28] outline-none"
-                />
-              </Field>
-              <Field label="Content" required>
-                <textarea
-                  value={editingReview.data.content || ''}
-                  onChange={(e) => setEditingReview({ ...editingReview, data: { ...editingReview.data, content: e.target.value } })}
-                  rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#090A28] outline-none resize-none"
-                />
-              </Field>
-              <div className="grid grid-cols-2 gap-4">
-                <Field label="Location">
-                  <input
-                    type="text"
-                    value={editingReview.data.location || ''}
-                    onChange={(e) => setEditingReview({ ...editingReview, data: { ...editingReview.data, location: e.target.value } })}
-                    placeholder="City, State"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#090A28] outline-none"
-                  />
-                </Field>
-                <Field label="Date">
-                  <input
-                    type="date"
-                    value={editingReview.data.date || ''}
-                    onChange={(e) => setEditingReview({ ...editingReview, data: { ...editingReview.data, date: e.target.value } })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#090A28] outline-none"
-                  />
-                </Field>
-              </div>
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={editingReview.data.verified ?? true}
-                  onChange={(e) => setEditingReview({ ...editingReview, data: { ...editingReview.data, verified: e.target.checked } })}
-                  className="w-4 h-4 rounded text-[#090A28] focus:ring-[#090A28]"
-                />
-                <span className="text-sm text-gray-700">Verified Purchase</span>
-              </label>
-            </div>
-            <div className="p-5 border-t border-gray-100 flex justify-end gap-3">
-              <button type="button" onClick={() => setShowReviewModal(false)} className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">
-                Cancel
-              </button>
-              <button type="button" onClick={saveReview} className="px-4 py-2 bg-[#090A28] text-white rounded-lg hover:bg-[#1c2070]">
-                Save
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </AdminLayout>
   );
 }
+

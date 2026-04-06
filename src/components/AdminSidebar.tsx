@@ -20,7 +20,8 @@ import {
   BarChart2,
   Mail,
   TrendingDown,
-  User
+  User,
+  AlertTriangle
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { lockScroll, unlockScroll } from '@/utils/scrollUtils';
@@ -43,6 +44,7 @@ const getMainNavItems = (ordersCount: number): NavItem[] => [
   { name: 'Analytics', path: '/admin/analytics', icon: BarChart2, description: 'Traffic & visitors' },
   { name: 'Mail Project', path: '/admin/mail-project', icon: Mail, description: 'Send & manage emails' },
   { name: 'Price Monitor', path: '/admin/price-monitor', icon: TrendingDown, description: 'Track product prices' },
+  { name: 'Error Log', path: '/admin/errors', icon: AlertTriangle, description: 'View client crashes' },
 ];
 
 const quickActions: NavItem[] = [
