@@ -1,24 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getProducts } from '@/lib/data';
+import { getProductsByCollection } from '@/lib/data';
 
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const category = searchParams.get('category')?.toLowerCase() || '';
+    // Support both ?collection= and ?category= for backward compatibility
+    const requestedCollection = (searchParams.get('collection') || searchParams.get('category'))?.toLowerCase() || '';
     
-    if (!category.trim()) {
+    if (!requestedCollection.trim()) {
       return NextResponse.json([]);
     }
 
-    const allProducts = await getProducts();
-    
-    const filteredProducts = allProducts.filter(product => 
-      product.category.toLowerCase() === category
-    );
+    // Rely exclusively on the centralized DB-level collection querying
+    const products = await getProductsByCollection(requestedCollection);
 
-    return NextResponse.json(filteredProducts);
+    return NextResponse.json(products);
   } catch (error) {
-    console.error('Category API Error:', error);
-    return NextResponse.json({ error: 'Failed to get products by category' }, { status: 500 });
+    console.error('Collection API Error:', error);
+    return NextResponse.json({ error: 'Failed to get products by collection' }, { status: 500 });
   }
 } 
