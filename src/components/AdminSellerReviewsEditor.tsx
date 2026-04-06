@@ -140,7 +140,7 @@ export default function AdminSellerReviewsEditor({ reviews, onChange }: Props) {
               <Star className="h-6 w-6 text-amber-300" />
             </div>
             <p className="text-sm text-gray-500 font-medium">No native reviews yet</p>
-            <p className="text-xs text-gray-400 mt-1">Click "Add Review" to create one.</p>
+            <p className="text-xs text-gray-400 mt-1">Click &quot;Add Review&quot; to create one.</p>
           </div>
         ) : (
           sortedReviews.map((review, index) => {
@@ -309,7 +309,7 @@ export default function AdminSellerReviewsEditor({ reviews, onChange }: Props) {
 
                       {(review.images || []).length === 0 ? (
                         <p className="text-xs text-gray-400 italic py-1">
-                          No images — click "Add Image" to attach photos.
+                          No images — click &quot;Add Image&quot; to attach photos.
                         </p>
                       ) : (
                         <div className="space-y-2">
