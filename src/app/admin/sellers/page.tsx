@@ -13,6 +13,7 @@ export default function SellersPage() {
   const [error, setError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+  const [adminRole, setAdminRole] = useState<string | null>(null);
 
   const fetchSellers = async () => {
     try {
@@ -31,7 +32,16 @@ export default function SellersPage() {
     }
   };
 
-  useEffect(() => { fetchSellers(); }, []);
+  useEffect(() => { 
+    fetchSellers(); 
+    // Check admin role from cookies for authorization rules
+    if (typeof document !== 'undefined') {
+      const roleMatch = document.cookie.split('; ').find(row => row.startsWith('admin_role='));
+      if (roleMatch) {
+        setAdminRole(roleMatch.split('=')[1]);
+      }
+    }
+  }, []);
 
   const handleDelete = async (id: string) => {
     try {
@@ -177,30 +187,32 @@ export default function SellersPage() {
                     <Edit2 className="h-3.5 w-3.5" />
                     Edit
                   </Link>
-                  {deleteConfirm === seller.id ? (
-                    <div className="flex items-center gap-1">
+                  {adminRole === 'SUPER_ADMIN' && (
+                    deleteConfirm === seller.id ? (
+                      <div className="flex items-center gap-1">
+                        <button
+                          onClick={() => handleDelete(seller.id)}
+                          className="px-3 py-1.5 text-xs font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
+                        >
+                          Confirm
+                        </button>
+                        <button
+                          onClick={() => setDeleteConfirm(null)}
+                          className="px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    ) : (
                       <button
-                        onClick={() => handleDelete(seller.id)}
-                        className="px-3 py-1.5 text-xs font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
+                        onClick={() => setDeleteConfirm(seller.id)}
+                        title="Delete seller"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors"
                       >
-                        Confirm
+                        <Trash2 className="h-3.5 w-3.5" />
+                        Delete
                       </button>
-                      <button
-                        onClick={() => setDeleteConfirm(null)}
-                        className="px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  ) : (
-                    <button
-                      onClick={() => setDeleteConfirm(seller.id)}
-                      title="Delete seller"
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors"
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                      Delete
-                    </button>
+                    )
                   )}
                 </div>
               </div>

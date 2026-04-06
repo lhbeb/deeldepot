@@ -106,6 +106,13 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    if (auth.role !== 'SUPER_ADMIN') {
+      return NextResponse.json(
+        { error: 'Forbidden: Only Super Admins can delete sellers' },
+        { status: 403 }
+      );
+    }
+
     const { id } = await params;
     const success = await deleteSeller(id);
 
