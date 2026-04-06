@@ -28,6 +28,7 @@ interface ProductJson {
   meta?: any;
   inStock?: boolean;
   in_stock?: boolean;
+  collections?: string[];
 }
 
 interface ImportResult {
@@ -352,6 +353,7 @@ async function processProductFromZip(
     reviews: productData.reviews || [],
     meta: productData.meta || {},
     in_stock: productData.in_stock !== undefined ? productData.in_stock : (productData.inStock !== undefined ? productData.inStock : true),
+    collections: productData.collections || [],
   };
 
   // Insert product to database (slug is guaranteed to be unique)
