@@ -55,14 +55,14 @@ function LoginForm() {
         data = await response.json();
         console.log('🔐 [Client] Response data:', data);
       } catch (jsonError) {
-        console.error('❌ [Client] Failed to parse JSON response:', jsonError);
+        console.warn('⚠️ [Client] Failed to parse JSON response:', jsonError);
         const text = await response.text();
-        console.error('❌ [Client] Response text:', text);
+        console.warn('⚠️ [Client] Response text:', text);
         throw new Error('Invalid response from server. Please try again.');
       }
 
       if (!response.ok) {
-        console.error('❌ [Client] Login failed:', data.error);
+        console.warn('⚠️ [Client] Login failed:', data.error);
         throw new Error(data.error || 'Login failed');
       }
 
@@ -109,17 +109,17 @@ function LoginForm() {
       // 3. Middleware will see the cookie on the next request
       window.location.href = '/admin/products';
     } catch (err) {
-      console.error('❌ [Client] Login error:', err);
+      console.warn('⚠️ [Client] Login error:', err);
 
       let errorMessage = 'An unexpected error occurred';
 
       if (err instanceof Error) {
-        console.error('❌ [Client] Error message:', err.message);
-        console.error('❌ [Client] Error stack:', err.stack);
+        console.warn('⚠️ [Client] Error message:', err.message);
+        console.warn('⚠️ [Client] Error stack:', err.stack);
         errorMessage = err.message;
         setError(err.message);
       } else {
-        console.error('❌ [Client] Unknown error:', err);
+        console.warn('⚠️ [Client] Unknown error:', err);
         setError('An unexpected error occurred. Please try again.');
         errorMessage = 'An unexpected error occurred. Please try again.';
       }
