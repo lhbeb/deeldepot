@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Trash2, Star } from 'lucide-react';
+import { Plus, Trash2, Star, ImagePlus, X, Upload } from 'lucide-react';
 import type { Review } from '@/types/product';
 
 interface Props {
@@ -8,6 +8,9 @@ interface Props {
 }
 
 export default function AdminSellerReviewsEditor({ reviews, onChange }: Props) {
+  // Track uploading state per review slot
+  const [uploadingFor, setUploadingFor] = useState<string | null>(null);
+
   const addReview = () => {
     const newReview: Review = {
       id: Math.random().toString(36).substring(2, 11),
@@ -17,6 +20,7 @@ export default function AdminSellerReviewsEditor({ reviews, onChange }: Props) {
       title: 'Great product',
       content: '',
       productTitle: '',
+      images: [],
     };
     onChange([...reviews, newReview]);
   };
@@ -34,6 +38,54 @@ export default function AdminSellerReviewsEditor({ reviews, onChange }: Props) {
         return r;
       })
     );
+  };
+
+  // Add a blank image URL slot
+  const addImageSlot = (reviewId: string) => {
+    const review = reviews.find((r) => r.id === reviewId);
+    if (!review) return;
+    updateReview(reviewId, 'images', [...(review.images || []), '']);
+  };
+
+  // Update a specific image URL
+  const updateImageUrl = (reviewId: string, imgIndex: number, url: string) => {
+    const review = reviews.find((r) => r.id === reviewId);
+    if (!review) return;
+    const imgs = [...(review.images || [])];
+    imgs[imgIndex] = url;
+    updateReview(reviewId, 'images', imgs);
+  };
+
+  // Remove a specific image slot
+  const removeImageSlot = (reviewId: string, imgIndex: number) => {
+    const review = reviews.find((r) => r.id === reviewId);
+    if (!review) return;
+    const imgs = (review.images || []).filter((_, i) => i !== imgIndex);
+    updateReview(reviewId, 'images', imgs);
+  };
+
+  // Handle file upload for a review image
+  const handleImageUpload = async (reviewId: string, imgIndex: number, file: File) => {
+    setUploadingFor(`${reviewId}-${imgIndex}`);
+    try {
+      const formData = new FormData();
+      // Store review images under a dedicated "review-images" folder
+      const path = `review-images/${reviewId}/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`;
+      formData.append('file', file);
+      formData.append('path', path);
+
+      const res = await fetch('/api/admin/upload-image', { method: 'POST', body: formData });
+      const data = await res.json();
+      if (data.url) {
+        updateImageUrl(reviewId, imgIndex, data.url);
+      } else {
+        alert('Upload failed: ' + (data.error || 'Unknown error'));
+      }
+    } catch (err) {
+      alert('Upload failed. Please try again.');
+    } finally {
+      setUploadingFor(null);
+    }
   };
 
   return (
@@ -131,7 +183,7 @@ export default function AdminSellerReviewsEditor({ reviews, onChange }: Props) {
                 </div>
               </div>
 
-              <div>
+              <div className="mb-4">
                 <label className="block text-xs font-medium text-gray-700 mb-1">Review Content</label>
                 <textarea
                   value={review.content || ''}
@@ -141,6 +193,90 @@ export default function AdminSellerReviewsEditor({ reviews, onChange }: Props) {
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#090A28] focus:border-[#090A28] outline-none transition-all text-sm resize-y"
                 />
               </div>
+
+              {/* ── Review Images ───────────────────────────────────────────── */}
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="block text-xs font-medium text-gray-700">
+                    Review Images
+                    <span className="ml-1 text-gray-400 font-normal">(optional)</span>
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => addImageSlot(review.id)}
+                    className="inline-flex items-center gap-1 text-xs text-[#090A28] hover:underline"
+                  >
+                    <ImagePlus className="h-3.5 w-3.5" />
+                    Add Image
+                  </button>
+                </div>
+
+                {(review.images || []).length === 0 ? (
+                  <p className="text-xs text-gray-400 italic">No images — reviews are shown without photos.</p>
+                ) : (
+                  <div className="space-y-2">
+                    {(review.images || []).map((imgUrl, imgIndex) => {
+                      const slotKey = `${review.id}-${imgIndex}`;
+                      const isUploading = uploadingFor === slotKey;
+
+                      return (
+                        <div key={imgIndex} className="flex items-center gap-2">
+                          {/* Thumbnail preview */}
+                          <div className="w-10 h-10 flex-shrink-0 rounded-md border border-gray-200 overflow-hidden bg-gray-50 flex items-center justify-center">
+                            {imgUrl ? (
+                              // eslint-disable-next-line @next/next/no-img-element
+                              <img src={imgUrl} alt={`Preview ${imgIndex + 1}`} className="w-full h-full object-cover" />
+                            ) : (
+                              <ImagePlus className="h-4 w-4 text-gray-300" />
+                            )}
+                          </div>
+
+                          {/* URL input */}
+                          <input
+                            type="url"
+                            value={imgUrl}
+                            onChange={(e) => updateImageUrl(review.id, imgIndex, e.target.value)}
+                            placeholder="https://… or upload below"
+                            className="flex-1 px-3 py-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#090A28] focus:border-[#090A28] outline-none text-sm"
+                          />
+
+                          {/* File upload button */}
+                          <label
+                            className={`relative flex-shrink-0 inline-flex items-center gap-1 px-2 py-1.5 rounded-lg text-xs font-medium cursor-pointer transition-colors
+                              ${isUploading ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-[#090A28]/10 text-[#090A28] hover:bg-[#090A28]/20'}`}
+                          >
+                            <Upload className="h-3.5 w-3.5" />
+                            {isUploading ? 'Uploading…' : 'Upload'}
+                            {!isUploading && (
+                              <input
+                                type="file"
+                                accept="image/*"
+                                className="absolute inset-0 opacity-0 cursor-pointer"
+                                onChange={(e) => {
+                                  const file = e.target.files?.[0];
+                                  if (file) handleImageUpload(review.id, imgIndex, file);
+                                  e.target.value = '';
+                                }}
+                              />
+                            )}
+                          </label>
+
+                          {/* Remove slot */}
+                          <button
+                            type="button"
+                            onClick={() => removeImageSlot(review.id, imgIndex)}
+                            className="flex-shrink-0 text-gray-400 hover:text-red-500 transition-colors"
+                            title="Remove image"
+                          >
+                            <X className="h-4 w-4" />
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+              {/* ── /Review Images ──────────────────────────────────────────── */}
             </div>
           ))
         )}
