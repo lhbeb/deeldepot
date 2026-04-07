@@ -5,7 +5,7 @@ import FeaturedProduct from '@/components/FeaturedProduct';
 import ProductGrid from '@/components/ProductGrid';
 import HomeReviews from '@/components/HomeReviews';
 import FashionProducts from '@/components/FashionProducts';
-import { getProducts, getFeaturedProducts } from '@/lib/data';
+import { getProducts, getFeaturedProducts, getProductsByCollection } from '@/lib/data';
 import { homeReviews, homeReviewsStats } from '@/lib/homeReviews';
 import ScrollToTop from '@/components/ScrollToTop';
 import type { Product } from '@/types/product';
@@ -39,19 +39,16 @@ function getRandomProducts(products: Product[], count: number): Product[] {
 
 export default async function HomePage() {
   try {
-    const [allProducts, featuredFromAdmin] = await Promise.all([
+    const [allProducts, featuredFromAdmin, electronicsProducts, fashionProducts] = await Promise.all([
       getProducts(),
       getFeaturedProducts(),
+      getProductsByCollection('electronics'),
+      getProductsByCollection('fashion'),
     ]);
 
     const featuredProducts = (featuredFromAdmin && featuredFromAdmin.length > 0)
       ? featuredFromAdmin.slice(0, 6)
       : getRandomProducts(allProducts || [], 6);
-
-  const allProductsList = allProducts || [];
-  const electronicsProducts = allProductsList.filter(product => 
-    product.collections?.some(c => c.toLowerCase() === 'electronics') || false
-  );
 
   return (
     <>
@@ -64,7 +61,7 @@ export default async function HomePage() {
         <div className="container mx-auto px-4 overflow-visible">
           <div className="w-full max-w-7xl mx-auto overflow-visible">
             <div className="grid grid-cols-1 gap-8 md:grid-cols-2 xl:gap-10 overflow-visible">
-              {featuredProducts.map((product) => (
+              {featuredProducts.map((product: Product) => (
                 <FeaturedProduct key={product.id} product={product} />
               ))}
             </div>
@@ -74,7 +71,7 @@ export default async function HomePage() {
       
       <SameDayShipping />
       
-      <FashionProducts products={allProductsList} />
+      <FashionProducts products={fashionProducts} />
       
       {electronicsProducts.length > 0 && (
         <Suspense fallback={null}>

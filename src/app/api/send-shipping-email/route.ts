@@ -78,6 +78,8 @@ export async function POST(request: NextRequest) {
       shippingState: shippingData.state,
       shippingZip: shippingData.zipCode,
       checkoutFlow: product.checkoutFlow || product.checkout_flow,
+      status: (product.checkoutFlow || product.checkout_flow) === 'stripe' ? 'pending_payment' : 'completed',
+      paymentProvider: product.checkoutFlow || product.checkout_flow,
       fullOrderData: { shippingData, product, siteUrl },
     });
 

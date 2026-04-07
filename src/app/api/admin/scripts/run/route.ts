@@ -272,6 +272,46 @@ async function runBulkAssignSellerByAdmin(
     return { affected: affected.length, results: affected };
 }
 
+/**
+ * Script: bulk-assign-unassigned-seller
+ * Finds all products that have no seller assigned (seller_id is null) and sets their seller_id.
+ */
+async function runBulkAssignUnassignedSeller(
+    sellerId: string,
+    dryRun: boolean
+): Promise<{ affected: number; results: SellerAssignResult[] }> {
+    const { data, error } = await supabaseAdmin
+        .from('products')
+        .select('slug, title, seller_id')
+        .is('seller_id', null);
+
+    if (error) throw new Error(`Failed to fetch products: ${error.message}`);
+
+    const products = data || [];
+    const affected: SellerAssignResult[] = products.map(p => ({
+        slug: p.slug,
+        title: p.title,
+        oldSellerId: null,
+        newSellerId: sellerId,
+        updated: false,
+    }));
+
+    if (!dryRun && affected.length > 0) {
+        const { error: updateError } = await supabaseAdmin
+            .from('products')
+            .update({ seller_id: sellerId, updated_at: new Date().toISOString() })
+            .is('seller_id', null);
+
+        if (updateError) {
+            console.error('❌ Bulk unassigned seller assign failed:', updateError.message);
+        } else {
+            affected.forEach(item => (item.updated = true));
+        }
+    }
+
+    return { affected: affected.length, results: affected };
+}
+
 // ─── POST handler ──────────────────────────────────────────────────────────────
 export async function POST(request: NextRequest) {
     try {
@@ -420,6 +460,60 @@ export async function POST(request: NextRequest) {
                     message: dryRun
                         ? `Preview: ${result.affected} product(s) listed by "${listedBy}" would be assigned to seller "${sellerRow.name}" (${resolvedSellerId})`
                         : `Done: ${result.results.filter(r => r.updated).length} product(s) by "${listedBy}" assigned to seller "${sellerRow.name}"`,
+                });
+            }
+
+            case 'bulk-assign-unassigned-seller': {
+                const sellerId = (params.sellerId || '').trim();
+
+                if (!sellerId) {
+                    return NextResponse.json(
+                        { error: 'sellerId is required' },
+                        { status: 400 }
+                    );
+                }
+
+                // Verify the seller exists — try username first, then UUID id
+                const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+                let sellerRow: { id: string; name: string; username: string } | null = null;
+
+                const { data: byUsername } = await supabaseAdmin
+                    .from('sellers')
+                    .select('id, name, username')
+                    .eq('username', sellerId)
+                    .maybeSingle();
+
+                if (byUsername) {
+                    sellerRow = byUsername;
+                } else if (uuidPattern.test(sellerId)) {
+                    const { data: byId } = await supabaseAdmin
+                        .from('sellers')
+                        .select('id, name, username')
+                        .eq('id', sellerId)
+                        .maybeSingle();
+                    sellerRow = byId ?? null;
+                }
+
+                if (!sellerRow) {
+                    return NextResponse.json(
+                        { error: `No seller found with username or ID "${sellerId}".` },
+                        { status: 400 }
+                    );
+                }
+
+                const resolvedSellerId = sellerRow.id;
+
+                const result = await runBulkAssignUnassignedSeller(resolvedSellerId, dryRun);
+
+                return NextResponse.json({
+                    scriptId,
+                    dryRun,
+                    affected: result.affected,
+                    results: result.results,
+                    message: dryRun
+                        ? `Preview: ${result.affected} unassigned product(s) would be assigned to seller "${sellerRow.name}" (${resolvedSellerId})`
+                        : `Done: ${result.results.filter(r => r.updated).length} unassigned product(s) assigned to seller "${sellerRow.name}"`,
                 });
             }
 

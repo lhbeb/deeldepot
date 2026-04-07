@@ -27,6 +27,12 @@ interface Order {
   created_at: string;
   updated_at: string;
   order_data: any;
+  status?: string;
+  payment_provider?: string;
+  stripe_payment_status?: string;
+  stripe_checkout_session_id?: string;
+  stripe_payment_intent_id?: string;
+  paid_at?: string;
   product_listed_by?: string | null;
   product_checkout_flow?: string | null;
   order_number?: number | null;
@@ -691,6 +697,29 @@ export default function AdminOrdersPage() {
                           Converted
                         </span>
                       )}
+                      {(() => {
+                        if (order.status === 'paid') return (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-green-100 text-green-700 text-xs font-medium rounded-full">
+                            <DollarSign className="h-3 w-3" /> Paid
+                          </span>
+                        );
+                        if (order.status === 'pending_payment') return (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-yellow-100 text-yellow-700 text-xs font-medium rounded-full">
+                            Pending Payment
+                          </span>
+                        );
+                        if (order.status === 'payment_failed') return (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-red-100 text-red-700 text-xs font-medium rounded-full">
+                            Payment Failed
+                          </span>
+                        );
+                        if (order.status === 'expired') return (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-gray-100 text-gray-700 text-xs font-medium rounded-full">
+                            Expired
+                          </span>
+                        );
+                        return null;
+                      })()}
                       {order.email_sent ? (
                         <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-gray-100 text-gray-600 text-xs font-medium rounded-full">
                           <MailCheck className="h-3 w-3" />
@@ -760,7 +789,7 @@ export default function AdminOrdersPage() {
               {/* Expanded Details */}
               {expandedOrderId === order.id && (
                 <div className={`px-4 pb-4 border-t ${order.is_converted ? 'border-green-200' : 'border-gray-100'}`}>
-                  <div className="pt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <div className="pt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     {/* Customer Details */}
                     <div>
                       <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
@@ -807,6 +836,41 @@ export default function AdminOrdersPage() {
                             </button>
                           </div>
                         )}
+                      </div>
+                    </div>
+
+                    {/* Payment Details */}
+                    <div>
+                      <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
+                        Payment & Status
+                      </h4>
+                      <div className="space-y-2">
+                         <div className="flex flex-col gap-1">
+                           <span className="text-xs text-gray-500">Lifecycle Status:</span>
+                           <span className="text-sm font-medium capitalize text-gray-700">{order.status?.replace('_', ' ') || 'Completed (Legacy)'}</span>
+                         </div>
+                         {(order.payment_provider || order.product_checkout_flow) && (
+                           <div className="flex flex-col gap-1">
+                             <span className="text-xs text-gray-500">Provider:</span>
+                             <span className="text-sm font-medium text-gray-700">{order.payment_provider || order.product_checkout_flow}</span>
+                           </div>
+                         )}
+                         {order.stripe_payment_status && (
+                           <div className="flex flex-col gap-1 mt-2">
+                             <span className="text-xs text-gray-500">Stripe Status:</span>
+                             <span className="text-xs font-mono bg-gray-100 px-2 py-1 rounded inline-block text-gray-700 w-fit">
+                               {order.stripe_payment_status}
+                             </span>
+                           </div>
+                         )}
+                         {order.stripe_payment_intent_id && (
+                           <div className="flex flex-col gap-1">
+                             <span className="text-xs text-gray-500">Payment Intent:</span>
+                             <span className="text-xs font-mono bg-gray-100 px-2 py-1 rounded inline-block text-gray-700 w-fit truncate" title={order.stripe_payment_intent_id}>
+                               {order.stripe_payment_intent_id.slice(0, 15)}...
+                             </span>
+                           </div>
+                         )}
                       </div>
                     </div>
 

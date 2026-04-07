@@ -135,6 +135,25 @@ const SCRIPTS: ScriptCard[] = [
             listedBy: Object.fromEntries(LISTED_BY_ADMINS.map(n => [n, n])),
         },
     },
+    {
+        id: 'bulk-assign-unassigned-seller',
+        name: 'Bulk Assign Unassigned Products to Seller',
+        description:
+            'Finds all products that have NO public seller assigned (seller_id is null/empty) and assigns them to the specified public seller. ' +
+            'Sets the seller_id field on every matching product. ' +
+            'Enter the seller\'s username (e.g. official-deeldepot) or their database ID. ' +
+            'Use Preview first to see how many products will be affected before running.',
+        danger: false,
+        params: {
+            sellerId: '',
+        },
+        paramLabels: {
+            sellerId: 'Assign to Seller username or ID',
+        },
+        paramPlaceholders: {
+            sellerId: 'e.g. official-deeldepot',
+        },
+    },
 ];
 
 

@@ -145,18 +145,21 @@ export async function getProductsByCategory(category: string): Promise<Product[]
  */
 export async function getProductsByCollection(collection: string): Promise<Product[]> {
   try {
-    // Fetch all products and filter by collection tag
-    // This is reliable and works correctly with array columns
-    const allProducts = await getProducts();
+    const { data, error } = await supabaseAdmin
+      .from('products')
+      .select('*')
+      .contains('collections', [collection])
+      .order('created_at', { ascending: false });
 
-    // Filter products that have the collection tag in their collections array
-    const filteredProducts = allProducts.filter(product => {
-      const collections = product.collections || [];
-      // Case-insensitive comparison for robustness
-      return collections.some(c => c.toLowerCase() === collection.toLowerCase());
-    });
+    if (error) {
+      console.error('Error fetching products by collection:', error);
+      return [];
+    }
 
-    return filteredProducts;
+    const products = (data || []).map(transformProduct);
+    
+    // Filter out drafts - only return published products
+    return products.filter(p => p.published !== false);
   } catch (error) {
     console.error('Error loading products by collection:', error);
     return [];

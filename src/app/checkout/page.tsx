@@ -12,7 +12,7 @@ import type { Product } from '@/types/product';
 import { debugLog, debugError } from '@/utils/debug';
 import CheckoutNotifier from '@/components/CheckoutNotifier';
 import KofiCheckout from '@/components/KofiCheckout';
-import StripeCheckout from '@/components/StripeCheckout';
+
 import PaypalInvoiceConfirmation from '@/components/PaypalInvoiceConfirmation';
 
 // Google Ads conversion tracking helper
@@ -62,7 +62,7 @@ const CheckoutPage: React.FC = () => {
   const stickyCtaRef = useRef<HTMLDivElement>(null);
   const [isRedirecting, setIsRedirecting] = useState(false);
   const [showKofiCheckout, setShowKofiCheckout] = useState(false); // New state for Ko-fi iframe
-  const [showStripeCheckout, setShowStripeCheckout] = useState(false); // New state for Stripe checkout
+
   const [showPaypalConfirmation, setShowPaypalConfirmation] = useState(false); // New state for PayPal Invoice confirmation
   const [emailError, setEmailError] = useState('');
   const [isSendingEmail, setIsSendingEmail] = useState(false);
@@ -260,7 +260,7 @@ const CheckoutPage: React.FC = () => {
     }
   };
 
-  const sendShippingEmail = async (shippingData: ShippingData, product: Product, retryCount: number = 0): Promise<boolean> => {
+  const sendShippingEmail = async (shippingData: ShippingData, product: Product, retryCount: number = 0): Promise<string | null> => {
     const maxRetries = 1; // Server already retries 3 times, so only 1 client retry
     console.log(`📧 [sendShippingEmail] Starting (attempt ${retryCount + 1})`);
     debugLog('sendShippingEmail', `Calling API... (attempt ${retryCount + 1})`, 'log');
@@ -323,17 +323,16 @@ const CheckoutPage: React.FC = () => {
 
       const result = await response.json();
 
-      // Order is saved even if email fails, so we return true if orderId exists
       if (result.success && result.orderId) {
         debugLog('sendShippingEmail', `Order saved (ID: ${result.orderId}). Email: ${result.messageId ? 'sent' : 'failed'} (${result.duration})`, 'log');
         if (result.error) {
           console.warn('Email failed but order saved:', result.note);
         }
-        return true; // Return true because order is saved
+        return result.orderId;
       }
 
       debugLog('sendShippingEmail', `Success: ${result.messageId} (${result.duration})`, 'log');
-      return true;
+      return result.orderId || null;
     } catch (error: any) {
       if (timeoutId) clearTimeout(timeoutId);
 
@@ -353,7 +352,7 @@ const CheckoutPage: React.FC = () => {
         debugError('sendShippingEmail: Error', error);
       }
 
-      return false;
+      return null;
     }
   };
 
@@ -431,17 +430,17 @@ const CheckoutPage: React.FC = () => {
       };
 
       console.log('📧 [Checkout] Calling sendShippingEmail...');
-      const emailSent = await sendShippingEmail(shippingDataToSend, product);
-      console.log('📧 [Checkout] sendShippingEmail result:', emailSent);
+      const orderId = await sendShippingEmail(shippingDataToSend, product);
+      console.log('📧 [Checkout] sendShippingEmail returned orderId:', orderId);
 
-      if (!emailSent) {
-        console.error('❌ [Checkout] Email send failed');
-        alert('Failed to send shipping information. Please try again.');
+      if (!orderId) {
+        console.error('❌ [Checkout] Order save failed');
+        alert('Failed to save order information. Please try again.');
         setIsSendingEmail(false);
         return;
       }
 
-      console.log('✅ [Checkout] Email sent successfully');
+      console.log('✅ [Checkout] Order saved successfully');
       setIsSendingEmail(false);
 
       // Track Google Ads conversion
@@ -463,9 +462,27 @@ const CheckoutPage: React.FC = () => {
         console.log('🎨 [Checkout] Ko-fi flow: Showing iframe');
         setShowKofiCheckout(true);
       } else if (checkoutFlow === 'stripe') {
-        // Stripe: Show Stripe checkout component
-        console.log('💳 [Checkout] Stripe flow: Showing Stripe checkout');
-        setShowStripeCheckout(true);
+        setIsRedirecting(true);
+        console.log('💳 [Checkout] Stripe flow: Creating Checkout Session');
+        try {
+          const res = await fetch('/api/create-stripe-checkout', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ orderId, product, shippingData }),
+          });
+          const data = await res.json();
+          if (data.url) {
+            window.location.href = data.url;
+          } else {
+            console.error('❌ [Checkout] Missing URL in Stripe response:', data);
+            alert('Failed to initialize payment. Please try again.');
+            setIsRedirecting(false);
+          }
+        } catch (e) {
+          console.error('❌ [Checkout] Failed connecting to Stripe:', e);
+          alert('Could not connect to payment provider.');
+          setIsRedirecting(false);
+        }
       } else if (checkoutFlow === 'paypal-invoice') {
         // PayPal Invoice: Show on-site confirmation, customer will receive a PayPal invoice by email
         console.log('📧 [Checkout] PayPal Invoice flow: Showing confirmation screen');
@@ -554,28 +571,7 @@ const CheckoutPage: React.FC = () => {
     );
   }
 
-  // Stripe checkout flow - show Stripe checkout
-  if (showStripeCheckout) {
-    const { product } = cartItem;
-    return (
-      <StripeCheckout
-        product={{
-          id: product.id,
-          slug: product.slug,
-          title: product.title,
-          price: product.price,
-          currency: product.currency,
-          images: product.images,
-        }}
-        shippingData={shippingData}
-        onClose={() => {
-          setShowStripeCheckout(false);
-          clearCart();
-          router.push('/');
-        }}
-      />
-    );
-  }
+
 
   if (isRedirecting) {
     return (

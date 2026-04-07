@@ -11,11 +11,11 @@ function ThankYouContent() {
   const [orderDetails, setOrderDetails] = useState<any>(null);
 
   useEffect(() => {
-    const paymentIntentId = searchParams.get('payment_intent');
+    const sessionId = searchParams.get('session_id');
 
-    // Only verify payment if we have a payment_intent (from Stripe redirect)
-    if (!paymentIntentId) {
-      console.log('ℹ️ No payment_intent found - showing generic thank you message');
+    // Only verify payment if we have a session_id (from Stripe redirect)
+    if (!sessionId) {
+      console.log('ℹ️ No session_id found - showing generic thank you message');
       return;
     }
 
@@ -25,21 +25,21 @@ function ThankYouContent() {
         const response = await fetch('/api/verify-payment', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ paymentIntentId }),
+          body: JSON.stringify({ sessionId }),
         });
 
         if (response.ok) {
           const data = await response.json();
           setOrderDetails(data);
 
-          // Track Google Ads conversion
-          if (typeof window !== 'undefined' && (window as any).gtag) {
+          // Track Google Ads conversion if paid
+          if (data.status === 'paid' && typeof window !== 'undefined' && (window as any).gtag) {
             try {
               (window as any).gtag('event', 'conversion', {
                 'send_to': 'AW-17682444096',
                 'value': data.amount ? data.amount / 100 : 0,
                 'currency': data.currency?.toUpperCase() || 'USD',
-                'transaction_id': paymentIntentId
+                'transaction_id': sessionId
               });
               console.log('✅ Google Ads conversion tracked');
             } catch (error) {
@@ -47,10 +47,12 @@ function ThankYouContent() {
             }
           }
         } else {
-          console.warn('⚠️ Payment verification failed (but showing success anyway)');
+          console.warn('⚠️ Payment verification failed, falling back to pending UI');
+          setOrderDetails({ status: 'pending' });
         }
       } catch (error) {
         console.error('❌ Background verification error:', error);
+        setOrderDetails({ status: 'pending' });
       }
     };
 
@@ -70,12 +72,13 @@ function ThankYouContent() {
 
           {/* Main Message */}
           <h1 className="text-3xl md:text-4xl font-bold text-[#262626] mb-4">
-            Thank You for Your Order!
+            {orderDetails?.status === 'paid' ? 'Thank You for Your Order!' : 'Payment Verification Pending...'}
           </h1>
 
           <p className="text-lg text-gray-600 mb-8 leading-relaxed">
-            Your payment has been confirmed and your order is being processed.
-            We&apos;re excited to get your items ready for shipping!
+            {orderDetails?.status === 'paid' 
+              ? 'Your payment has been successfully recorded and your order is queued for manual processing. We will send you an email confirmation shortly once verified.' 
+              : 'Your payment is still processing or awaiting backend verification. We will process your order and send a confirmation email once it is completely confirmed.'}
           </p>
 
           {/* Order Details */}
@@ -83,7 +86,7 @@ function ThankYouContent() {
             <div className="bg-gray-50 rounded-xl p-6 mb-8">
               <p className="text-sm text-gray-500 mb-2">Order ID</p>
               <p className="text-lg font-mono font-semibold text-[#262626] mb-4">
-                {orderDetails.paymentIntentId}
+                {orderDetails.orderId || orderDetails.sessionId}
               </p>
               {orderDetails.amount && (
                 <p className="text-2xl font-bold text-green-600">
@@ -167,7 +170,9 @@ function ThankYouContent() {
         {/* Footer Note */}
         <div className="text-center mt-8">
           <p className="text-sm text-gray-500">
-            A confirmation email has been sent to your email address
+            {orderDetails?.status === 'paid' 
+              ? 'You will receive a confirmation email once our team reviews your order' 
+              : 'We will notify you by email once your payment clears'}
           </p>
         </div>
       </div>

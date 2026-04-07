@@ -13,6 +13,8 @@ export interface OrderData {
   shippingState: string;
   shippingZip: string;
   checkoutFlow?: string;
+  status?: string;
+  paymentProvider?: string;
   fullOrderData: any; // Complete order object for reference
 }
 
@@ -53,6 +55,8 @@ export async function saveOrder(orderData: OrderData): Promise<{ id: string; suc
       shipping_state: orderData.shippingState,
       shipping_zip: orderData.shippingZip,
       checkout_flow: orderData.checkoutFlow || null,
+      status: orderData.status || 'pending_payment',
+      payment_provider: orderData.paymentProvider || null,
       full_order_data: orderData.fullOrderData || {},
       email_sent: false,
       email_error: null,
@@ -282,6 +286,42 @@ export async function getAllOrders() {
   } catch (error) {
     console.error('Error fetching orders:', error);
     return [];
+  }
+}
+
+/**
+ * Update Stripe lifecycle status fields
+ */
+export async function updateOrderStripeStatus(
+  orderId: string,
+  updates: {
+    status?: string;
+    stripe_checkout_session_id?: string;
+    stripe_payment_intent_id?: string;
+    stripe_payment_status?: string;
+    paid_at?: string;
+    payment_last_error?: string;
+    checkout_expires_at?: string;
+  }
+): Promise<boolean> {
+  try {
+    const { error } = await supabaseAdmin
+      .from('orders')
+      .update({
+        ...updates,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', orderId);
+
+    if (error) {
+      console.error('❌ [updateOrderStripeStatus] Error:', error);
+      return false;
+    }
+
+    return true;
+  } catch (error) {
+    console.error('❌ [updateOrderStripeStatus] Exception:', error);
+    return false;
   }
 }
 

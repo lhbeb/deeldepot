@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { headers } from 'next/headers';
+import { updateOrderStripeStatus } from '@/lib/supabase/orders';
 
 // Stripe initialization deferred to handler to avoid build-time crashes
 
@@ -80,53 +81,64 @@ export async function POST(request: NextRequest) {
 // Handle successful checkout completion
 async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     console.log('[Stripe Webhook] Checkout completed:', session.id);
-    console.log('[Stripe Webhook] Customer email:', session.customer_email);
-    console.log('[Stripe Webhook] Payment status:', session.payment_status);
-
-    // Here you could:
-    // - Save order to database
-    // - Send confirmation email
-    // - Update inventory
-    // - Trigger fulfillment
-}
-
-// Handle expired checkout sessions (IMPORTANT for your issue)
-async function handleCheckoutExpired(session: Stripe.Checkout.Session) {
-    console.log('[Stripe Webhook] ✅ Checkout session EXPIRED (auto-cleaned):', session.id);
-    console.log('[Stripe Webhook] Metadata:', session.metadata);
-
-    // The session is already expired by Stripe
-    // No incomplete transaction will remain in the dashboard
-    // This log helps you track abandoned carts for analytics
-
-    // Optional: Track abandoned carts
-    if (session.metadata) {
-        console.log('[Stripe Webhook] Abandoned cart:', {
-            product_slug: session.metadata.product_slug,
-            customer_email: session.metadata.customer_email || session.customer_email,
-            expired_at: new Date().toISOString(),
-        });
+    
+    if (session.metadata?.order_id) {
+        if (session.payment_status === 'paid') {
+            const paymentIntentId = typeof session.payment_intent === 'string' 
+                ? session.payment_intent 
+                : session.payment_intent?.id;
+                
+            await updateOrderStripeStatus(session.metadata.order_id, {
+                status: 'paid',
+                stripe_payment_intent_id: paymentIntentId,
+                stripe_payment_status: session.payment_status,
+                paid_at: new Date().toISOString()
+            });
+            console.log('[Stripe Webhook] DB updated to PAID for order:', session.metadata.order_id);
+        }
     }
 }
 
-// Handle async payment success (e.g., some payment methods take time)
+// Handle expired checkout sessions
+async function handleCheckoutExpired(session: Stripe.Checkout.Session) {
+    console.log('[Stripe Webhook] ✅ Checkout session EXPIRED:', session.id);
+    
+    if (session.metadata?.order_id) {
+        await updateOrderStripeStatus(session.metadata.order_id, {
+            status: 'expired'
+        });
+        console.log('[Stripe Webhook] DB updated to EXPIRED for order:', session.metadata.order_id);
+    }
+}
+
+// Handle async payment success
 async function handleAsyncPaymentSucceeded(session: Stripe.Checkout.Session) {
     console.log('[Stripe Webhook] Async payment succeeded:', session.id);
-    // Handle similar to checkout.session.completed
+    if (session.metadata?.order_id) {
+        await updateOrderStripeStatus(session.metadata.order_id, {
+            status: 'paid',
+            stripe_payment_status: 'paid',
+            paid_at: new Date().toISOString()
+        });
+    }
 }
 
 // Handle async payment failure
 async function handleAsyncPaymentFailed(session: Stripe.Checkout.Session) {
     console.log('[Stripe Webhook] Async payment failed:', session.id);
-    console.log('[Stripe Webhook] Customer should be notified');
-
-    // Optional: Send email to customer about failed payment
+    if (session.metadata?.order_id) {
+        await updateOrderStripeStatus(session.metadata.order_id, {
+            status: 'payment_failed',
+            stripe_payment_status: 'failed'
+        });
+    }
 }
 
 // Handle payment intent failure
 async function handlePaymentFailed(paymentIntent: Stripe.PaymentIntent) {
     console.log('[Stripe Webhook] Payment failed:', paymentIntent.id);
     console.log('[Stripe Webhook] Failure reason:', paymentIntent.last_payment_error?.message);
-
-    // Optional: Log payment failures for analytics
+    
+    // We typically handle failures via checkout.session.async_payment_failed
+    // but this gives more detail
 }

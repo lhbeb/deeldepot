@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
+import { updateOrderStripeStatus } from '@/lib/supabase/orders';
 
 // Stripe initialization deferred to POST request handling to avoid build-time crashes
 
@@ -52,12 +53,12 @@ export async function POST(request: NextRequest) {
         });
         
         const body = await request.json();
-        const { product, shippingData } = body;
+        const { orderId, product, shippingData } = body;
 
         // Validate required data
-        if (!product || !shippingData) {
+        if (!orderId || !product || !shippingData) {
             return NextResponse.json(
-                { error: 'Missing required data: product or shippingData' },
+                { error: 'Missing required data: orderId, product or shippingData' },
                 { status: 400 }
             );
         }
@@ -94,17 +95,21 @@ export async function POST(request: NextRequest) {
             // Reduces incomplete transactions faster while giving users adequate time
             expires_at: Math.floor(Date.now() / 1000) + (15 * 60), // 15 minutes from now
             metadata: {
+                order_id: orderId,
                 product_slug: product.slug,
                 product_id: product.id,
-                shipping_address: shippingData.streetAddress,
-                shipping_city: shippingData.city,
-                shipping_state: shippingData.state,
-                shipping_zip: shippingData.zipCode,
                 customer_email: shippingData.email,
             },
         });
 
-        return NextResponse.json({ sessionId: session.id });
+        // CRITICAL: Update the local database order with the Checkout Session ID
+        await updateOrderStripeStatus(orderId, {
+            stripe_checkout_session_id: session.id,
+            status: 'pending_payment',
+            checkout_expires_at: new Date(Date.now() + 15 * 60 * 1000).toISOString()
+        });
+
+        return NextResponse.json({ url: session.url, sessionId: session.id });
     } catch (error: any) {
         // Get sanitized error message (hides sensitive API details)
         const safeErrorMessage = getSafeStripeError(error);

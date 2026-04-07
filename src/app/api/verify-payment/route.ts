@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
+import { getOrderById } from '@/lib/supabase/orders';
 
 // Stripe initialization deferred to handler to avoid build-time crashes
 
@@ -10,33 +11,58 @@ export async function POST(request: NextRequest) {
             apiVersion: '2026-01-28.clover' as any,
         });
 
-        const { paymentIntentId } = await request.json();
+        const { sessionId } = await request.json();
 
-        if (!paymentIntentId) {
+        if (!sessionId) {
             return NextResponse.json(
-                { error: 'Missing payment intent ID' },
+                { error: 'Missing session ID' },
                 { status: 400 }
             );
         }
 
-        // Retrieve payment intent from Stripe
-        const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+        // Retrieve session from Stripe
+        const session = await stripe.checkout.sessions.retrieve(sessionId);
 
-        console.log('✅ [Payment Verification] Payment Intent retrieved:', {
-            id: paymentIntent.id,
-            status: paymentIntent.status,
-            amount: paymentIntent.amount,
-            currency: paymentIntent.currency,
+        console.log('✅ [Payment Verification] Checkout Session retrieved:', {
+            id: session.id,
+            status: session.status,
+            payment_status: session.payment_status,
+            amount: session.amount_total,
         });
 
-        // Return payment status and details
+        // Strict verification: Require Stripe session to be paid
+        if (session.payment_status !== 'paid') {
+            return NextResponse.json({
+                status: 'pending',
+                message: 'Payment not completed or still processing'
+            });
+        }
+        
+        const orderId = session.metadata?.order_id;
+        if (!orderId) {
+             return NextResponse.json(
+                { error: 'Session missing order metadata' },
+                { status: 400 }
+            );
+        }
+        
+        // Wait for webhook to update local DB (give it a bit of time or just check immediately)
+        const order = await getOrderById(orderId);
+        
+        if (!order || order.status !== 'paid') {
+            return NextResponse.json({
+                status: 'pending',
+                message: 'Order record pending sync or not paid locally'
+            });
+        }
+
+        // Return payment status and details securely
         return NextResponse.json({
-            status: paymentIntent.status,
-            paymentIntentId: paymentIntent.id,
-            amount: paymentIntent.amount,
-            currency: paymentIntent.currency,
-            metadata: paymentIntent.metadata,
-            created: paymentIntent.created,
+            status: 'paid', // Explicit trust signal for frontend
+            orderId: order.id,
+            sessionId: session.id,
+            amount: session.amount_total,
+            currency: session.currency,
         });
 
     } catch (error: any) {
