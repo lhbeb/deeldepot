@@ -698,6 +698,9 @@ export default function AdminOrdersPage() {
                         </span>
                       )}
                       {(() => {
+                        const isStripeFlow = order.payment_provider === 'stripe' || order.product_checkout_flow === 'stripe';
+                        if (!isStripeFlow) return null;
+                        
                         if (order.status === 'paid') return (
                           <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-green-100 text-green-700 text-xs font-medium rounded-full">
                             <DollarSign className="h-3 w-3" /> Paid
@@ -845,10 +848,16 @@ export default function AdminOrdersPage() {
                         Payment & Status
                       </h4>
                       <div className="space-y-2">
-                         <div className="flex flex-col gap-1">
-                           <span className="text-xs text-gray-500">Lifecycle Status:</span>
-                           <span className="text-sm font-medium capitalize text-gray-700">{order.status?.replace('_', ' ') || 'Completed (Legacy)'}</span>
-                         </div>
+                         {(() => {
+                            const isStripeFlow = order.payment_provider === 'stripe' || order.product_checkout_flow === 'stripe';
+                            if (!isStripeFlow) return null;
+                            return (
+                              <div className="flex flex-col gap-1">
+                                <span className="text-xs text-gray-500">Lifecycle Status:</span>
+                                <span className="text-sm font-medium capitalize text-gray-700">{order.status?.replace('_', ' ') || 'Completed (Legacy)'}</span>
+                              </div>
+                            );
+                         })()}
                          {(order.payment_provider || order.product_checkout_flow) && (
                            <div className="flex flex-col gap-1">
                              <span className="text-xs text-gray-500">Provider:</span>
