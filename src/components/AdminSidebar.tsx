@@ -21,7 +21,8 @@ import {
   Mail,
   TrendingDown,
   User,
-  AlertTriangle
+  AlertTriangle,
+  CreditCard
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { lockScroll, unlockScroll } from '@/utils/scrollUtils';
@@ -41,6 +42,7 @@ const getMainNavItems = (ordersCount: number): NavItem[] => [
   { name: 'Sellers', path: '/admin/sellers', icon: User, description: 'Manage sellers profiles' },
   { name: 'Orders', path: '/admin/orders', icon: ShoppingCart, description: 'View all orders', badge: ordersCount > 0 ? ordersCount : undefined },
   { name: 'Scripts', path: '/admin/scripts', icon: Terminal, description: 'Run DB scripts' },
+  { name: 'Payment Settings', path: '/admin/payment-settings', icon: CreditCard, description: 'Manage Stripe keys' },
   { name: 'Analytics', path: '/admin/analytics', icon: BarChart2, description: 'Traffic & visitors' },
   { name: 'Mail Project', path: '/admin/mail-project', icon: Mail, description: 'Send & manage emails' },
   { name: 'Price Monitor', path: '/admin/price-monitor', icon: TrendingDown, description: 'Track product prices' },

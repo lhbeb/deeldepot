@@ -45,6 +45,7 @@ export function addToCart(product: Product): void {
       reviews: Array.isArray(product.reviews) ? product.reviews : [],
       meta: product.meta || undefined,
       inStock: product.inStock !== undefined ? product.inStock : true,
+      sellerId: product.sellerId || null,
     };
 
     debugCart('addToCart: clean product created', { productId: cleanProduct.id });

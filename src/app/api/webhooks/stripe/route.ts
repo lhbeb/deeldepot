@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { headers } from 'next/headers';
 import { updateOrderStripeStatus } from '@/lib/supabase/orders';
+import { getStripeConfig } from '@/lib/supabase/payment-settings';
 
 // Stripe initialization deferred to handler to avoid build-time crashes
 
@@ -11,7 +12,8 @@ const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET || '';
 export async function POST(request: NextRequest) {
     try {
         // Initialize Stripe inside handler to defer until runtime (avoids Vercel build crash)
-        const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || 'sk_test_placeholder', {
+        const stripeConfig = await getStripeConfig();
+        const stripe = new Stripe(stripeConfig.secretKey || 'sk_test_placeholder', {
             apiVersion: '2026-01-28.clover' as any,
         });
 

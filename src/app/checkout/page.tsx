@@ -66,6 +66,7 @@ const CheckoutPage: React.FC = () => {
   const [showPaypalConfirmation, setShowPaypalConfirmation] = useState(false); // New state for PayPal Invoice confirmation
   const [emailError, setEmailError] = useState('');
   const [isSendingEmail, setIsSendingEmail] = useState(false);
+  const [sellerName, setSellerName] = useState<string | null>(null);
 
   // iOS Safari visual viewport fix — keeps fixed bottom bar visible when
   // the browser chrome (address bar) shrinks the visual viewport on scroll.
@@ -210,6 +211,17 @@ const CheckoutPage: React.FC = () => {
         debugLog('CheckoutPage: useEffect', { productId: item.product?.id, productTitle: item.product?.title }, 'log');
         setCartItem(item);
         debugLog('CheckoutPage: useEffect', 'Cart item set successfully', 'log');
+
+        if (item.product && item.product.sellerId) {
+          fetch(`/api/sellers/id/${item.product.sellerId}`)
+            .then(res => res.ok ? res.json() : null)
+            .then(data => {
+              if (data) {
+                setSellerName(data.name || data.username || null);
+              }
+            })
+            .catch(err => console.error('Error fetching seller name', err));
+        }
       } catch (error) {
         debugError('CheckoutPage: useEffect - Error loading cart', error);
         router.push('/');
@@ -665,6 +677,11 @@ const CheckoutPage: React.FC = () => {
                       <div className="flex-1 min-w-0">
                         <h3 className="font-semibold text-[#262626] text-base line-clamp-1 mb-1">{product.title}</h3>
                         <p className="text-[#090A28] font-bold text-xl mb-1">${product.price.toFixed(2)}</p>
+                        {sellerName && (
+                          <p className="text-sm text-gray-600 mb-1 truncate">
+                            Sold by: <span className="font-medium text-[#262626]">{sellerName}</span>
+                          </p>
+                        )}
                         <p className="text-gray-400 text-xs leading-tight">Tap To View/Hide Summary</p>
                       </div>
                     </div>
@@ -939,6 +956,11 @@ const CheckoutPage: React.FC = () => {
                             />
                             <div className="flex-grow flex flex-col justify-between">
                               <h3 className="font-semibold text-[#262626] line-clamp-2 text-base mb-1">{product.title}</h3>
+                              {sellerName && (
+                                <p className="text-sm text-gray-600 mb-1 truncate">
+                                  Sold by: <span className="font-medium text-[#262626]">{sellerName}</span>
+                                </p>
+                              )}
                               <div className="flex items-center justify-between text-sm text-gray-600 mb-1">
                                 <span className="bg-white px-2 py-0.5 rounded-full inline-block">{product.condition}</span>
                                 <span>Qty: {cartItem.quantity}</span>
