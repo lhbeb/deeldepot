@@ -22,7 +22,9 @@ import {
   TrendingDown,
   User,
   AlertTriangle,
-  CreditCard
+  CreditCard,
+  ChevronDown,
+  MoreHorizontal
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { lockScroll, unlockScroll } from '@/utils/scrollUtils';
@@ -41,11 +43,15 @@ const getMainNavItems = (ordersCount: number): NavItem[] => [
   { name: 'Products', path: '/admin/products', icon: Package, description: 'Manage inventory' },
   { name: 'Sellers', path: '/admin/sellers', icon: User, description: 'Manage sellers profiles' },
   { name: 'Orders', path: '/admin/orders', icon: ShoppingCart, description: 'View all orders', badge: ordersCount > 0 ? ordersCount : undefined },
-  { name: 'Scripts', path: '/admin/scripts', icon: Terminal, description: 'Run DB scripts' },
-  { name: 'Payment Settings', path: '/admin/payment-settings', icon: CreditCard, description: 'Manage Stripe keys' },
   { name: 'Analytics', path: '/admin/analytics', icon: BarChart2, description: 'Traffic & visitors' },
   { name: 'Mail Project', path: '/admin/mail-project', icon: Mail, description: 'Send & manage emails' },
   { name: 'Price Monitor', path: '/admin/price-monitor', icon: TrendingDown, description: 'Track product prices' },
+];
+
+// Items bundled under the "More" dropdown
+const moreNavItems: NavItem[] = [
+  { name: 'Payment Settings', path: '/admin/payment-settings', icon: CreditCard, description: 'Manage Stripe keys' },
+  { name: 'Scripts', path: '/admin/scripts', icon: Terminal, description: 'Run DB scripts' },
   { name: 'Error Log', path: '/admin/errors', icon: AlertTriangle, description: 'View client crashes' },
 ];
 
@@ -60,6 +66,7 @@ export default function AdminSidebar() {
   const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [moreOpen, setMoreOpen] = useState(false);
 
   // Auto-refresh token before expiry
   useAdminAuth();
@@ -196,6 +203,13 @@ export default function AdminSidebar() {
     return pathname === path || pathname.startsWith(path + '/');
   };
 
+  // Auto-open "More" if we're on one of its pages
+  useEffect(() => {
+    if (moreNavItems.some((i) => isActive(i.path))) {
+      setMoreOpen(true);
+    }
+  }, [pathname]);
+
   if (!mounted) return null;
 
   return (
@@ -296,6 +310,70 @@ export default function AdminSidebar() {
                   </Link>
                 );
               })}
+
+              {/* More — collapsible group */}
+              <div>
+                <button
+                  onClick={() => setMoreOpen((o) => !o)}
+                  className={`
+                    w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200
+                    ${moreNavItems.some((i) => isActive(i.path))
+                      ? 'bg-[#06092a] text-white shadow-lg shadow-[#06092a]/30'
+                      : 'text-gray-600 hover:bg-gray-100 hover:text-[#262626]'
+                    }
+                  `}
+                >
+                  <MoreHorizontal
+                    className={`h-5 w-5 flex-shrink-0 ${
+                      moreNavItems.some((i) => isActive(i.path)) ? 'text-white' : 'text-gray-400'
+                    }`}
+                  />
+                  <span className="flex-1 text-left font-medium text-sm">More</span>
+                  <ChevronDown
+                    className={`h-4 w-4 flex-shrink-0 transition-transform duration-200 ${
+                      moreOpen ? 'rotate-180' : ''
+                    } ${
+                      moreNavItems.some((i) => isActive(i.path)) ? 'text-white' : 'text-gray-400'
+                    }`}
+                  />
+                </button>
+
+                {/* Dropdown items */}
+                <div
+                  className={`overflow-hidden transition-all duration-200 ease-in-out ${
+                    moreOpen ? 'max-h-60 opacity-100 mt-1' : 'max-h-0 opacity-0'
+                  }`}
+                >
+                  <div className="pl-3 space-y-1 border-l-2 border-gray-100 ml-4">
+                    {moreNavItems.map((item) => {
+                      const Icon = item.icon;
+                      const active = isActive(item.path);
+                      return (
+                        <Link
+                          key={item.path}
+                          href={item.path}
+                          onClick={() => setMobileMenuOpen(false)}
+                          className={`
+                            flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200
+                            ${active
+                              ? 'bg-[#06092a] text-white shadow-lg shadow-[#06092a]/30'
+                              : 'text-gray-600 hover:bg-gray-100 hover:text-[#262626]'
+                            }
+                          `}
+                        >
+                          <Icon className={`h-5 w-5 flex-shrink-0 ${active ? 'text-white' : 'text-gray-400'}`} />
+                          <div className="flex-1 min-w-0">
+                            <span className="font-medium text-sm block">{item.name}</span>
+                            {item.description && !active && (
+                              <span className="text-[11px] text-gray-400 truncate block">{item.description}</span>
+                            )}
+                          </div>
+                        </Link>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 

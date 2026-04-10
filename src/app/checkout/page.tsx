@@ -15,25 +15,6 @@ import KofiCheckout from '@/components/KofiCheckout';
 
 import PaypalInvoiceConfirmation from '@/components/PaypalInvoiceConfirmation';
 
-// Google Ads conversion tracking helper
-const trackGoogleAdsConversion = (value?: number, currency: string = 'USD') => {
-  if (typeof window !== 'undefined' && (window as any).gtag) {
-    try {
-      // Track conversion event
-      // Note: Replace 'CONVERSION_LABEL' with your actual conversion label from Google Ads if provided
-      // You can find this in Google Ads > Tools & Settings > Conversions
-      (window as any).gtag('event', 'conversion', {
-        'send_to': 'AW-17682444096',
-        'value': value || 0,
-        'currency': currency,
-        'transaction_id': Date.now().toString() // Unique transaction ID
-      });
-      debugLog('Google Ads Conversion', 'Conversion tracked', 'log');
-    } catch (error) {
-      debugError('Google Ads Conversion Tracking Error', error);
-    }
-  }
-};
 
 interface ShippingData {
   streetAddress: string;
@@ -455,8 +436,6 @@ const CheckoutPage: React.FC = () => {
       console.log('✅ [Checkout] Order saved successfully');
       setIsSendingEmail(false);
 
-      // Track Google Ads conversion
-      trackGoogleAdsConversion(product.price, product.currency || 'USD');
 
       // Determine checkout flow based on product.checkoutFlow
       console.log('🔍 [Checkout] Product data:', {
@@ -1300,8 +1279,6 @@ const CheckoutPage: React.FC = () => {
                       <div ref={stickyCtaRef} className="lg:hidden fixed bottom-0 left-0 right-0 z-[100] bg-white border-t-2 border-gray-300 px-4 shadow-2xl" style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom))', paddingTop: '1rem', willChange: 'transform' }}>
                         <button
                           onClick={() => {
-                            // Track Google Ads conversion before redirect
-                            trackGoogleAdsConversion(product.price, product.currency || 'USD');
                             setIsRedirecting(true);
                             window.scrollTo({ top: 0 });
                             setTimeout(() => {

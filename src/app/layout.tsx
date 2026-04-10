@@ -184,47 +184,6 @@ export default function RootLayout({
           </AdminRouteOnly>
         </ErrorBoundaryWrapper>
 
-
-        <AdminRouteCheck>
-          <Script
-            src="https://www.googletagmanager.com/gtag/js?id=G-6ELCP7YFYP"
-            strategy="afterInteractive"
-            async
-          />
-          <Script
-            id="gtag-init"
-            strategy="afterInteractive"
-            dangerouslySetInnerHTML={{
-              __html: `
-                window.dataLayer = window.dataLayer || [];
-                function gtag(){dataLayer.push(arguments);}
-                gtag('js', new Date());
-                gtag('config', 'G-6ELCP7YFYP');
-              `,
-            }}
-          />
-        </AdminRouteCheck>
-        {/* Google Ads Conversion Tracking */}
-        <AdminRouteCheck>
-          <Script
-            src="https://www.googletagmanager.com/gtag/js?id=AW-17682444096"
-            strategy="afterInteractive"
-            async
-          />
-          <Script
-            id="google-ads-init"
-            strategy="afterInteractive"
-            dangerouslySetInnerHTML={{
-              __html: `
-                window.dataLayer = window.dataLayer || [];
-                function gtag(){dataLayer.push(arguments);}
-                gtag('js', new Date());
-                gtag('config', 'AW-17682444096');
-              `,
-            }}
-          />
-        </AdminRouteCheck>
-        {/* Analytics Tracker - strictly for public site */}
         <AdminRouteCheck>
           <Script
             src="https://analyticsapp-five.vercel.app/tracker.js"

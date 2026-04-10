@@ -31,21 +31,6 @@ function ThankYouContent() {
         if (response.ok) {
           const data = await response.json();
           setOrderDetails(data);
-
-          // Track Google Ads conversion if paid
-          if (data.status === 'paid' && typeof window !== 'undefined' && (window as any).gtag) {
-            try {
-              (window as any).gtag('event', 'conversion', {
-                'send_to': 'AW-17682444096',
-                'value': data.amount ? data.amount / 100 : 0,
-                'currency': data.currency?.toUpperCase() || 'USD',
-                'transaction_id': sessionId
-              });
-              console.log('✅ Google Ads conversion tracked');
-            } catch (error) {
-              console.error('❌ Error tracking Google Ads conversion:', error);
-            }
-          }
         } else {
           console.warn('⚠️ Payment verification failed, falling back to pending UI');
           setOrderDetails({ status: 'pending' });
