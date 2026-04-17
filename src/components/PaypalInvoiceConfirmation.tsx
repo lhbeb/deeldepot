@@ -70,7 +70,7 @@ export default function PaypalInvoiceConfirmation({ shippingData, product, onClo
                 MOBILE  (< lg)  — full-screen chat UX
                 No page scroll. Chat fills the screen.
             ═══════════════════════════════════════ */}
-            <div className="lg:hidden flex flex-col" style={{ height: '100dvh', overflow: 'hidden', touchAction: 'pan-y', overscrollBehaviorX: 'none' as any }}>
+            <div className="lg:hidden fixed inset-0 z-[9999] bg-gray-50 flex flex-col" style={{ height: '100dvh', overflow: 'hidden' }}>
 
                 {/* Sticky compact top bar */}
                 <div className="flex-shrink-0 bg-white border-b border-gray-100 shadow-sm">
