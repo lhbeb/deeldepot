@@ -5,12 +5,14 @@ import Script from 'next/script';
 import { Loader2, CheckCircle, AlertCircle, X } from 'lucide-react';
 
 interface ShippingData {
-  firstName: string;
-  lastName: string;
-  address: string;
+  streetAddress?: string;
+  address?: string;         // legacy fallback
+  firstName?: string;
+  lastName?: string;
   city: string;
   zipCode: string;
-  country: string;
+  state?: string;
+  country?: string;
   email: string;
 }
 
@@ -42,6 +44,14 @@ const PaypalUnclaimedCheckout: React.FC<PaypalUnclaimedCheckoutProps> = ({
   const [globalPayeeEmail, setGlobalPayeeEmail] = useState<string | null>(preloadedEmail ?? null);
   const [configFetched, setConfigFetched] = useState(!!preloadedEmail);
   const buttonsRendered = useRef(false);
+
+  // Critical fix: if the SDK script was already loaded in a previous render,
+  // onLoad never fires. Check window.paypal synchronously on mount.
+  useEffect(() => {
+    if ((window as any).paypal) {
+      setSdkReady(true);
+    }
+  }, []);
 
   // Step 1: fetch global payee email from DB (skip if parent already pre-fetched it)
   useEffect(() => {

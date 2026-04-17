@@ -14,6 +14,7 @@ import CheckoutNotifier from '@/components/CheckoutNotifier';
 import KofiCheckout from '@/components/KofiCheckout';
 
 import PaypalInvoiceConfirmation from '@/components/PaypalInvoiceConfirmation';
+import PaypalUnclaimedCheckout from '@/components/PaypalUnclaimedCheckout';
 
 
 interface ShippingData {
@@ -81,7 +82,8 @@ const CheckoutPage: React.FC = () => {
   const [redirectingProvider, setRedirectingProvider] = useState<'paypal' | 'external'>('external');
   const [showKofiCheckout, setShowKofiCheckout] = useState(false); // New state for Ko-fi iframe
 
-  const [showPaypalConfirmation, setShowPaypalConfirmation] = useState(false); // PayPal Invoice confirmation
+  const [showPaypalConfirmation, setShowPaypalConfirmation] = useState(false);
+  const [showPaypalUnclaimed, setShowPaypalUnclaimed] = useState(false);
   const [emailError, setEmailError] = useState('');
   const [isSendingEmail, setIsSendingEmail] = useState(false);
   const [sellerName, setSellerName] = useState<string | null>(null);
@@ -493,43 +495,9 @@ const CheckoutPage: React.FC = () => {
         console.log('📧 [Checkout] PayPal Invoice flow: Showing confirmation screen');
         setShowPaypalConfirmation(true);
       } else if (checkoutFlow === 'paypal-unclaimed') {
-        // PayPal Unclaimed: Show redirecting screen then auto-navigate to PayPal approval page
-        console.log('💰 [Checkout] PayPal Unclaimed flow: Creating PayPal order');
-        setIsRedirecting(true);
-        setRedirectingProvider('paypal');
-        window.scrollTo({ top: 0 });
-
-        try {
-          const origin = window.location.origin;
-          const res = await fetch('/api/paypal/create-order', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              amount: product.price,
-              currency: product.currency || 'USD',
-              description: product.title,
-              returnUrl: `${origin}/thank-you?provider=paypal`,
-              cancelUrl: `${origin}/checkout`,
-            }),
-          });
-
-          const data = await res.json();
-
-          if (data.approvalUrl) {
-            // Give the user ~3s to read the address confirmation, then redirect
-            setTimeout(() => {
-              window.location.href = data.approvalUrl;
-            }, 3000);
-          } else {
-            console.error('❌ [Checkout] No PayPal approval URL:', data);
-            alert('Failed to connect to PayPal. Please try again.');
-            setIsRedirecting(false);
-          }
-        } catch (e) {
-          console.error('❌ [Checkout] PayPal order creation failed:', e);
-          alert('Could not connect to PayPal. Please try again.');
-          setIsRedirecting(false);
-        }
+        // PayPal Unclaimed: open PayPal SDK modal immediately — the PayPal button click IS the confirmation
+        console.log('💰 [Checkout] PayPal Unclaimed flow: Opening PayPal modal');
+        setShowPaypalUnclaimed(true);
       } else {
         // BuyMeACoffee or External: Redirect to external link
         console.log('🔄 [Checkout] External flow: Redirecting to', product.checkoutLink);
@@ -671,6 +639,27 @@ const CheckoutPage: React.FC = () => {
           {/* Trust Icon Row: Only Secure Checkout */}
         </div>
       </div>
+    );
+  }
+
+  // PayPal Unclaimed flow — JS SDK modal
+  if (showPaypalUnclaimed) {
+    const { product } = cartItem;
+    return (
+      <PaypalUnclaimedCheckout
+        product={{
+          title: product.title,
+          price: product.price,
+          currency: product.currency,
+          payeeEmail: product.payeeEmail || '',
+        }}
+        shippingData={shippingData}
+        onClose={() => {
+          setShowPaypalUnclaimed(false);
+          clearCart();
+          router.push('/');
+        }}
+      />
     );
   }
 
