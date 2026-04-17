@@ -125,7 +125,7 @@ export default function AdminSidebar() {
         const timeoutId = setTimeout(() => abortController?.abort(), 10000); // 10 second timeout
 
         try {
-          const response = await fetch('/api/admin/orders', {
+          const response = await fetch('/api/admin/orders/count', {
             signal: abortController.signal,
             headers: {
               ...(token && { 'Authorization': `Bearer ${token}` })
@@ -135,8 +135,8 @@ export default function AdminSidebar() {
           clearTimeout(timeoutId);
 
           if (response.ok) {
-            const orders = await response.json();
-            setOrdersCount(Array.isArray(orders) ? orders.length : 0);
+            const data = await response.json();
+            setOrdersCount(typeof data.count === 'number' ? data.count : 0);
           } else if (response.status === 401) {
             // Not authenticated - silently fail
             return;

@@ -325,3 +325,24 @@ export async function updateOrderStripeStatus(
   }
 }
 
+
+/**
+ * Get total orders count without fetching rows (bypasses 1000-row PostgREST limit)
+ */
+export async function getOrdersCount(): Promise<number> {
+  try {
+    const { count, error } = await supabaseAdmin
+      .from('orders')
+      .select('*', { count: 'exact', head: true });
+
+    if (error) {
+      console.error('Error fetching orders count:', error);
+      return 0;
+    }
+
+    return count ?? 0;
+  } catch (error) {
+    console.error('Error fetching orders count:', error);
+    return 0;
+  }
+}
