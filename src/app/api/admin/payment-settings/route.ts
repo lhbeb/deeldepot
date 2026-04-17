@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase/server';
 import { invalidateStripeConfigCache, invalidatePaypalConfigCache } from '@/lib/supabase/payment-settings';
 
-// Helper to get auth from request
-async function getSuperAdminAuth(request: NextRequest) {
+// Helper to get admin auth from request
+async function getAdminAuth(request: NextRequest) {
     // Bypass authentication in development if enabled
     const { shouldBypassAuth } = await import('@/lib/supabase/auth');
     if (shouldBypassAuth()) {
@@ -18,9 +18,10 @@ async function getSuperAdminAuth(request: NextRequest) {
             const getSecretKey = () => new TextEncoder().encode(JWT_SECRET);
             const { payload } = await jwtVerify(token, getSecretKey());
             const decoded = payload as { role: string; isActive: boolean; email: string };
+            const normalizedRole = decoded.role?.toUpperCase();
 
             if (!decoded.isActive) return null;
-            if (decoded.role !== 'SUPER_ADMIN' && decoded.role !== 'super-admin' && decoded.role !== 'ADMIN' && decoded.role !== 'admin') return null;
+            if (!['SUPER_ADMIN', 'REGULAR_ADMIN', 'ADMIN'].includes(normalizedRole)) return null;
 
             return { authenticated: true, role: decoded.role, email: decoded.email };
         } catch (error) {
@@ -31,9 +32,37 @@ async function getSuperAdminAuth(request: NextRequest) {
     return null;
 }
 
+async function getPaypalSettingsRow() {
+    let data: { payee_email?: string | null; publishable_key?: string | null; is_active?: boolean | null } | null = null;
+    let error: any = null;
+
+    const primaryResult = await supabaseAdmin
+        .from('payment_settings')
+        .select('payee_email, publishable_key, is_active')
+        .eq('provider', 'paypal-unclaimed')
+        .single();
+
+    data = primaryResult.data;
+    error = primaryResult.error;
+
+    // Backward-compatible fallback for databases that do not yet have payee_email.
+    if (error && error.code === '42703') {
+        const fallbackResult = await supabaseAdmin
+            .from('payment_settings')
+            .select('publishable_key, is_active')
+            .eq('provider', 'paypal-unclaimed')
+            .single();
+
+        data = fallbackResult.data;
+        error = fallbackResult.error;
+    }
+
+    return { data, error };
+}
+
 export async function GET(request: NextRequest) {
     try {
-        const auth = await getSuperAdminAuth(request);
+        const auth = await getAdminAuth(request);
         if (!auth) {
             return NextResponse.json({ error: 'Unauthorized: Admin access required' }, { status: 401 });
         }
@@ -46,11 +75,7 @@ export async function GET(request: NextRequest) {
             .single();
 
         // Fetch PayPal settings
-        const { data: paypalData, error: paypalError } = await supabaseAdmin
-            .from('payment_settings')
-            .select('publishable_key, is_active')
-            .eq('provider', 'paypal-unclaimed')
-            .single();
+        const { data: paypalData, error: paypalError } = await getPaypalSettingsRow();
 
         if (stripeError && stripeError.code !== 'PGRST116') {
             console.error('Error fetching Stripe settings:', stripeError);
@@ -82,7 +107,7 @@ export async function GET(request: NextRequest) {
         if (paypalData) {
             response.paypal = {
                 isConfigured: true,
-                payeeEmail: paypalData.publishable_key,
+                payeeEmail: paypalData.payee_email || paypalData.publishable_key || '',
                 isActive: paypalData.is_active
             };
         }
@@ -97,7 +122,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
     try {
-        const auth = await getSuperAdminAuth(request);
+        const auth = await getAdminAuth(request);
         if (!auth) {
             return NextResponse.json({ error: 'Unauthorized: Admin access required' }, { status: 401 });
         }
@@ -110,17 +135,45 @@ export async function POST(request: NextRequest) {
                 return NextResponse.json({ error: 'Missing Payee Email' }, { status: 400 });
             }
 
-            const { error } = await supabaseAdmin
+            // Check if row already exists so we can UPDATE instead of INSERT (avoids NOT NULL constraint on secret_key)
+            const { data: existing } = await supabaseAdmin
                 .from('payment_settings')
-                .upsert({
-                    provider: 'paypal-unclaimed',
-                    publishable_key: payeeEmail,
-                    is_active: true,
-                    updated_by: auth.email
-                }, { onConflict: 'provider' });
+                .select('id')
+                .eq('provider', 'paypal-unclaimed')
+                .maybeSingle();
 
-            if (error) {
-                console.error('Error upserting PayPal settings:', error);
+            let upsertError: any = null;
+
+            if (existing) {
+                // Row exists — safe to UPDATE only the payee columns
+                const { error: updateError } = await supabaseAdmin
+                    .from('payment_settings')
+                    .update({
+                        payee_email: payeeEmail,
+                        publishable_key: payeeEmail,
+                        is_active: true,
+                        updated_by: auth.email
+                    })
+                    .eq('provider', 'paypal-unclaimed');
+                upsertError = updateError;
+            } else {
+                // No row yet — INSERT with placeholder for NOT NULL columns
+                const { error: insertError } = await supabaseAdmin
+                    .from('payment_settings')
+                    .insert({
+                        provider: 'paypal-unclaimed',
+                        payee_email: payeeEmail,
+                        publishable_key: payeeEmail,
+                        secret_key: 'paypal-not-applicable',
+                        mode: 'live',
+                        is_active: true,
+                        updated_by: auth.email
+                    });
+                upsertError = insertError;
+            }
+
+            if (upsertError) {
+                console.error('Error saving PayPal settings:', upsertError);
                 return NextResponse.json({ error: 'Failed to save configuration' }, { status: 500 });
             }
 

@@ -16,6 +16,7 @@ export interface PaypalConfig {
  * If not configured in the DB, it falls back to environment variables.
  * Caches the result in memory for 1 minute to prevent hammering the DB.
  */
+let cachedConfig: StripeConfig | null = null;
 let lastFetchTime = 0;
 
 let cachedPaypalConfig: PaypalConfig | null = null;
@@ -90,16 +91,35 @@ export async function getPaypalUnclaimedConfig(): Promise<PaypalConfig> {
     }
 
     try {
-        const { data, error } = await supabaseAdmin
+        let data: { payee_email?: string | null; publishable_key?: string | null } | null = null;
+        let error: any = null;
+
+        const primaryResult = await supabaseAdmin
             .from('payment_settings')
-            .select('publishable_key')
+            .select('payee_email, publishable_key')
             .eq('provider', 'paypal-unclaimed')
             .eq('is_active', true)
             .single();
 
+        data = primaryResult.data;
+        error = primaryResult.error;
+
+        // Backward-compatible fallback for databases that do not yet have payee_email.
+        if (error && error.code === '42703') {
+            const fallbackResult = await supabaseAdmin
+                .from('payment_settings')
+                .select('publishable_key')
+                .eq('provider', 'paypal-unclaimed')
+                .eq('is_active', true)
+                .single();
+
+            data = fallbackResult.data;
+            error = fallbackResult.error;
+        }
+
         if (!error && data) {
             cachedPaypalConfig = {
-                payeeEmail: data.publishable_key
+                payeeEmail: data.payee_email || data.publishable_key || ''
             };
             lastPaypalFetchTime = now;
             return cachedPaypalConfig;

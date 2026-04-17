@@ -24,7 +24,7 @@ interface Product {
   inStock?: boolean;
   created_at: string;
   checkoutLink?: string;
-  checkoutFlow?: 'buymeacoffee' | 'kofi' | 'stripe' | 'external' | 'paypal-invoice';
+  checkoutFlow?: 'buymeacoffee' | 'kofi' | 'stripe' | 'external' | 'paypal-invoice' | 'paypal-unclaimed';
   isFeatured?: boolean;
   is_featured?: boolean;
   published?: boolean;
@@ -44,7 +44,7 @@ export default function AdminProductsPage() {
   const [featuredFilter, setFeaturedFilter] = useState<'all' | 'featured' | 'not_featured'>('all');
   const [stockFilter, setStockFilter] = useState<'all' | 'in_stock' | 'sold_out'>('all');
   const [listedByFilter, setListedByFilter] = useState<string>('all');
-  const [checkoutFilter, setCheckoutFilter] = useState<'all' | 'stripe' | 'kofi' | 'buymeacoffee' | 'external' | 'paypal-invoice'>('all');
+  const [checkoutFilter, setCheckoutFilter] = useState<'all' | 'stripe' | 'kofi' | 'buymeacoffee' | 'external' | 'paypal-invoice' | 'paypal-unclaimed'>('all');
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [currentPage, setCurrentPage] = useState(1);
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -628,7 +628,7 @@ export default function AdminProductsPage() {
                 <Filter className="h-5 w-5 text-gray-400" />
                 <select
                   value={checkoutFilter}
-                  onChange={(e) => setCheckoutFilter(e.target.value as 'all' | 'stripe' | 'kofi' | 'buymeacoffee' | 'external' | 'paypal-invoice')}
+                  onChange={(e) => setCheckoutFilter(e.target.value as 'all' | 'stripe' | 'kofi' | 'buymeacoffee' | 'external' | 'paypal-invoice' | 'paypal-unclaimed')}
                   className="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#090A28] focus:border-transparent text-sm font-medium"
                 >
                   <option value="all">All Checkout Methods</option>
@@ -637,6 +637,7 @@ export default function AdminProductsPage() {
                   <option value="buymeacoffee">☕ Buy Me a Coffee</option>
                   <option value="external">🔗 External</option>
                   <option value="paypal-invoice">🔵 PayPal Invoice</option>
+                  <option value="paypal-unclaimed">🟦 PayPal Unclaimed</option>
                 </select>
               </div>
             </div>
@@ -764,6 +765,7 @@ export default function AdminProductsPage() {
             {checkoutFilter === 'buymeacoffee' && ` (Buy Me a Coffee checkout)`}
             {checkoutFilter === 'external' && ` (External checkout)`}
             {checkoutFilter === 'paypal-invoice' && ` (PayPal Invoice checkout)`}
+            {checkoutFilter === 'paypal-unclaimed' && ` (PayPal Unclaimed checkout)`}
           </div>
         </div>
       )}
@@ -1064,6 +1066,14 @@ export default function AdminProductsPage() {
                           <path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944 2.79A.859.859 0 0 1 5.79 2h7.832c2.585 0 4.383.56 5.392 1.68.476.523.806 1.105.985 1.75.19.68.19 1.377.003 2.092l-.01.04v.554l.44.248a3.09 3.09 0 0 1 .83.698c.44.528.714 1.201.817 2.002.106.82.067 1.81-.116 2.946-.21 1.3-.576 2.426-1.09 3.35-.47.858-1.073 1.56-1.793 2.09-.686.504-1.5.882-2.42 1.12-.887.23-1.896.346-3.003.346h-.715a1.717 1.717 0 0 0-1.7 1.453l-.09.503-.527 3.36-.024.135a.641.641 0 0 1-.633.545z" />
                         </svg>
                         PayPal Invoice
+                      </span>
+                    ) : product.checkoutFlow === 'paypal-unclaimed' ? (
+                      // PayPal Unclaimed: Not clickable, just a badge
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-sky-100 text-sky-700 text-sm font-semibold rounded-lg">
+                        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944 2.79A.859.859 0 0 1 5.79 2h7.832c2.585 0 4.383.56 5.392 1.68.476.523.806 1.105.985 1.75.19.68.19 1.377.003 2.092l-.01.04v.554l.44.248a3.09 3.09 0 0 1 .83.698c.44.528.714 1.201.817 2.002.106.82.067 1.81-.116 2.946-.21 1.3-.576 2.426-1.09 3.35-.47.858-1.073 1.56-1.793 2.09-.686.504-1.5.882-2.42 1.12-.887.23-1.896.346-3.003.346h-.715a1.717 1.717 0 0 0-1.7 1.453l-.09.503-.527 3.36-.024.135a.641.641 0 0 1-.633.545z" />
+                        </svg>
+                        PayPal Unclaimed
                       </span>
                     ) : product.checkoutLink ? (
                       // Ko-fi or Buy Me a Coffee: Clickable preview link

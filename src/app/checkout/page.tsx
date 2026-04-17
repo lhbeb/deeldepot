@@ -81,8 +81,10 @@ const CheckoutPage: React.FC = () => {
   const [isRedirecting, setIsRedirecting] = useState(false);
   const [showKofiCheckout, setShowKofiCheckout] = useState(false); // New state for Ko-fi iframe
 
-  const [showPaypalConfirmation, setShowPaypalConfirmation] = useState(false); // New state for PayPal Invoice confirmation
+  const [showPaypalConfirmation, setShowPaypalConfirmation] = useState(false); // PayPal Invoice confirmation
   const [showPaypalUnclaimed, setShowPaypalUnclaimed] = useState(false);
+  const [showPaypalAddressConfirm, setShowPaypalAddressConfirm] = useState(false); // 2-sec address confirm
+  const [preloadedPaypalEmail, setPreloadedPaypalEmail] = useState<string | null>(null);
   const [emailError, setEmailError] = useState('');
   const [isSendingEmail, setIsSendingEmail] = useState(false);
   const [sellerName, setSellerName] = useState<string | null>(null);
@@ -494,9 +496,25 @@ const CheckoutPage: React.FC = () => {
         console.log('📧 [Checkout] PayPal Invoice flow: Showing confirmation screen');
         setShowPaypalConfirmation(true);
       } else if (checkoutFlow === 'paypal-unclaimed') {
-        // PayPal Unclaimed: Show PayPal buttons for direct payment to payee email
-        console.log('💰 [Checkout] PayPal Unclaimed flow: Showing payment modal');
-        setShowPaypalUnclaimed(true);
+        // PayPal Unclaimed: Show 2-second address confirmation, then auto-open PayPal modal
+        console.log('💰 [Checkout] PayPal Unclaimed flow: Starting address confirmation');
+        setShowPaypalAddressConfirm(true);
+
+        // Pre-fetch global payee email in the background during the 2-second window
+        fetch('/api/payment-settings/unclaimed')
+          .then(res => res.ok ? res.json() : null)
+          .then(data => {
+            if (data?.configured && data?.payeeEmail) {
+              setPreloadedPaypalEmail(data.payeeEmail);
+            }
+          })
+          .catch(() => {});
+
+        // After 2 seconds, auto-transition to PayPal SDK modal
+        setTimeout(() => {
+          setShowPaypalAddressConfirm(false);
+          setShowPaypalUnclaimed(true);
+        }, 2000);
       } else {
         // BuyMeACoffee or External: Redirect to external link
         console.log('🔄 [Checkout] External flow: Redirecting to', product.checkoutLink);
@@ -583,7 +601,43 @@ const CheckoutPage: React.FC = () => {
 
 
 
-  // PayPal Unclaimed flow - show PayPal buttons
+  // PayPal Unclaimed — 2-second address confirmation interstitial
+  if (showPaypalAddressConfirm) {
+    const { product } = cartItem;
+    const addr = shippingData;
+    return (
+      <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-[#090A28]/40 backdrop-blur-sm">
+        <div className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 fade-in duration-300">
+          <div className="bg-[#090A28] px-6 py-4">
+            <h3 className="text-white font-bold">Confirming your order</h3>
+          </div>
+          <div className="p-6 text-center">
+            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 animate-in zoom-in-90 duration-500">
+              <svg className="h-8 w-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <p className="text-sm font-semibold text-gray-800 mb-1">{product.title}</p>
+            <p className="text-lg font-bold text-[#090A28] mb-4">
+              {product.currency === 'EUR' ? '€' : product.currency === 'GBP' ? '£' : '$'}{product.price.toFixed(2)}
+            </p>
+            <div className="bg-gray-50 rounded-2xl p-4 text-left text-sm text-gray-600 space-y-1">
+              <p className="font-semibold text-gray-800">{addr.firstName} {addr.lastName}</p>
+              <p>{addr.address}</p>
+              <p>{addr.city}, {addr.zipCode}</p>
+              <p>{addr.country}</p>
+            </div>
+            <div className="mt-5 flex items-center justify-center gap-2 text-xs text-gray-400">
+              <div className="w-1.5 h-1.5 bg-[#090A28] rounded-full animate-pulse" />
+              Opening PayPal...
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // PayPal Unclaimed flow — show PayPal SDK buttons
   if (showPaypalUnclaimed) {
     const { product } = cartItem;
     return (
@@ -594,6 +648,7 @@ const CheckoutPage: React.FC = () => {
           currency: product.currency,
           payeeEmail: product.payeeEmail,
         }}
+        preloadedEmail={preloadedPaypalEmail}
         shippingData={shippingData}
         onClose={() => {
           setShowPaypalUnclaimed(false);

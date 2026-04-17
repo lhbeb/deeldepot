@@ -171,7 +171,11 @@ export default function PaymentSettingsPage() {
         }
     };
 
-    const isAuthorized = adminRole === 'SUPER_ADMIN' || adminRole === 'SUPER-ADMIN' || adminRole === 'ADMIN';
+    const isAuthorized =
+        adminRole === 'SUPER_ADMIN' ||
+        adminRole === 'SUPER-ADMIN' ||
+        adminRole === 'REGULAR_ADMIN' ||
+        adminRole === 'ADMIN';
 
     return (
         <AdminLayout
@@ -194,7 +198,7 @@ export default function PaymentSettingsPage() {
                     </p>
                 </div>
             ) : (
-                <div className="max-w-3xl space-y-6">
+                <div className="max-w-6xl space-y-6">
                     {statusMessage && (
                         <div className={`p-4 rounded-xl flex items-start gap-3 ${
                             statusMessage.type === 'success' ? 'bg-green-50 border border-green-200 text-green-800' : 'bg-red-50 border border-red-200 text-red-800'
@@ -208,7 +212,10 @@ export default function PaymentSettingsPage() {
                         </div>
                     )}
 
-                    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 items-start">
+
+                        {/* Stripe Configuration Card */}
+                        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                         <div className="p-6 border-b border-gray-100 flex items-center justify-between">
                             <div className="flex items-center gap-4">
                                 <div className="w-11 h-11 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0">
@@ -296,9 +303,7 @@ export default function PaymentSettingsPage() {
                                 </button>
                             </div>
                         </form>
-                    </div>
-
-                    {/* PayPal Configuration Card */}
+                        </div>
                     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                         <div className="p-6 border-b border-gray-100 flex items-center justify-between">
                             <div className="flex items-center gap-4">
@@ -328,7 +333,7 @@ export default function PaymentSettingsPage() {
                                     className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#090A28] focus:border-transparent text-sm"
                                     required
                                 />
-                                <p className="text-xs text-gray-500 mt-1.5 ml-1">This email will be used for <strong>all products</strong> that have the "PayPal Unclaimed" flow enabled.</p>
+                                <p className="text-xs text-gray-500 mt-1.5 ml-1">This email will be used for <strong>all products</strong> that have the &quot;PayPal Unclaimed&quot; flow enabled.</p>
                             </div>
 
                             <div className="pt-6 border-t border-gray-100 flex justify-end">
@@ -352,6 +357,9 @@ export default function PaymentSettingsPage() {
                             </div>
                         </form>
                     </div>
+
+                    </div>
+
                 </div>
             )}
         </AdminLayout>

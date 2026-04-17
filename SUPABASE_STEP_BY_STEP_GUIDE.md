@@ -168,7 +168,7 @@ npm run dev
    - **Brand**: `Test Brand`
    - **Category**: `Test Category`
    - **Condition**: `New`
-   - **Payee Email**: `your-email@example.com`
+   - ** Email**: `your-email@example.com`
    - **Checkout Link**: `https://buymeacoffee.com/test`
    - **Images**: `/products/test/img1.webp`
 3. Click **"Create Product"**
@@ -191,7 +191,7 @@ If you want to add products via SQL instead of the dashboard:
 ```sql
 INSERT INTO products (
   id, slug, title, description, price, brand, category, condition,
-  payee_email, checkout_link, images, currency, rating, review_count
+  _email, checkout_link, images, currency, rating, review_count
 ) VALUES (
   'test-product-1',
   'test-product-1',

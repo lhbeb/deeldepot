@@ -533,16 +533,6 @@ export default function EditProductPage() {
                 />
               </Field>
 
-              <Field label="Payee Email" hint={formData.checkout_flow === 'paypal-unclaimed' ? "Note: This is overridden by the Global Payee Email in Payment Settings." : "Required for certain checkout flows"}>
-                <input
-                  type="email"
-                  value={formData.payee_email}
-                  onChange={(e) => updateField('payee_email', e.target.value)}
-                  placeholder="e.g. hoffman_a@gmx.de"
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#090A28] focus:border-[#090A28] outline-none transition-all"
-                />
-              </Field>
-
               <Field label="Checkout Flow" required hint="Select how customers will complete their purchase">
                 <select
                   value={formData.checkout_flow}
@@ -577,7 +567,7 @@ export default function EditProductPage() {
                       </>
                     ) : formData.checkout_flow === 'paypal-unclaimed' ? (
                       <>
-                        <strong>PayPal Unclaimed:</strong> Payment buttons load directly on your site after address confirmation. Funds are sent to the <strong>Payee Email</strong> configured for this product.
+                        <strong>PayPal Unclaimed:</strong> Payment buttons load directly on your site after address confirmation. Funds are sent to the global payee email configured in Payment Settings.
                       </>
                     ) : (
                       <>
@@ -883,4 +873,3 @@ export default function EditProductPage() {
     </AdminLayout>
   );
 }
-
