@@ -12,10 +12,15 @@ interface KofiCheckoutProps {
         zipCode: string;
         email: string;
     };
+    sellerName?: string | null;
+    product?: {
+        title: string;
+        price: number;
+    };
     onClose?: () => void;
 }
 
-export default function KofiCheckout({ checkoutLink, shippingData, onClose }: KofiCheckoutProps) {
+export default function KofiCheckout({ checkoutLink, shippingData, sellerName, product, onClose }: KofiCheckoutProps) {
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
@@ -72,7 +77,22 @@ export default function KofiCheckout({ checkoutLink, shippingData, onClose }: Ko
                             </div>
                         </div>
 
-
+                        {/* Order Summary - Right */}
+                        {product && (
+                            <div className="flex-1 bg-white border border-gray-100 rounded-2xl shadow-sm p-5 flex flex-col justify-between">
+                                <div>
+                                    <h3 className="font-semibold text-gray-400 text-xs uppercase tracking-wider mb-2">Order Summary</h3>
+                                    <div className="font-bold text-[#262626] text-lg leading-tight mb-1">{product.title}</div>
+                                    {sellerName && (
+                                        <div className="text-sm text-gray-500 mb-2">Sold by: <span className="font-medium text-[#090A28]">{sellerName}</span></div>
+                                    )}
+                                </div>
+                                <div className="pt-3 border-t border-gray-100 flex justify-between items-end mt-4">
+                                    <span className="text-sm font-semibold text-gray-500">Total</span>
+                                    <span className="text-2xl font-extrabold text-[#090A28]">${product.price.toFixed(2)}</span>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
 

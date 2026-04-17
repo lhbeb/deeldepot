@@ -40,7 +40,6 @@ const CheckoutPage: React.FC = () => {
   const [showStateSuggestions, setShowStateSuggestions] = useState(false);
   const [stateSuggestionIndex, setStateSuggestionIndex] = useState(-1);
   const stateInputRef = useRef<HTMLInputElement>(null);
-  const stickyCtaRef = useRef<HTMLDivElement>(null);
   const [isRedirecting, setIsRedirecting] = useState(false);
   const [showKofiCheckout, setShowKofiCheckout] = useState(false); // New state for Ko-fi iframe
 
@@ -48,29 +47,6 @@ const CheckoutPage: React.FC = () => {
   const [emailError, setEmailError] = useState('');
   const [isSendingEmail, setIsSendingEmail] = useState(false);
   const [sellerName, setSellerName] = useState<string | null>(null);
-
-  // iOS Safari visual viewport fix — keeps fixed bottom bar visible when
-  // the browser chrome (address bar) shrinks the visual viewport on scroll.
-  useEffect(() => {
-    const vv = window.visualViewport;
-    if (!vv) return;
-
-    const updateBarPosition = () => {
-      const el = stickyCtaRef.current;
-      if (!el) return;
-      // Offset = distance between layout viewport bottom and visual viewport bottom
-      const offsetY = window.innerHeight - (vv.offsetTop + vv.height);
-      el.style.transform = `translateY(${-Math.max(0, offsetY)}px)`;
-    };
-
-    updateBarPosition();
-    vv.addEventListener('scroll', updateBarPosition);
-    vv.addEventListener('resize', updateBarPosition);
-    return () => {
-      vv.removeEventListener('scroll', updateBarPosition);
-      vv.removeEventListener('resize', updateBarPosition);
-    };
-  }, []);
 
 
 
@@ -619,7 +595,7 @@ const CheckoutPage: React.FC = () => {
   const { product } = cartItem;
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50 pb-24 lg:pb-4">
+    <div className="min-h-screen flex flex-col bg-gray-50 pb-32 lg:pb-4">
       <CheckoutNotifier />
       <main className="flex-grow py-4">
         <div className="container mx-auto px-4">
@@ -1152,7 +1128,7 @@ const CheckoutPage: React.FC = () => {
                     </div>
 
                     {/* CTA Button - Mobile (Sticky) */}
-                    <div ref={stickyCtaRef} className="lg:hidden fixed bottom-0 left-0 right-0 z-[100] bg-white border-t-2 border-gray-300 px-4 shadow-2xl" style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom))', paddingTop: '1rem', willChange: 'transform' }}>
+                    <div className="lg:hidden fixed bottom-0 left-0 right-0 z-[100] bg-white border-t-2 border-gray-300 px-4 shadow-2xl" style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom))', paddingTop: '1rem' }}>
                       <button
                         type="submit"
                         onClick={(e) => {
@@ -1276,7 +1252,7 @@ const CheckoutPage: React.FC = () => {
                         </div>
                       </div>
                       {/* Sticky button on mobile */}
-                      <div ref={stickyCtaRef} className="lg:hidden fixed bottom-0 left-0 right-0 z-[100] bg-white border-t-2 border-gray-300 px-4 shadow-2xl" style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom))', paddingTop: '1rem', willChange: 'transform' }}>
+                      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-[100] bg-white border-t-2 border-gray-300 px-4 shadow-2xl" style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom))', paddingTop: '1rem' }}>
                         <button
                           onClick={() => {
                             setIsRedirecting(true);

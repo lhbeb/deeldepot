@@ -17,10 +17,11 @@ interface PaypalInvoiceConfirmationProps {
         currency?: string;
         images?: string[];
     };
+    sellerName?: string | null;
     onClose?: () => void;
 }
 
-export default function PaypalInvoiceConfirmation({ shippingData, product, onClose }: PaypalInvoiceConfirmationProps) {
+export default function PaypalInvoiceConfirmation({ shippingData, product, sellerName, onClose }: PaypalInvoiceConfirmationProps) {
     const [detailsOpen, setDetailsOpen] = useState(false);
     const currencySymbol = product.currency === 'EUR' ? '€' : product.currency === 'GBP' ? '£' : '$';
     const orderTotal = `${currencySymbol}${product.price.toFixed(2)}`;
@@ -105,6 +106,11 @@ export default function PaypalInvoiceConfirmation({ shippingData, product, onClo
                                     <Mail className="h-3.5 w-3.5 text-[#090A28] flex-shrink-0" />
                                     <span className="text-[#090A28] text-xs font-medium break-all">{shippingData.email}</span>
                                 </div>
+                                {sellerName && (
+                                    <div className="flex items-center gap-2 pt-2 mt-1 border-t border-blue-100/50">
+                                        <span className="text-[#090A28] text-xs font-medium opacity-90 text-left">Sold by: {sellerName}</span>
+                                    </div>
+                                )}
                                 <p className="text-xs text-gray-400 pl-5">
                                     A PayPal invoice will be sent here once confirmed.
                                 </p>
@@ -140,6 +146,13 @@ export default function PaypalInvoiceConfirmation({ shippingData, product, onClo
                                     <p className="text-xs text-gray-500 mt-0.5">Chat with our team to complete your purchase</p>
                                 </div>
                             </div>
+
+                            {sellerName && (
+                                <div className="bg-gray-50 text-[#262626] rounded-xl px-4 py-3 flex items-center justify-between mb-4 border border-gray-100">
+                                    <span className="text-sm font-medium opacity-80">Sold by</span>
+                                    <span className="text-sm font-bold text-[#090A28]">{sellerName}</span>
+                                </div>
+                            )}
 
                             <div className="bg-[#090A28] text-white rounded-xl px-4 py-3 flex items-center justify-between mb-5">
                                 <span className="text-sm font-medium opacity-80">Order Total</span>

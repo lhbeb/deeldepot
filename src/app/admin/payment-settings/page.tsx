@@ -117,7 +117,7 @@ export default function PaymentSettingsPage() {
         }
     };
 
-    const isSuperAdmin = adminRole === 'SUPER_ADMIN' || adminRole === 'SUPER-ADMIN';
+    const isAuthorized = adminRole === 'SUPER_ADMIN' || adminRole === 'SUPER-ADMIN' || adminRole === 'ADMIN';
 
     return (
         <AdminLayout
@@ -128,15 +128,15 @@ export default function PaymentSettingsPage() {
                 <div className="flex items-center justify-center py-24">
                     <RefreshCw className="h-8 w-8 text-gray-400 animate-spin" />
                 </div>
-            ) : !isSuperAdmin ? (
+            ) : !isAuthorized ? (
                 <div className="flex flex-col items-center justify-center py-24 text-center">
                     <div className="w-20 h-20 rounded-2xl bg-gray-100 flex items-center justify-center mb-6">
                         <ShieldOff className="h-10 w-10 text-gray-400" />
                     </div>
-                    <h2 className="text-xl font-bold text-[#262626] mb-2">Super Admin Only</h2>
+                    <h2 className="text-xl font-bold text-[#262626] mb-2">Admin Only</h2>
                     <p className="text-gray-500 max-w-sm text-sm leading-relaxed">
-                        Payment settings are restricted to <strong>Super Admin</strong> accounts.
-                        Please contact a Super Admin if you need access.
+                        Payment settings are restricted to <strong>Admin</strong> accounts.
+                        Please contact an Administrator if you need access.
                     </p>
                 </div>
             ) : (

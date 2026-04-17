@@ -20,7 +20,7 @@ async function getSuperAdminAuth(request: NextRequest) {
             const decoded = payload as { role: string; isActive: boolean; email: string };
 
             if (!decoded.isActive) return null;
-            if (decoded.role !== 'SUPER_ADMIN' && decoded.role !== 'super-admin') return null;
+            if (decoded.role !== 'SUPER_ADMIN' && decoded.role !== 'super-admin' && decoded.role !== 'ADMIN' && decoded.role !== 'admin') return null;
 
             return { authenticated: true, role: decoded.role, email: decoded.email };
         } catch (error) {
@@ -35,7 +35,7 @@ export async function GET(request: NextRequest) {
     try {
         const auth = await getSuperAdminAuth(request);
         if (!auth) {
-            return NextResponse.json({ error: 'Unauthorized: Super Admin access required' }, { status: 401 });
+            return NextResponse.json({ error: 'Unauthorized: Admin access required' }, { status: 401 });
         }
 
         const { data, error } = await supabaseAdmin
@@ -78,7 +78,7 @@ export async function POST(request: NextRequest) {
     try {
         const auth = await getSuperAdminAuth(request);
         if (!auth) {
-            return NextResponse.json({ error: 'Unauthorized: Super Admin access required' }, { status: 401 });
+            return NextResponse.json({ error: 'Unauthorized: Admin access required' }, { status: 401 });
         }
 
         const body = await request.json();

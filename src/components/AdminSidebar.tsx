@@ -205,10 +205,11 @@ export default function AdminSidebar() {
 
   // Auto-open "More" if we're on one of its pages
   useEffect(() => {
-    if (moreNavItems.some((i) => isActive(i.path))) {
+    const visibleMoreItems = moreNavItems.filter((item) => isSuperAdmin ? true : item.name === 'Payment Settings');
+    if (visibleMoreItems.some((i) => isActive(i.path))) {
       setMoreOpen(true);
     }
-  }, [pathname]);
+  }, [pathname, isSuperAdmin]);
 
   if (!mounted) return null;
 
@@ -317,7 +318,7 @@ export default function AdminSidebar() {
                   onClick={() => setMoreOpen((o) => !o)}
                   className={`
                     w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200
-                    ${moreNavItems.some((i) => isActive(i.path))
+                    ${moreNavItems.filter((item) => isSuperAdmin ? true : item.name === 'Payment Settings').some((i) => isActive(i.path))
                       ? 'bg-[#06092a] text-white shadow-lg shadow-[#06092a]/30'
                       : 'text-gray-600 hover:bg-gray-100 hover:text-[#262626]'
                     }
@@ -325,7 +326,7 @@ export default function AdminSidebar() {
                 >
                   <MoreHorizontal
                     className={`h-5 w-5 flex-shrink-0 ${
-                      moreNavItems.some((i) => isActive(i.path)) ? 'text-white' : 'text-gray-400'
+                      moreNavItems.filter((item) => isSuperAdmin ? true : item.name === 'Payment Settings').some((i) => isActive(i.path)) ? 'text-white' : 'text-gray-400'
                     }`}
                   />
                   <span className="flex-1 text-left font-medium text-sm">More</span>
@@ -333,7 +334,7 @@ export default function AdminSidebar() {
                     className={`h-4 w-4 flex-shrink-0 transition-transform duration-200 ${
                       moreOpen ? 'rotate-180' : ''
                     } ${
-                      moreNavItems.some((i) => isActive(i.path)) ? 'text-white' : 'text-gray-400'
+                      moreNavItems.filter((item) => isSuperAdmin ? true : item.name === 'Payment Settings').some((i) => isActive(i.path)) ? 'text-white' : 'text-gray-400'
                     }`}
                   />
                 </button>
@@ -345,7 +346,7 @@ export default function AdminSidebar() {
                   }`}
                 >
                   <div className="pl-3 space-y-1 border-l-2 border-gray-100 ml-4">
-                    {moreNavItems.map((item) => {
+                    {moreNavItems.filter((item) => isSuperAdmin ? true : item.name === 'Payment Settings').map((item) => {
                       const Icon = item.icon;
                       const active = isActive(item.path);
                       return (
