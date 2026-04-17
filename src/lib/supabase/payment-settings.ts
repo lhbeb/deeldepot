@@ -7,13 +7,20 @@ export interface StripeConfig {
     isActive: boolean;
 }
 
+export interface PaypalConfig {
+    payeeEmail: string;
+}
+
 /**
  * Fetches the active Stripe configuration from the database.
  * If not configured in the DB, it falls back to environment variables.
  * Caches the result in memory for 1 minute to prevent hammering the DB.
  */
-let cachedConfig: StripeConfig | null = null;
 let lastFetchTime = 0;
+
+let cachedPaypalConfig: PaypalConfig | null = null;
+let lastPaypalFetchTime = 0;
+
 const CACHE_TTL = 60 * 1000; // 1 minute
 
 export async function getStripeConfig(): Promise<StripeConfig> {
@@ -73,10 +80,53 @@ export async function getStripeConfig(): Promise<StripeConfig> {
 }
 
 /**
+ * Fetches the global PayPal Unclaimed configuration from the database.
+ */
+export async function getPaypalUnclaimedConfig(): Promise<PaypalConfig> {
+    const now = Date.now();
+    
+    if (cachedPaypalConfig && (now - lastPaypalFetchTime) < CACHE_TTL) {
+        return cachedPaypalConfig;
+    }
+
+    try {
+        const { data, error } = await supabaseAdmin
+            .from('payment_settings')
+            .select('publishable_key')
+            .eq('provider', 'paypal-unclaimed')
+            .eq('is_active', true)
+            .single();
+
+        if (!error && data) {
+            cachedPaypalConfig = {
+                payeeEmail: data.publishable_key
+            };
+            lastPaypalFetchTime = now;
+            return cachedPaypalConfig;
+        }
+    } catch (err) {
+        console.error('❌ [Payment Settings] Unexpected error fetching PayPal config:', err);
+    }
+
+    // Default fallback
+    const fallback: PaypalConfig = {
+        payeeEmail: ''
+    };
+    cachedPaypalConfig = fallback;
+    lastPaypalFetchTime = now;
+    return fallback;
+}
+
+/**
  * Force invalidate the Stripe config cache.
  * Useful when saving new keys from the admin dashboard.
  */
 export function invalidateStripeConfigCache() {
     cachedConfig = null;
     lastFetchTime = 0;
+}
+
+export function invalidatePaypalConfigCache() {
+    cachedPaypalConfig = null;
+    lastPaypalFetchTime = 0;
 }

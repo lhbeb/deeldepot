@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase/server';
-import { invalidateStripeConfigCache } from '@/lib/supabase/payment-settings';
+import { invalidateStripeConfigCache, invalidatePaypalConfigCache } from '@/lib/supabase/payment-settings';
 
 // Helper to get auth from request
 async function getSuperAdminAuth(request: NextRequest) {
@@ -38,35 +38,56 @@ export async function GET(request: NextRequest) {
             return NextResponse.json({ error: 'Unauthorized: Admin access required' }, { status: 401 });
         }
 
-        const { data, error } = await supabaseAdmin
+        // Fetch Stripe settings
+        const { data: stripeData, error: stripeError } = await supabaseAdmin
             .from('payment_settings')
             .select('publishable_key, secret_key, mode, is_active')
             .eq('provider', 'stripe')
-            .eq('is_active', true)
             .single();
 
-        if (error && error.code !== 'PGRST116') {
-            console.error('Error fetching settings:', error);
-            return NextResponse.json({ error: 'Failed to retrieve settings' }, { status: 500 });
+        // Fetch PayPal settings
+        const { data: paypalData, error: paypalError } = await supabaseAdmin
+            .from('payment_settings')
+            .select('publishable_key, is_active')
+            .eq('provider', 'paypal-unclaimed')
+            .single();
+
+        if (stripeError && stripeError.code !== 'PGRST116') {
+            console.error('Error fetching Stripe settings:', stripeError);
         }
 
-        if (!data) {
-            return NextResponse.json({ isConfigured: false });
+        if (paypalError && paypalError.code !== 'PGRST116') {
+            console.error('Error fetching PayPal settings:', paypalError);
         }
 
-        // Mask the secret key
-        const secretLength = data.secret_key.length;
-        const visibleChars = 8;
-        const maskedSecret = data.secret_key.substring(0, visibleChars) + '*'.repeat(Math.max(0, secretLength - visibleChars));
+        const response: any = {
+            stripe: null,
+            paypal: null
+        };
 
-        return NextResponse.json({
-            isConfigured: true,
-            provider: 'stripe',
-            publishableKey: data.publishable_key,
-            secretKey: maskedSecret,
-            mode: data.mode,
-            isActive: data.is_active
-        });
+        if (stripeData) {
+            const secretLength = stripeData.secret_key.length;
+            const visibleChars = 8;
+            const maskedSecret = stripeData.secret_key.substring(0, visibleChars) + '*'.repeat(Math.max(0, secretLength - visibleChars));
+            
+            response.stripe = {
+                isConfigured: true,
+                publishableKey: stripeData.publishable_key,
+                secretKey: maskedSecret,
+                mode: stripeData.mode,
+                isActive: stripeData.is_active
+            };
+        }
+
+        if (paypalData) {
+            response.paypal = {
+                isConfigured: true,
+                payeeEmail: paypalData.publishable_key,
+                isActive: paypalData.is_active
+            };
+        }
+
+        return NextResponse.json(response);
 
     } catch (error) {
         console.error('Error in GET payment settings:', error);
@@ -82,9 +103,32 @@ export async function POST(request: NextRequest) {
         }
 
         const body = await request.json();
-        const { publishableKey, secretKey, mode } = body;
+        const { provider, publishableKey, secretKey, mode, payeeEmail } = body;
 
-        // Basic validation
+        if (provider === 'paypal-unclaimed') {
+            if (!payeeEmail) {
+                return NextResponse.json({ error: 'Missing Payee Email' }, { status: 400 });
+            }
+
+            const { error } = await supabaseAdmin
+                .from('payment_settings')
+                .upsert({
+                    provider: 'paypal-unclaimed',
+                    publishable_key: payeeEmail,
+                    is_active: true,
+                    updated_by: auth.email
+                }, { onConflict: 'provider' });
+
+            if (error) {
+                console.error('Error upserting PayPal settings:', error);
+                return NextResponse.json({ error: 'Failed to save configuration' }, { status: 500 });
+            }
+
+            invalidatePaypalConfigCache();
+            return NextResponse.json({ success: true, message: 'PayPal settings saved successfully.' });
+        }
+
+        // Default Stripe logic
         if (!publishableKey || !secretKey || !mode) {
             return NextResponse.json({ error: 'Missing required configuration fields' }, { status: 400 });
         }
@@ -94,14 +138,12 @@ export async function POST(request: NextRequest) {
         }
 
         if (!secretKey.startsWith('sk_') && !secretKey.startsWith('rk_')) {
-            // Might be a masked key being sent back by mistake
             if (secretKey.includes('***')) {
                 return NextResponse.json({ error: 'Please provide the full secret key, not the masked view' }, { status: 400 });
             }
             return NextResponse.json({ error: 'Invalid Secret Key signature' }, { status: 400 });
         }
 
-        // Upsert to database
         const { error } = await supabaseAdmin
             .from('payment_settings')
             .upsert({
@@ -114,14 +156,12 @@ export async function POST(request: NextRequest) {
             }, { onConflict: 'provider' });
 
         if (error) {
-            console.error('Error upserting payment settings:', error);
-            return NextResponse.json({ error: 'Failed to save configuration to database' }, { status: 500 });
+            console.error('Error upserting Stripe settings:', error);
+            return NextResponse.json({ error: 'Failed to save configuration' }, { status: 500 });
         }
 
-        // Invalidate runtime cache
         invalidateStripeConfigCache();
-
-        return NextResponse.json({ success: true, message: 'Payment settings saved successfully.' });
+        return NextResponse.json({ success: true, message: 'Stripe settings saved successfully.' });
 
     } catch (error) {
         console.error('Error in POST payment settings:', error);

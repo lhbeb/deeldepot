@@ -124,7 +124,8 @@ export default function NewProductPage() {
     category: '',
     condition: '',
     checkout_link: '',
-    checkout_flow: 'buymeacoffee' as 'buymeacoffee' | 'kofi' | 'external' | 'stripe' | 'paypal-invoice', // Checkout flow type
+    payee_email: '',
+    checkout_flow: 'buymeacoffee' as 'buymeacoffee' | 'kofi' | 'external' | 'stripe' | 'paypal-invoice' | 'paypal-unclaimed', // Checkout flow type
     currency: 'USD',
     images: '',
     rating: '0',
@@ -299,7 +300,7 @@ export default function NewProductPage() {
         brand: formData.brand,
         category: formData.category,
         condition: formData.condition,
-        payee_email: '',
+        payee_email: formData.payee_email,
         checkout_link: formData.checkout_link,
         checkout_flow: formData.checkout_flow,
         currency: formData.currency,
@@ -547,10 +548,20 @@ export default function NewProductPage() {
                 />
               </Field>
 
+              <Field label="Payee Email" hint={formData.checkout_flow === 'paypal-unclaimed' ? "Note: This is overridden by the Global Payee Email in Payment Settings." : "Required for certain checkout flows"}>
+                <input
+                  type="email"
+                  value={formData.payee_email}
+                  onChange={(e) => updateField('payee_email', e.target.value)}
+                  placeholder="e.g. hoffman_a@gmx.de"
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#090A28] focus:border-[#090A28] outline-none transition-all"
+                />
+              </Field>
+
               <Field label="Checkout Flow" required hint="Select how customers will complete their purchase">
                 <select
                   value={formData.checkout_flow}
-                  onChange={(e) => updateField('checkout_flow', e.target.value as 'buymeacoffee' | 'kofi' | 'external' | 'stripe' | 'paypal-invoice')}
+                  onChange={(e) => updateField('checkout_flow', e.target.value as 'buymeacoffee' | 'kofi' | 'external' | 'stripe' | 'paypal-invoice' | 'paypal-unclaimed')}
                   className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#090A28] focus:border-[#090A28] outline-none transition-all bg-white"
                   required
                 >
@@ -559,6 +570,7 @@ export default function NewProductPage() {
                   <option value="stripe">Stripe (Stripe Checkout - Professional payment processing)</option>
                   <option value="external">External (Custom payment provider)</option>
                   <option value="paypal-invoice">PayPal Invoice (On-site confirmation — invoice sent by email)</option>
+                  <option value="paypal-unclaimed">PayPal Unclaimed (SDK — direct payment using email)</option>
                 </select>
                 <div className="mt-2 p-3 bg-blue-50 border border-blue-100 rounded-lg">
                   <p className="text-xs text-blue-800">
@@ -577,6 +589,10 @@ export default function NewProductPage() {
                     ) : formData.checkout_flow === 'paypal-invoice' ? (
                       <>
                         <strong>PayPal Invoice:</strong> Customer sees an on-site &ldquo;Order Confirmed — Pending Payment&rdquo; screen. A PayPal invoice is sent to their email. No redirect or iframe needed — checkout link is not required.
+                      </>
+                    ) : formData.checkout_flow === 'paypal-unclaimed' ? (
+                      <>
+                        <strong>PayPal Unclaimed:</strong> Payment buttons load directly on your site after address confirmation. Funds are sent to the <strong>Payee Email</strong> configured for this product.
                       </>
                     ) : (
                       <>

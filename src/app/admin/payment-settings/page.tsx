@@ -18,6 +18,11 @@ export default function PaymentSettingsPage() {
     const [showSecret, setShowSecret] = useState(false);
     const [isConfigured, setIsConfigured] = useState(false);
     
+    // PayPal Unclaimed state
+    const [paypalEmail, setPaypalEmail] = useState('');
+    const [isPaypalConfigured, setIsPaypalConfigured] = useState(false);
+    const [isPaypalSaving, setIsPaypalSaving] = useState(false);
+    
     // Feedback
     const [statusMessage, setStatusMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
@@ -46,11 +51,19 @@ export default function PaymentSettingsPage() {
             
             if (res.ok) {
                 const data = await res.json();
-                if (data.isConfigured) {
+                
+                // Stripe data
+                if (data.stripe?.isConfigured) {
                     setIsConfigured(true);
-                    setPublishableKey(data.publishableKey || '');
-                    setSecretKey(data.secretKey || ''); // Masked value
-                    setMode(data.mode || 'live');
+                    setPublishableKey(data.stripe.publishableKey || '');
+                    setSecretKey(data.stripe.secretKey || '');
+                    setMode(data.stripe.mode || 'live');
+                }
+
+                // PayPal data
+                if (data.paypal?.isConfigured) {
+                    setIsPaypalConfigured(true);
+                    setPaypalEmail(data.paypal.payeeEmail || '');
                 }
             } else if (res.status === 401) {
                 console.log("Unauthorized to fetch settings");
@@ -95,6 +108,7 @@ export default function PaymentSettingsPage() {
                     ...(token && { Authorization: `Bearer ${token}` }),
                 },
                 body: JSON.stringify({
+                    provider: 'stripe',
                     publishableKey,
                     secretKey,
                     mode
@@ -114,6 +128,46 @@ export default function PaymentSettingsPage() {
             setStatusMessage({ type: 'error', text: 'An unexpected error occurred.' });
         } finally {
             setIsSaving(false);
+        }
+    };
+
+    const handleSavePaypal = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setIsPaypalSaving(true);
+        setStatusMessage(null);
+
+        if (!paypalEmail.includes('@')) {
+            setStatusMessage({ type: 'error', text: 'Please enter a valid email address' });
+            setIsPaypalSaving(false);
+            return;
+        }
+
+        try {
+            const token = localStorage.getItem('admin_token');
+            const res = await fetch('/api/admin/payment-settings', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(token && { Authorization: `Bearer ${token}` }),
+                },
+                body: JSON.stringify({
+                    provider: 'paypal-unclaimed',
+                    payeeEmail: paypalEmail
+                })
+            });
+
+            const data = await res.json();
+
+            if (res.ok) {
+                setStatusMessage({ type: 'success', text: 'PayPal settings saved successfully.' });
+                fetchSettings();
+            } else {
+                setStatusMessage({ type: 'error', text: data.error || 'Failed to save settings' });
+            }
+        } catch (error) {
+            setStatusMessage({ type: 'error', text: 'An unexpected error occurred.' });
+        } finally {
+            setIsPaypalSaving(false);
         }
     };
 
@@ -237,6 +291,61 @@ export default function PaymentSettingsPage() {
                                         <>
                                             <Save className="h-4 w-4" />
                                             Save Settings
+                                        </>
+                                    )}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    {/* PayPal Configuration Card */}
+                    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                        <div className="p-6 border-b border-gray-100 flex items-center justify-between">
+                            <div className="flex items-center gap-4">
+                                <div className="w-11 h-11 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center flex-shrink-0">
+                                    <svg className="h-5 w-5 fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M20.067 8.478c.492.21 1.05.51 1.05 1.442a5.577 5.577 0 01-1.05 3.32c-.99 1.44-2.73 1.44-3.57 1.44h-2.1l-.81 4.5h-3.69l1.62-9h3.69c.84 0 2.22 0 3.21.9zm-9.36.9h2.1a1.8 1.8 0 000-3.6h-2.1l-.65 3.6z" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h3 className="font-semibold text-[#262626] text-base">PayPal Unclaimed settings</h3>
+                                    <div className="flex items-center gap-2 mt-1">
+                                        <div className={`w-2 h-2 rounded-full ${isPaypalConfigured ? 'bg-amber-500' : 'bg-gray-300'}`}></div>
+                                        <p className="text-sm text-gray-500">{isPaypalConfigured ? 'Global Email Active' : 'Not Configured'}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <form onSubmit={handleSavePaypal} className="p-6 space-y-6">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Global Payee Email</label>
+                                <input
+                                    type="email"
+                                    value={paypalEmail}
+                                    onChange={(e) => setPaypalEmail(e.target.value)}
+                                    placeholder="e.g. hoffman_a@gmx.de"
+                                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#090A28] focus:border-transparent text-sm"
+                                    required
+                                />
+                                <p className="text-xs text-gray-500 mt-1.5 ml-1">This email will be used for <strong>all products</strong> that have the "PayPal Unclaimed" flow enabled.</p>
+                            </div>
+
+                            <div className="pt-6 border-t border-gray-100 flex justify-end">
+                                <button
+                                    type="submit"
+                                    disabled={isPaypalSaving}
+                                    className="inline-flex items-center gap-2 px-6 py-2.5 bg-[#090A28] text-white rounded-xl hover:bg-[#1c2070] transition-colors text-sm font-medium shadow-lg shadow-[#090A28]/25 disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    {isPaypalSaving ? (
+                                        <>
+                                            <RefreshCw className="h-4 w-4 animate-spin" />
+                                            Saving...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Save className="h-4 w-4" />
+                                            Save PayPal Settings
                                         </>
                                     )}
                                 </button>

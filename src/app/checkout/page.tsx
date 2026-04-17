@@ -14,6 +14,7 @@ import CheckoutNotifier from '@/components/CheckoutNotifier';
 import KofiCheckout from '@/components/KofiCheckout';
 
 import PaypalInvoiceConfirmation from '@/components/PaypalInvoiceConfirmation';
+import PaypalUnclaimedCheckout from '@/components/PaypalUnclaimedCheckout';
 
 
 interface ShippingData {
@@ -81,6 +82,7 @@ const CheckoutPage: React.FC = () => {
   const [showKofiCheckout, setShowKofiCheckout] = useState(false); // New state for Ko-fi iframe
 
   const [showPaypalConfirmation, setShowPaypalConfirmation] = useState(false); // New state for PayPal Invoice confirmation
+  const [showPaypalUnclaimed, setShowPaypalUnclaimed] = useState(false);
   const [emailError, setEmailError] = useState('');
   const [isSendingEmail, setIsSendingEmail] = useState(false);
   const [sellerName, setSellerName] = useState<string | null>(null);
@@ -491,6 +493,10 @@ const CheckoutPage: React.FC = () => {
         // PayPal Invoice: Show on-site confirmation, customer will receive a PayPal invoice by email
         console.log('📧 [Checkout] PayPal Invoice flow: Showing confirmation screen');
         setShowPaypalConfirmation(true);
+      } else if (checkoutFlow === 'paypal-unclaimed') {
+        // PayPal Unclaimed: Show PayPal buttons for direct payment to payee email
+        console.log('💰 [Checkout] PayPal Unclaimed flow: Showing payment modal');
+        setShowPaypalUnclaimed(true);
       } else {
         // BuyMeACoffee or External: Redirect to external link
         console.log('🔄 [Checkout] External flow: Redirecting to', product.checkoutLink);
@@ -576,6 +582,27 @@ const CheckoutPage: React.FC = () => {
   }
 
 
+
+  // PayPal Unclaimed flow - show PayPal buttons
+  if (showPaypalUnclaimed) {
+    const { product } = cartItem;
+    return (
+      <PaypalUnclaimedCheckout
+        product={{
+          title: product.title,
+          price: product.price,
+          currency: product.currency,
+          payeeEmail: product.payeeEmail,
+        }}
+        shippingData={shippingData}
+        onClose={() => {
+          setShowPaypalUnclaimed(false);
+          clearCart();
+          router.push('/');
+        }}
+      />
+    );
+  }
 
   if (isRedirecting) {
     return (

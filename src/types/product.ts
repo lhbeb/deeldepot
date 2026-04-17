@@ -30,7 +30,7 @@ export interface Product {
   payeeEmail: string;
   currency: string;
   checkoutLink: string;
-  checkoutFlow?: 'buymeacoffee' | 'kofi' | 'external' | 'stripe' | 'paypal-invoice'; // Checkout flow type
+  checkoutFlow?: 'buymeacoffee' | 'kofi' | 'external' | 'stripe' | 'paypal-invoice' | 'paypal-unclaimed'; // Checkout flow type
   reviews?: Review[];
   meta?: {
     title?: string;
