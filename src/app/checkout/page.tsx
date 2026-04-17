@@ -24,6 +24,43 @@ interface ShippingData {
   email: string;
 }
 
+interface MobileCheckoutCTAProps {
+  onClick?: (e: React.MouseEvent) => void;
+  disabled?: boolean;
+  isLoading?: boolean;
+  loadingLabel?: string;
+  label: string;
+}
+
+const MobileCheckoutCTA: React.FC<MobileCheckoutCTAProps> = ({
+  onClick,
+  disabled,
+  isLoading,
+  loadingLabel,
+  label
+}) => (
+  <div className="lg:hidden sticky bottom-0 left-0 right-0 z-[100] bg-white border-t-2 border-gray-100 px-4 shadow-[0_-4px_20px_rgba(0,0,0,0.08)]" style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom))', paddingTop: '1rem' }}>
+    <button
+      type={onClick ? "button" : "submit"}
+      onClick={onClick}
+      disabled={disabled}
+      className={`w-full font-bold py-4 px-6 rounded-xl transition-all duration-200 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-4 focus:ring-[#090A28] focus:ring-offset-2 text-lg sm:text-xl ${disabled
+        ? 'bg-gray-400 cursor-not-allowed text-white'
+        : 'bg-[#090A28] hover:bg-[#1c2070] text-white active:scale-[0.98]'
+        }`}
+    >
+      {isLoading ? (
+        <>
+          <div className="animate-spin rounded-full h-6 w-6 border-b-3 border-white mr-3"></div>
+          <span className="text-white text-lg font-bold">{loadingLabel}</span>
+        </>
+      ) : (
+        <span className="text-white text-lg sm:text-xl font-bold">{label}</span>
+      )}
+    </button>
+  </div>
+);
+
 const CheckoutPage: React.FC = () => {
   const router = useRouter();
   const [cartItem, setCartItem] = useState<CartItem | null>(null);
@@ -1128,36 +1165,12 @@ const CheckoutPage: React.FC = () => {
                     </div>
 
                     {/* CTA Button - Mobile (Sticky) */}
-                    <div className="lg:hidden fixed bottom-0 left-0 right-0 z-[100] bg-white border-t-2 border-gray-300 px-4 shadow-2xl" style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom))', paddingTop: '1rem' }}>
-                      <button
-                        type="submit"
-                        onClick={(e) => {
-                          console.log('🔘 [Checkout] Submit button clicked (mobile)');
-                          // Let form onSubmit handle it, but log for debugging
-                        }}
-                        disabled={isSendingEmail || isRedirecting}
-                        className={`w-full font-bold py-4 px-6 rounded-xl transition-colors duration-200 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-4 focus:ring-[#090A28] focus:ring-offset-2 text-lg sm:text-xl ${isSendingEmail || isRedirecting
-                          ? 'bg-gray-400 cursor-not-allowed text-white'
-                          : 'bg-[#090A28] hover:bg-[#1c2070] text-white'
-                          }`}
-                      >
-                        {isSendingEmail ? (
-                          <>
-                            <div className="animate-spin rounded-full h-6 w-6 border-b-3 border-white mr-3"></div>
-                            <span className="text-white text-lg font-bold">Confirming Address...</span>
-                          </>
-                        ) : isRedirecting ? (
-                          <>
-                            <div className="animate-spin rounded-full h-6 w-6 border-b-3 border-white mr-3"></div>
-                            <span className="text-white text-lg font-bold">Redirecting...</span>
-                          </>
-                        ) : (
-                          <>
-                            <span className="text-white text-lg sm:text-xl font-bold">Continue to Payment</span>
-                          </>
-                        )}
-                      </button>
-                    </div>
+                    <MobileCheckoutCTA
+                      disabled={isSendingEmail || isRedirecting}
+                      isLoading={isSendingEmail || isRedirecting}
+                      loadingLabel={isSendingEmail ? "Confirming Address..." : "Redirecting..."}
+                      label="Continue to Payment"
+                    />
 
                     {/* Secure Checkout Info - Mobile */}
                     <div className="lg:hidden mt-4 mb-4 flex flex-col items-center justify-center space-y-2 text-center w-full">
@@ -1252,29 +1265,19 @@ const CheckoutPage: React.FC = () => {
                         </div>
                       </div>
                       {/* Sticky button on mobile */}
-                      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-[100] bg-white border-t-2 border-gray-300 px-4 shadow-2xl" style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom))', paddingTop: '1rem' }}>
-                        <button
-                          onClick={() => {
-                            setIsRedirecting(true);
-                            window.scrollTo({ top: 0 });
-                            setTimeout(() => {
-                              window.location.href = product.checkoutLink;
-                            }, 1000);
-                          }}
-                          className="w-full bg-[#090A28] hover:bg-[#1c2070] py-4 lg:py-5 px-6 sm:px-8 rounded-xl font-bold transition-colors duration-200 flex items-center justify-center text-white focus:outline-none focus:ring-4 focus:ring-[#090A28] focus:ring-offset-2 text-lg sm:text-xl"
-                        >
-                          {isRedirecting ? (
-                            <>
-                              <div className="animate-spin rounded-full h-6 w-6 border-b-3 border-white mr-3"></div>
-                              <span className="text-white text-lg font-bold">Processing...</span>
-                            </>
-                          ) : (
-                            <>
-                              <span className="text-white text-lg sm:text-xl font-bold">Continue to Payment</span>
-                            </>
-                          )}
-                        </button>
-                      </div>
+                      <MobileCheckoutCTA
+                        onClick={() => {
+                          setIsRedirecting(true);
+                          window.scrollTo({ top: 0 });
+                          setTimeout(() => {
+                            window.location.href = product.checkoutLink;
+                          }, 1000);
+                        }}
+                        disabled={isRedirecting}
+                        isLoading={isRedirecting}
+                        loadingLabel="Processing..."
+                        label="Continue to Payment"
+                      />
                     </div>
                   </div>
                 )}
