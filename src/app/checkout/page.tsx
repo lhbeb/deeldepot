@@ -15,6 +15,7 @@ import KofiCheckout from '@/components/KofiCheckout';
 
 import PaypalInvoiceConfirmation from '@/components/PaypalInvoiceConfirmation';
 import PaypalUnclaimedCheckout from '@/components/PaypalUnclaimedCheckout';
+import PaypalInlineButton from '@/components/PaypalInlineButton';
 
 
 interface ShippingData {
@@ -87,6 +88,7 @@ const CheckoutPage: React.FC = () => {
   const [emailError, setEmailError] = useState('');
   const [isSendingEmail, setIsSendingEmail] = useState(false);
   const [sellerName, setSellerName] = useState<string | null>(null);
+  const [unclaimedPayeeEmail, setUnclaimedPayeeEmail] = useState('');
 
 
 
@@ -218,6 +220,16 @@ const CheckoutPage: React.FC = () => {
               }
             })
             .catch(err => console.error('Error fetching seller name', err));
+        }
+
+        // Pre-fetch PayPal settings so it's ready immediately when button is clicked
+        if (item.product?.checkoutFlow === 'paypal-unclaimed') {
+          fetch('/api/payment-settings/unclaimed')
+            .then(res => res.ok ? res.json() : null)
+            .then(data => {
+              if (data && data.payeeEmail) setUnclaimedPayeeEmail(data.payeeEmail);
+            })
+            .catch(err => console.error('Error fetching paypal email', err));
         }
       } catch (error) {
         debugError('CheckoutPage: useEffect - Error loading cart', error);
@@ -369,6 +381,55 @@ const CheckoutPage: React.FC = () => {
     setShippingData(prev => ({ ...prev, state }));
     setShowStateSuggestions(false);
     setStateSuggestions([]);
+  };
+
+  const isFormValid = Boolean(
+    cartItem?.product &&
+    cartItem.product.inStock !== false &&
+    shippingData.email &&
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(shippingData.email) &&
+    shippingData.zipCode &&
+    shippingData.zipCode.trim().length >= 3 &&
+    shippingData.streetAddress &&
+    shippingData.city &&
+    shippingData.state
+  );
+
+
+  /**
+   * Called by the PayPal inline button before opening PayPal.
+   * Runs local validation ONLY so the popup opens instantly.
+   */
+  const handlePaypalBeforePayment = async (): Promise<{ ok: boolean; payeeEmail: string; amount: number; currency: string; description: string }> => {
+    const fail = { ok: false, payeeEmail: '', amount: 0, currency: 'USD', description: '' };
+
+    if (!cartItem?.product) return fail;
+    const product = cartItem.product;
+    if (product.inStock === false) return fail;
+
+    if (!isFormValid) return fail;
+
+    const payeeEmail = unclaimedPayeeEmail || product.payeeEmail || '';
+
+    return { 
+      ok: true, 
+      payeeEmail, 
+      amount: product.price, 
+      currency: product.currency || 'USD', 
+      description: product.title 
+    };
+  };
+
+  const handlePaypalSuccess = async () => {
+    if (!cartItem?.product) return;
+    setIsSendingEmail(true);
+    try {
+      await sendShippingEmail({ ...shippingData }, cartItem.product);
+    } catch (e) {
+      console.error('Failed to send shipping email after paypal capture', e);
+    }
+    clearCart();
+    router.push('/thank-you?provider=paypal');
   };
 
   const handleContinueToCheckout = async (e: React.FormEvent) => {
@@ -752,10 +813,11 @@ const CheckoutPage: React.FC = () => {
                   <div className="flex gap-4 lg:gap-8 items-start">
                     {/* Left: Shipping Form */}
                     <div className="flex-1">
-                      <div className="bg-white rounded-2xl shadow-sm p-6 lg:p-8 border border-gray-100">
-                        <h2 className="text-xl lg:text-2xl font-bold text-[#262626] mb-6 lg:mb-8">Delivery Address</h2>
+                      <div className="bg-white rounded-2xl shadow-sm p-6 lg:p-8 border border-gray-100 flex justify-center">
+                        <div className="w-full max-w-[750px]">
+                          <h2 className="text-xl lg:text-2xl font-bold text-[#262626] mb-6 lg:mb-8 text-left">Delivery Address</h2>
 
-                        <form onSubmit={handleContinueToCheckout} className="space-y-6">
+                          <form onSubmit={handleContinueToCheckout} className="space-y-6">
                           {/* Street Address */}
                           <div>
                             <label htmlFor="streetAddress" className="block text-sm font-semibold text-gray-700 mb-3">
@@ -893,36 +955,27 @@ const CheckoutPage: React.FC = () => {
                             />
                           </div>
 
-                          {/* Continue to Payment Button - Desktop (at end of form) */}
+                          {/* Continue to Payment Button - Desktop */}
                           <div className="hidden lg:block mt-8">
-                            <button
-                              type="submit"
-                              onClick={(e) => {
-                                console.log('🔘 [Checkout] Submit button clicked (desktop)');
-                                // Let form onSubmit handle it
-                              }}
-                              disabled={isSendingEmail || isRedirecting}
-                              className={`w-full font-bold py-5 px-8 rounded-xl transition-colors duration-200 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed text-white focus:outline-none focus:ring-4 focus:ring-[#090A28] focus:ring-offset-2 text-xl ${isSendingEmail || isRedirecting
-                                ? 'bg-gray-400 cursor-not-allowed'
-                                : 'bg-[#090A28] hover:bg-[#1c2070]'
-                                }`}
-                            >
-                              {isSendingEmail ? (
-                                <>
-                                  <div className="animate-spin rounded-full h-6 w-6 border-b-3 border-white mr-3"></div>
-                                  <span className="text-xl font-bold">Confirming Address...</span>
-                                </>
-                              ) : isRedirecting ? (
-                                <>
-                                  <div className="animate-spin rounded-full h-6 w-6 border-b-3 border-white mr-3"></div>
-                                  <span className="text-xl font-bold">Redirecting...</span>
-                                </>
-                              ) : (
-                                <>
-                                  <span className="text-xl font-bold">Continue to Payment</span>
-                                </>
-                              )}
-                            </button>
+                            {product.checkoutFlow === 'paypal-unclaimed' ? (
+                              <PaypalInlineButton
+                                containerId="paypal-inline-desktop-form"
+                                onBeforePayment={handlePaypalBeforePayment}
+                                onSuccess={handlePaypalSuccess}
+                                disabled={isSendingEmail || !isFormValid}
+                              />
+                            ) : (
+                              <button
+                                type="submit"
+                                onClick={() => console.log('🔘 [Checkout] Submit button clicked (desktop)')}
+                                disabled={isSendingEmail || isRedirecting}
+                                className={`w-full font-bold py-5 px-8 rounded-xl transition-colors duration-200 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed text-white focus:outline-none focus:ring-4 focus:ring-[#090A28] focus:ring-offset-2 text-xl ${isSendingEmail || isRedirecting ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#090A28] hover:bg-[#1c2070]'}`}
+                              >
+                                {isSendingEmail ? (<><div className="animate-spin rounded-full h-6 w-6 border-b-3 border-white mr-3" /><span className="text-xl font-bold">Confirming Address...</span></>) :
+                                 isRedirecting ? (<><div className="animate-spin rounded-full h-6 w-6 border-b-3 border-white mr-3" /><span className="text-xl font-bold">Redirecting...</span></>) :
+                                 (<span className="text-xl font-bold">Continue to Payment</span>)}
+                              </button>
+                            )}
                           </div>
                         </form>
 
@@ -960,6 +1013,7 @@ const CheckoutPage: React.FC = () => {
                                 Shipping Policy
                               </Link>
                             </div>
+                          </div>
                           </div>
                         </div>
 
@@ -1166,45 +1220,50 @@ const CheckoutPage: React.FC = () => {
                       )}
                     </div>
 
-                    {/* CTA Button - Desktop (at end of form) */}
+                    {/* CTA Button - Desktop */}
                     <div className="hidden lg:block mt-8">
-                      <button
-                        type="submit"
-                        onClick={(e) => {
-                          console.log('🔘 [Checkout] Submit button clicked (desktop)');
-                          // Let form onSubmit handle it, but log for debugging
-                        }}
-                        disabled={isSendingEmail || isRedirecting}
-                        className={`w-full font-bold py-5 px-8 rounded-xl transition-colors duration-200 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-4 focus:ring-[#090A28] focus:ring-offset-2 text-xl ${isSendingEmail || isRedirecting
-                          ? 'bg-gray-400 cursor-not-allowed text-white'
-                          : 'bg-[#090A28] hover:bg-[#1c2070] text-white'
-                          }`}
-                      >
-                        {isSendingEmail ? (
-                          <>
-                            <div className="animate-spin rounded-full h-6 w-6 border-b-3 border-white mr-3"></div>
-                            <span className="text-white text-xl font-bold">Confirming Address...</span>
-                          </>
-                        ) : isRedirecting ? (
-                          <>
-                            <div className="animate-spin rounded-full h-6 w-6 border-b-3 border-white mr-3"></div>
-                            <span className="text-white text-xl font-bold">Redirecting...</span>
-                          </>
-                        ) : (
-                          <>
-                            <span className="text-white text-xl font-bold">Continue to Payment</span>
-                          </>
-                        )}
-                      </button>
+                      {product.checkoutFlow === 'paypal-unclaimed' ? (
+                        <PaypalInlineButton
+                          containerId="paypal-inline-mobile-form-desktop-btn"
+                          onBeforePayment={handlePaypalBeforePayment}
+                          onSuccess={handlePaypalSuccess}
+                          disabled={isSendingEmail || !isFormValid}
+                        />
+                      ) : (
+                        <button
+                          type="submit"
+                          onClick={() => console.log('🔘 [Checkout] Submit button clicked (mobile-form desktop)')}
+                          disabled={isSendingEmail || isRedirecting}
+                          className={`w-full font-bold py-5 px-8 rounded-xl transition-colors duration-200 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-4 focus:ring-[#090A28] focus:ring-offset-2 text-xl ${isSendingEmail || isRedirecting ? 'bg-gray-400 cursor-not-allowed text-white' : 'bg-[#090A28] hover:bg-[#1c2070] text-white'}`}
+                        >
+                          {isSendingEmail ? (<><div className="animate-spin rounded-full h-6 w-6 border-b-3 border-white mr-3" /><span className="text-white text-xl font-bold">Confirming Address...</span></>) :
+                           isRedirecting ? (<><div className="animate-spin rounded-full h-6 w-6 border-b-3 border-white mr-3" /><span className="text-white text-xl font-bold">Redirecting...</span></>) :
+                           (<span className="text-white text-xl font-bold">Continue to Payment</span>)}
+                        </button>
+                      )}
                     </div>
 
-                    {/* CTA Button - Mobile (Sticky) */}
-                    <MobileCheckoutCTA
-                      disabled={isSendingEmail || isRedirecting}
-                      isLoading={isSendingEmail || isRedirecting}
-                      loadingLabel={isSendingEmail ? "Confirming Address..." : "Redirecting..."}
-                      label="Continue to Payment"
-                    />
+                    {/* CTA Button - Mobile Sticky (hidden for paypal-unclaimed, PayPal button is in-form) */}
+                    {product.checkoutFlow !== 'paypal-unclaimed' && (
+                      <MobileCheckoutCTA
+                        disabled={isSendingEmail || isRedirecting}
+                        isLoading={isSendingEmail || isRedirecting}
+                        loadingLabel={isSendingEmail ? "Confirming Address..." : "Redirecting..."}
+                        label="Continue to Payment"
+                      />
+                    )}
+
+                    {/* Mobile inline PayPal button */}
+                    {product.checkoutFlow === 'paypal-unclaimed' && (
+                      <div className="lg:hidden mt-6 mb-4">
+                        <PaypalInlineButton
+                          containerId="paypal-inline-mobile-form-mobile-btn"
+                          onBeforePayment={handlePaypalBeforePayment}
+                          onSuccess={handlePaypalSuccess}
+                          disabled={isSendingEmail || !isFormValid}
+                        />
+                      </div>
+                    )}
 
                     {/* Secure Checkout Info - Mobile */}
                     <div className="lg:hidden mt-4 mb-4 flex flex-col items-center justify-center space-y-2 text-center w-full">
