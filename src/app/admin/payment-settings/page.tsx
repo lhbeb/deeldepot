@@ -333,7 +333,7 @@ export default function PaymentSettingsPage() {
                                     className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#090A28] focus:border-transparent text-sm"
                                     required
                                 />
-                                <p className="text-xs text-gray-500 mt-1.5 ml-1">This email will be used for <strong>all products</strong> that have the &quot;PayPal Unclaimed&quot; flow enabled.</p>
+                                <p className="text-xs text-gray-500 mt-1.5 ml-1">Payments for all <strong>PayPal Unclaimed</strong> products will be sent directly to this email via PayPal Standard Redirect. No Client ID required.</p>
                             </div>
 
                             <div className="pt-6 border-t border-gray-100 flex justify-end">

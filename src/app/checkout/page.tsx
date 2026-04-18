@@ -15,7 +15,7 @@ import KofiCheckout from '@/components/KofiCheckout';
 
 import PaypalInvoiceConfirmation from '@/components/PaypalInvoiceConfirmation';
 import PaypalUnclaimedCheckout from '@/components/PaypalUnclaimedCheckout';
-import PaypalInlineButton from '@/components/PaypalInlineButton';
+import PaypalRedirectButton from '@/components/PaypalRedirectButton';
 
 
 interface ShippingData {
@@ -89,6 +89,7 @@ const CheckoutPage: React.FC = () => {
   const [isSendingEmail, setIsSendingEmail] = useState(false);
   const [sellerName, setSellerName] = useState<string | null>(null);
   const [unclaimedPayeeEmail, setUnclaimedPayeeEmail] = useState('');
+  const [paypalClientId, setPaypalClientId] = useState('');
 
 
 
@@ -154,20 +155,12 @@ const CheckoutPage: React.FC = () => {
   ];
 
   const ukRegions = [
-    'England', 'Scotland', 'Wales', 'Northern Ireland',
-    'Bedfordshire', 'Berkshire', 'Bristol', 'Buckinghamshire', 'Cambridgeshire', 'Cheshire',
-    'Cornwall', 'Cumbria', 'Derbyshire', 'Devon', 'Dorset', 'Durham', 'East Sussex', 'Essex',
-    'Gloucestershire', 'Greater London', 'Greater Manchester', 'Hampshire', 'Herefordshire',
-    'Hertfordshire', 'Isle of Wight', 'Kent', 'Lancashire', 'Leicestershire', 'Lincolnshire',
-    'London', 'Merseyside', 'Norfolk', 'Northamptonshire', 'Northumberland', 'Nottinghamshire',
-    'Oxfordshire', 'Rutland', 'Shropshire', 'Somerset', 'South Yorkshire', 'Staffordshire',
-    'Suffolk', 'Surrey', 'Tyne and Wear', 'Warwickshire', 'West Midlands', 'West Sussex',
-    'West Yorkshire', 'Wiltshire', 'Worcestershire'
+    'England', 'Scotland', 'Wales', 'Northern Ireland'
   ];
 
   const australianStates = [
-    'Australian Capital Territory', 'New South Wales', 'Northern Territory', 'Queensland',
-    'South Australia', 'Tasmania', 'Victoria', 'Western Australia'
+    'New South Wales', 'Victoria', 'Queensland', 'Western Australia', 'South Australia',
+    'Tasmania', 'Australian Capital Territory', 'Northern Territory'
   ];
 
   const netherlandsProvinces = [
@@ -175,9 +168,11 @@ const CheckoutPage: React.FC = () => {
     'North Brabant', 'North Holland', 'Overijssel', 'South Holland', 'Utrecht', 'Zeeland'
   ];
 
-  const countryRegionMap: Record<string, string[]> = {
-    '+1': [...usStates, ...canadianProvinces], // US/Canada
+  // Mapping state variables
+  const regionData = {
+    '+1': [...usStates, ...canadianProvinces], // Combined for brevity or use separate logic if you have separate country selectors
     '+44': ukRegions, // UK
+    '+31': netherlandsProvinces, // Netherlands
     '+61': australianStates, // Australia
   };
 
@@ -224,12 +219,21 @@ const CheckoutPage: React.FC = () => {
 
         // Pre-fetch PayPal settings so it's ready immediately when button is clicked
         if (item.product?.checkoutFlow === 'paypal-unclaimed') {
-          fetch('/api/payment-settings/unclaimed')
+          fetch(`/api/payment-settings/unclaimed?t=${Date.now()}`)
             .then(res => res.ok ? res.json() : null)
             .then(data => {
-              if (data && data.payeeEmail) setUnclaimedPayeeEmail(data.payeeEmail);
+              if (data) {
+                if (data.payeeEmail) setUnclaimedPayeeEmail(data.payeeEmail);
+                setPaypalClientId(data.clientId || process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || 'sb'); 
+              } else {
+                // If API fails, still provide a fallback to unblock the UI
+                setPaypalClientId(process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || 'sb');
+              }
             })
-            .catch(err => console.error('Error fetching paypal email', err));
+            .catch(err => {
+              console.error('Error fetching paypal email', err);
+              setPaypalClientId(process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || 'sb');
+            });
         }
       } catch (error) {
         debugError('CheckoutPage: useEffect - Error loading cart', error);
@@ -272,7 +276,7 @@ const CheckoutPage: React.FC = () => {
         return;
       }
 
-      const regions = countryRegionMap['US'] || [];
+      const regions = regionData[shippingData.country] || [];
       const filtered = regions.filter(region =>
         region.toLowerCase().includes(value.toLowerCase())
       );
@@ -397,39 +401,66 @@ const CheckoutPage: React.FC = () => {
 
 
   /**
-   * Called by the PayPal inline button before opening PayPal.
-   * Runs local validation ONLY so the popup opens instantly.
+   * Called by the PayPal Redirect button.
+   * Runs validation AND saves the order intent to the DB before redirecting.
    */
   const handlePaypalBeforePayment = async (): Promise<{ ok: boolean; payeeEmail: string; amount: number; currency: string; description: string }> => {
     const fail = { ok: false, payeeEmail: '', amount: 0, currency: 'USD', description: '' };
 
     if (!cartItem?.product) return fail;
     const product = cartItem.product;
-    if (product.inStock === false) return fail;
-
-    if (!isFormValid) return fail;
-
-    const payeeEmail = unclaimedPayeeEmail || product.payeeEmail || '';
-
-    return { 
-      ok: true, 
-      payeeEmail, 
-      amount: product.price, 
-      currency: product.currency || 'USD', 
-      description: product.title 
-    };
-  };
-
-  const handlePaypalSuccess = async () => {
-    if (!cartItem?.product) return;
-    setIsSendingEmail(true);
-    try {
-      await sendShippingEmail({ ...shippingData }, cartItem.product);
-    } catch (e) {
-      console.error('Failed to send shipping email after paypal capture', e);
+    if (product.inStock === false) {
+      alert('Sorry, this item is no longer in stock.');
+      return fail;
     }
-    clearCart();
-    router.push('/thank-you?provider=paypal');
+
+    if (!isFormValid) {
+      alert('Please complete all required shipping fields before continuing to payment.');
+      return fail;
+    }
+
+    try {
+      // 1. Save the order / notify owner before they leave for PayPal
+      console.log('🚀 [PayPal] Saving order intent...');
+      setIsSendingEmail(true);
+      
+      const orderId = await sendShippingEmail({ ...shippingData }, product);
+      setIsSendingEmail(false);
+
+      if (!orderId) {
+        throw new Error('Failed to save order intent');
+      }
+
+      // 2. Return data for the actual PayPal redirect
+      const payeeEmail = unclaimedPayeeEmail || product.payeeEmail || '';
+      // Inline total calculation: product price + optional shipping
+      const shippingCost = cartItem.shippingMethod?.price || 0;
+      const amount = parseFloat((product.price + shippingCost).toFixed(2));
+
+      // Guard: If no payee email is configured, fail clearly
+      if (!payeeEmail) {
+        alert('Payment is not configured for this product. Please contact support.');
+        return fail;
+      }
+
+      console.log('💳 [PayPal] Resolved payeeEmail:', payeeEmail, '| amount:', amount, product.currency || 'USD');
+
+      // Clear the cart immediately so the customer can't double-submit
+      clearCart();
+
+      return { 
+        ok: true, 
+        payeeEmail, 
+        amount: amount, 
+        currency: product.currency || 'USD', 
+        description: product.title 
+      };
+    } catch (err) {
+      debugError('CheckoutPage: handlePaypalBeforePayment', err);
+      setIsSendingEmail(false);
+      alert('Failed to initialize checkout. Please check your connection and try again.');
+      return fail;
+    }
   };
 
   const handleContinueToCheckout = async (e: React.FormEvent) => {
@@ -958,10 +989,8 @@ const CheckoutPage: React.FC = () => {
                           {/* Continue to Payment Button - Desktop */}
                           <div className="hidden lg:block mt-8">
                             {product.checkoutFlow === 'paypal-unclaimed' ? (
-                              <PaypalInlineButton
-                                containerId="paypal-inline-desktop-form"
+                              <PaypalRedirectButton
                                 onBeforePayment={handlePaypalBeforePayment}
-                                onSuccess={handlePaypalSuccess}
                                 disabled={isSendingEmail || !isFormValid}
                               />
                             ) : (
@@ -1223,10 +1252,8 @@ const CheckoutPage: React.FC = () => {
                     {/* CTA Button - Desktop */}
                     <div className="hidden lg:block mt-8">
                       {product.checkoutFlow === 'paypal-unclaimed' ? (
-                        <PaypalInlineButton
-                          containerId="paypal-inline-mobile-form-desktop-btn"
+                        <PaypalRedirectButton
                           onBeforePayment={handlePaypalBeforePayment}
-                          onSuccess={handlePaypalSuccess}
                           disabled={isSendingEmail || !isFormValid}
                         />
                       ) : (
@@ -1256,10 +1283,8 @@ const CheckoutPage: React.FC = () => {
                     {/* Mobile inline PayPal button */}
                     {product.checkoutFlow === 'paypal-unclaimed' && (
                       <div className="lg:hidden mt-6 mb-4">
-                        <PaypalInlineButton
-                          containerId="paypal-inline-mobile-form-mobile-btn"
+                        <PaypalRedirectButton
                           onBeforePayment={handlePaypalBeforePayment}
-                          onSuccess={handlePaypalSuccess}
                           disabled={isSendingEmail || !isFormValid}
                         />
                       </div>

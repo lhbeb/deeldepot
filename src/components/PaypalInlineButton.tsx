@@ -12,6 +12,8 @@ interface PaypalInlineButtonProps {
   disabled?: boolean;
   /** Unique DOM id for the PayPal button container. Must be unique per mounted instance. */
   containerId?: string;
+  currency?: string;
+  clientId?: string;
 }
 
 /**
@@ -25,6 +27,8 @@ const PaypalInlineButton: React.FC<PaypalInlineButtonProps> = ({
   onError,
   disabled,
   containerId = 'paypal-inline-button-container',
+  currency = 'USD',
+  clientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || 'sb',
 }) => {
   const [sdkReady, setSdkReady] = useState(false);
   const [rendered, setRendered] = useState(false);
@@ -179,7 +183,7 @@ const PaypalInlineButton: React.FC<PaypalInlineButtonProps> = ({
       </div>
 
       <Script
-        src="https://www.paypal.com/sdk/js?client-id=sb&currency=USD"
+        src={`https://www.paypal.com/sdk/js?client-id=${clientId}&currency=${currency}`}
         strategy="afterInteractive"
         onReady={() => setSdkReady(true)}
         onError={() => setError('Failed to load PayPal script. Check your connection.')}

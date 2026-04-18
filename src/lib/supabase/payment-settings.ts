@@ -7,10 +7,6 @@ export interface StripeConfig {
     isActive: boolean;
 }
 
-export interface PaypalConfig {
-    payeeEmail: string;
-}
-
 /**
  * Fetches the active Stripe configuration from the database.
  * If not configured in the DB, it falls back to environment variables.
@@ -22,7 +18,7 @@ let lastFetchTime = 0;
 let cachedPaypalConfig: PaypalConfig | null = null;
 let lastPaypalFetchTime = 0;
 
-const CACHE_TTL = 60 * 1000; // 1 minute
+const CACHE_TTL = 0; // Temporarily 0 to flush cache
 
 export async function getStripeConfig(): Promise<StripeConfig> {
     const now = Date.now();
@@ -80,8 +76,13 @@ export async function getStripeConfig(): Promise<StripeConfig> {
     return fallbackConfig;
 }
 
+export interface PaypalConfig {
+    payeeEmail: string;
+    clientId: string;
+}
+
 /**
- * Fetches the global PayPal Unclaimed configuration from the database.
+ * Fetches the global PayPal Unclaimed configuration and primary client ID from the database.
  */
 export async function getPaypalUnclaimedConfig(): Promise<PaypalConfig> {
     const now = Date.now();
@@ -90,10 +91,12 @@ export async function getPaypalUnclaimedConfig(): Promise<PaypalConfig> {
         return cachedPaypalConfig;
     }
 
-    try {
-        let data: { payee_email?: string | null; publishable_key?: string | null } | null = null;
-        let error: any = null;
+    let payeeEmail = '';
+    // Priority 1: Env variable
+    let clientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || '';
 
+    try {
+        // Fetch Unclaimed Payee Email
         const primaryResult = await supabaseAdmin
             .from('payment_settings')
             .select('payee_email, publishable_key')
@@ -101,40 +104,52 @@ export async function getPaypalUnclaimedConfig(): Promise<PaypalConfig> {
             .eq('is_active', true)
             .single();
 
-        data = primaryResult.data;
-        error = primaryResult.error;
-
-        // Backward-compatible fallback for databases that do not yet have payee_email.
-        if (error && error.code === '42703') {
+        if (!primaryResult.error && primaryResult.data) {
+            payeeEmail = primaryResult.data.payee_email || primaryResult.data.publishable_key || '';
+            
+            // If we don't have a clientId from env yet, see if publishable_key looks like a real Client ID (not an email)
+            if (!clientId && primaryResult.data.publishable_key && !primaryResult.data.publishable_key.includes('@')) {
+                clientId = primaryResult.data.publishable_key;
+            }
+        } else if (primaryResult.error && primaryResult.error.code === '42703') {
             const fallbackResult = await supabaseAdmin
                 .from('payment_settings')
                 .select('publishable_key')
                 .eq('provider', 'paypal-unclaimed')
                 .eq('is_active', true)
                 .single();
-
-            data = fallbackResult.data;
-            error = fallbackResult.error;
+            if (!fallbackResult.error && fallbackResult.data) {
+                payeeEmail = fallbackResult.data.publishable_key || '';
+                if (!clientId && payeeEmail && !payeeEmail.includes('@')) {
+                    clientId = payeeEmail;
+                }
+            }
         }
 
-        if (!error && data) {
-            cachedPaypalConfig = {
-                payeeEmail: data.payee_email || data.publishable_key || ''
-            };
-            lastPaypalFetchTime = now;
-            return cachedPaypalConfig;
+        // Priority 2: Main PayPal Config (for client ID) - This row is created by admin panel
+        if (!clientId) {
+            const mainPaypalResult = await supabaseAdmin
+                .from('payment_settings')
+                .select('publishable_key')
+                .eq('provider', 'paypal')
+                .eq('is_active', true)
+                .single();
+
+            if (!mainPaypalResult.error && mainPaypalResult.data && mainPaypalResult.data.publishable_key) {
+                clientId = mainPaypalResult.data.publishable_key;
+            }
         }
+
     } catch (err) {
         console.error('❌ [Payment Settings] Unexpected error fetching PayPal config:', err);
     }
 
-    // Default fallback
-    const fallback: PaypalConfig = {
-        payeeEmail: ''
-    };
-    cachedPaypalConfig = fallback;
+    // Final fallback to sandbox if absolutely nothing found
+    if (!clientId) clientId = 'sb';
+
+    cachedPaypalConfig = { payeeEmail, clientId };
     lastPaypalFetchTime = now;
-    return fallback;
+    return cachedPaypalConfig;
 }
 
 /**

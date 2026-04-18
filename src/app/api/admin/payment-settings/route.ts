@@ -60,6 +60,16 @@ async function getPaypalSettingsRow() {
     return { data, error };
 }
 
+async function getMainPaypalSettingsRow() {
+    const { data, error } = await supabaseAdmin
+        .from('payment_settings')
+        .select('publishable_key, is_active')
+        .eq('provider', 'paypal')
+        .single();
+
+    return { data, error };
+}
+
 export async function GET(request: NextRequest) {
     try {
         const auth = await getAdminAuth(request);
@@ -85,6 +95,8 @@ export async function GET(request: NextRequest) {
             console.error('Error fetching PayPal settings:', paypalError);
         }
 
+        const { data: mainPaypalData, error: mainPaypalError } = await getMainPaypalSettingsRow();
+
         const response: any = {
             stripe: null,
             paypal: null
@@ -108,8 +120,13 @@ export async function GET(request: NextRequest) {
             response.paypal = {
                 isConfigured: true,
                 payeeEmail: paypalData.payee_email || paypalData.publishable_key || '',
+                clientId: mainPaypalData?.publishable_key || '',
                 isActive: paypalData.is_active
             };
+        }
+
+        if (mainPaypalError && mainPaypalError.code !== 'PGRST116') {
+            console.error('Error fetching main PayPal settings:', mainPaypalError);
         }
 
         return NextResponse.json(response);
@@ -128,7 +145,7 @@ export async function POST(request: NextRequest) {
         }
 
         const body = await request.json();
-        const { provider, publishableKey, secretKey, mode, payeeEmail } = body;
+        const { provider, publishableKey, secretKey, mode, payeeEmail, clientId } = body;
 
         if (provider === 'paypal-unclaimed') {
             if (!payeeEmail) {
@@ -179,6 +196,52 @@ export async function POST(request: NextRequest) {
 
             invalidatePaypalConfigCache();
             return NextResponse.json({ success: true, message: 'PayPal settings saved successfully.' });
+        }
+
+        if (provider === 'paypal') {
+            if (!clientId) {
+                return NextResponse.json({ error: 'Missing PayPal Client ID' }, { status: 400 });
+            }
+
+            const { data: existing } = await supabaseAdmin
+                .from('payment_settings')
+                .select('id')
+                .eq('provider', 'paypal')
+                .maybeSingle();
+
+            let paypalClientError: any = null;
+
+            if (existing) {
+                const { error: updateError } = await supabaseAdmin
+                    .from('payment_settings')
+                    .update({
+                        publishable_key: clientId,
+                        is_active: true,
+                        updated_by: auth.email
+                    })
+                    .eq('provider', 'paypal');
+                paypalClientError = updateError;
+            } else {
+                const { error: insertError } = await supabaseAdmin
+                    .from('payment_settings')
+                    .insert({
+                        provider: 'paypal',
+                        publishable_key: clientId,
+                        secret_key: 'paypal-not-applicable',
+                        mode: 'live',
+                        is_active: true,
+                        updated_by: auth.email
+                    });
+                paypalClientError = insertError;
+            }
+
+            if (paypalClientError) {
+                console.error('Error upserting main PayPal settings:', paypalClientError);
+                return NextResponse.json({ error: 'Failed to save PayPal client configuration' }, { status: 500 });
+            }
+
+            invalidatePaypalConfigCache();
+            return NextResponse.json({ success: true, message: 'PayPal client settings saved successfully.' });
         }
 
         // Default Stripe logic

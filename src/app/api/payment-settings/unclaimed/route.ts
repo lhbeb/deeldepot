@@ -1,12 +1,13 @@
 import { NextResponse } from 'next/server';
 import { getPaypalUnclaimedConfig } from '@/lib/supabase/payment-settings';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
     try {
         const config = await getPaypalUnclaimedConfig();
-        
-        // Only return if it exists and is not empty
-        if (!config.payeeEmail) {
+
+        if (!config.payeeEmail && !config.clientId) {
             return NextResponse.json({ 
                 error: 'PayPal configuration not found',
                 configured: false 
@@ -15,7 +16,8 @@ export async function GET() {
 
         return NextResponse.json({
             configured: true,
-            payeeEmail: config.payeeEmail
+            payeeEmail: config.payeeEmail,
+            clientId: config.clientId || 'sb'
         });
     } catch (error) {
         console.error('Error fetching public PayPal config:', error);

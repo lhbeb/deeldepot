@@ -246,9 +246,9 @@ const PaypalUnclaimedCheckout: React.FC<PaypalUnclaimedCheckoutProps> = ({
       </div>
 
       <Script
-        src={`https://www.paypal.com/sdk/js?client-id=sb&currency=${product.currency || 'USD'}`}
+        src={`https://www.paypal.com/sdk/js?client-id=${process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || 'sb'}&currency=${product.currency || 'USD'}`}
         strategy="afterInteractive"
-        onLoad={() => setSdkReady(true)}
+        onReady={() => setSdkReady(true)}
         onError={() => setError("PayPal SDK failed to load. Please check your connection.")}
       />
     </div>
