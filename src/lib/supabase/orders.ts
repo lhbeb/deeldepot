@@ -16,6 +16,8 @@ export interface OrderData {
   status?: string;
   paymentProvider?: string;
   fullOrderData: any; // Complete order object for reference
+  sellerPayeeEmail?: string; // The seller who should receive the payout
+  payoutStatus?: string; // 'pending' | 'sent' | 'failed' | 'not_applicable'
 }
 
 /**
@@ -60,6 +62,8 @@ export async function saveOrder(orderData: OrderData): Promise<{ id: string; suc
       full_order_data: orderData.fullOrderData || {},
       email_sent: false,
       email_error: null,
+      seller_payee_email: orderData.sellerPayeeEmail || null,
+      payout_status: orderData.payoutStatus || (orderData.checkoutFlow === 'paypal-unclaimed' ? 'pending' : 'not_applicable'),
     };
 
     console.log('📦 [saveOrder] Inserting data:', JSON.stringify(insertData, null, 2));

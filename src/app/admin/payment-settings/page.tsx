@@ -20,6 +20,9 @@ export default function PaymentSettingsPage() {
     
     // PayPal Unclaimed state
     const [paypalEmail, setPaypalEmail] = useState('');
+    const [paypalClientId, setPaypalClientId] = useState('');
+    const [paypalSecret, setPaypalSecret] = useState('');
+    const [showPaypalSecret, setShowPaypalSecret] = useState(false);
     const [isPaypalConfigured, setIsPaypalConfigured] = useState(false);
     const [isPaypalSaving, setIsPaypalSaving] = useState(false);
     
@@ -64,6 +67,8 @@ export default function PaymentSettingsPage() {
                 if (data.paypal?.isConfigured) {
                     setIsPaypalConfigured(true);
                     setPaypalEmail(data.paypal.payeeEmail || '');
+                    if (data.paypal.clientId) setPaypalClientId(data.paypal.clientId);
+                    if (data.paypal.hasSecret) setPaypalSecret('••••••••••••••••'); // masked
                 }
             } else if (res.status === 401) {
                 console.log("Unauthorized to fetch settings");
@@ -152,7 +157,9 @@ export default function PaymentSettingsPage() {
                 },
                 body: JSON.stringify({
                     provider: 'paypal-unclaimed',
-                    payeeEmail: paypalEmail
+                    payeeEmail: paypalEmail,
+                    ...(paypalClientId.trim() && { clientId: paypalClientId.trim() }),
+                    ...(paypalSecret && !paypalSecret.includes('•') && { secretKey: paypalSecret }),
                 })
             });
 
@@ -324,16 +331,52 @@ export default function PaymentSettingsPage() {
 
                         <form onSubmit={handleSavePaypal} className="p-6 space-y-6">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Global Payee Email</label>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Platform PayPal Email <span className="text-gray-400 font-normal">(receives all buyer payments)</span></label>
                                 <input
                                     type="email"
                                     value={paypalEmail}
                                     onChange={(e) => setPaypalEmail(e.target.value)}
-                                    placeholder="e.g. hoffman_a@gmx.de"
+                                    placeholder="e.g. platform@yourdomain.com"
                                     className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#090A28] focus:border-transparent text-sm"
                                     required
                                 />
-                                <p className="text-xs text-gray-500 mt-1.5 ml-1">Payments for all <strong>PayPal Unclaimed</strong> products will be sent directly to this email via PayPal Standard Redirect. No Client ID required.</p>
+                                <p className="text-xs text-gray-500 mt-1.5 ml-1">Your verified PayPal Business account. All buyer payments land here first — you then payout to sellers from the <strong>Payouts</strong> dashboard.</p>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">PayPal API Client ID <span className="text-amber-600">(for Payouts)</span></label>
+                                <input
+                                    type="text"
+                                    value={paypalClientId}
+                                    onChange={(e) => setPaypalClientId(e.target.value)}
+                                    placeholder="AaBbCcDd... (from developer.paypal.com)"
+                                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#090A28] focus:border-transparent text-sm font-mono"
+                                />
+                                <p className="text-xs text-gray-500 mt-1.5 ml-1">Live Client ID from your PayPal REST app. Required together with the secret below to send payouts.</p>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">PayPal API Client Secret <span className="text-amber-600">(for Payouts)</span></label>
+                                <div className="relative">
+                                    <input
+                                        type={showPaypalSecret ? 'text' : 'password'}
+                                        value={paypalSecret}
+                                        onChange={(e) => setPaypalSecret(e.target.value)}
+                                        placeholder="Paste your PayPal Client Secret here"
+                                        className="w-full px-4 py-2.5 pr-12 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#090A28] focus:border-transparent text-sm font-mono"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowPaypalSecret(!showPaypalSecret)}
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600 rounded-md"
+                                    >
+                                        {showPaypalSecret ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                    </button>
+                                </div>
+                                <p className="text-xs text-amber-600 mt-1.5 ml-1 flex items-center gap-1">
+                                    <AlertCircle className="h-3.5 w-3.5" />
+                                    Required to send PayPal Payouts to sellers. Get this from developer.paypal.com → Live credentials.
+                                </p>
                             </div>
 
                             <div className="pt-6 border-t border-gray-100 flex justify-end">

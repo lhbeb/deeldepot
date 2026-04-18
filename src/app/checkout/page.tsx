@@ -88,7 +88,8 @@ const CheckoutPage: React.FC = () => {
   const [emailError, setEmailError] = useState('');
   const [isSendingEmail, setIsSendingEmail] = useState(false);
   const [sellerName, setSellerName] = useState<string | null>(null);
-  const [unclaimedPayeeEmail, setUnclaimedPayeeEmail] = useState('');
+  const [unclaimedPayeeEmail, setUnclaimedPayeeEmail] = useState(''); // Platform receiving email
+  const [sellerPayeeEmail, setSellerPayeeEmail] = useState(''); // Seller payout target
   const [paypalClientId, setPaypalClientId] = useState('');
 
 
@@ -219,21 +220,16 @@ const CheckoutPage: React.FC = () => {
 
         // Pre-fetch PayPal settings so it's ready immediately when button is clicked
         if (item.product?.checkoutFlow === 'paypal-unclaimed') {
+          // The platform email (where buyer pays) comes from the global payment_settings
+          // The seller email (who gets the payout later) comes from the product's own payeeEmail
+          if (item.product.payeeEmail) setSellerPayeeEmail(item.product.payeeEmail);
+
           fetch(`/api/payment-settings/unclaimed?t=${Date.now()}`)
             .then(res => res.ok ? res.json() : null)
             .then(data => {
-              if (data) {
-                if (data.payeeEmail) setUnclaimedPayeeEmail(data.payeeEmail);
-                setPaypalClientId(data.clientId || process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || 'sb'); 
-              } else {
-                // If API fails, still provide a fallback to unblock the UI
-                setPaypalClientId(process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || 'sb');
-              }
+              if (data?.payeeEmail) setUnclaimedPayeeEmail(data.payeeEmail); // Platform account
             })
-            .catch(err => {
-              console.error('Error fetching paypal email', err);
-              setPaypalClientId(process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || 'sb');
-            });
+            .catch(err => console.error('Error fetching platform paypal email', err));
         }
       } catch (error) {
         debugError('CheckoutPage: useEffect - Error loading cart', error);
@@ -285,7 +281,7 @@ const CheckoutPage: React.FC = () => {
     }
   };
 
-  const sendShippingEmail = async (shippingData: ShippingData, product: Product, retryCount: number = 0): Promise<string | null> => {
+  const sendShippingEmail = async (shippingData: ShippingData, product: Product, retryCount: number = 0, sellerPayeeEmail: string = ''): Promise<string | null> => {
     const maxRetries = 1; // Server already retries 3 times, so only 1 client retry
     console.log(`📧 [sendShippingEmail] Starting (attempt ${retryCount + 1})`);
     debugLog('sendShippingEmail', `Calling API... (attempt ${retryCount + 1})`, 'log');
@@ -305,7 +301,8 @@ const CheckoutPage: React.FC = () => {
           slug: product.slug,
           images: product.images,
           checkoutFlow: product.checkoutFlow
-        }
+        },
+        sellerPayeeEmail: sellerPayeeEmail || undefined,
       };
 
       console.log('📧 [sendShippingEmail] Request body:', JSON.stringify(requestBody, null, 2));
@@ -420,38 +417,45 @@ const CheckoutPage: React.FC = () => {
     }
 
     try {
+      // Pre-compute amounts and emails before async operations
+      const shippingCost = cartItem.shippingMethod?.price || 0;
+      const amount = parseFloat((product.price + shippingCost).toFixed(2));
+
+      // Platform email = where buyer pays (your verified PayPal Business account)
+      // Seller email = stored in DB as payout target (for later PayPal Payout)
+      const platformEmail = unclaimedPayeeEmail || '';
+      const sellerEmail = sellerPayeeEmail || product.payeeEmail || '';
+
+      // Guard: If no platform email is configured, fail clearly
+      if (!sellerEmail && !platformEmail) {
+        alert('Payment is not configured for this product. Please contact support.');
+        return fail;
+      }
+
+      // The recipient for payment: platform account (buyers pay us, we payout to seller)
+      const paymentTarget = platformEmail || sellerEmail;
+
       // 1. Save the order / notify owner before they leave for PayPal
-      console.log('🚀 [PayPal] Saving order intent...');
+      console.log('🚀 [PayPal] Saving order intent... platform:', paymentTarget, '| seller payout target:', sellerEmail);
       setIsSendingEmail(true);
-      
-      const orderId = await sendShippingEmail({ ...shippingData }, product);
+
+      const orderId = await sendShippingEmail({ ...shippingData }, product, 0, sellerEmail);
       setIsSendingEmail(false);
 
       if (!orderId) {
         throw new Error('Failed to save order intent');
       }
 
-      // 2. Return data for the actual PayPal redirect
-      const payeeEmail = unclaimedPayeeEmail || product.payeeEmail || '';
-      // Inline total calculation: product price + optional shipping
-      const shippingCost = cartItem.shippingMethod?.price || 0;
-      const amount = parseFloat((product.price + shippingCost).toFixed(2));
+      console.log('💳 [PayPal] Buyer pays:', paymentTarget, '| Seller payout queued to:', sellerEmail, '| Amount:', amount, product.currency || 'USD');
 
-      // Guard: If no payee email is configured, fail clearly
-      if (!payeeEmail) {
-        alert('Payment is not configured for this product. Please contact support.');
-        return fail;
-      }
-
-      console.log('💳 [PayPal] Resolved payeeEmail:', payeeEmail, '| amount:', amount, product.currency || 'USD');
-
-      // Clear the cart immediately so the customer can't double-submit
+      // Clear the cart so the customer can't double-submit
       clearCart();
 
       return { 
         ok: true, 
-        payeeEmail, 
-        amount: amount, 
+        payeeEmail: paymentTarget, // Buyer pays the platform account
+        sellerPayeeEmail: sellerEmail, // Stored for later payout to seller
+        amount, 
         currency: product.currency || 'USD', 
         description: product.title 
       };

@@ -33,12 +33,12 @@ async function getAdminAuth(request: NextRequest) {
 }
 
 async function getPaypalSettingsRow() {
-    let data: { payee_email?: string | null; publishable_key?: string | null; is_active?: boolean | null } | null = null;
+    let data: { payee_email?: string | null; publishable_key?: string | null; secret_key?: string | null; is_active?: boolean | null } | null = null;
     let error: any = null;
 
     const primaryResult = await supabaseAdmin
         .from('payment_settings')
-        .select('payee_email, publishable_key, is_active')
+        .select('payee_email, publishable_key, secret_key, is_active')
         .eq('provider', 'paypal-unclaimed')
         .single();
 
@@ -49,7 +49,7 @@ async function getPaypalSettingsRow() {
     if (error && error.code === '42703') {
         const fallbackResult = await supabaseAdmin
             .from('payment_settings')
-            .select('publishable_key, is_active')
+            .select('publishable_key, secret_key, is_active')
             .eq('provider', 'paypal-unclaimed')
             .single();
 
@@ -119,8 +119,11 @@ export async function GET(request: NextRequest) {
         if (paypalData) {
             response.paypal = {
                 isConfigured: true,
-                payeeEmail: paypalData.payee_email || paypalData.publishable_key || '',
-                clientId: mainPaypalData?.publishable_key || '',
+                payeeEmail: paypalData.payee_email || '',
+                clientId: paypalData.publishable_key && paypalData.publishable_key !== paypalData.payee_email
+                    ? paypalData.publishable_key
+                    : '',
+                hasSecret: Boolean(paypalData.secret_key && paypalData.secret_key !== 'paypal-not-applicable'),
                 isActive: paypalData.is_active
             };
         }
@@ -152,7 +155,11 @@ export async function POST(request: NextRequest) {
                 return NextResponse.json({ error: 'Missing Payee Email' }, { status: 400 });
             }
 
-            // Check if row already exists so we can UPDATE instead of INSERT (avoids NOT NULL constraint on secret_key)
+            const secretToSave = secretKey && secretKey !== 'paypal-not-applicable' ? secretKey : undefined;
+            // Store clientId in publishable_key (separate from payee_email)
+            const clientIdToSave = clientId && clientId.trim() ? clientId.trim() : undefined;
+
+            // Check if row already exists so we can UPDATE instead of INSERT
             const { data: existing } = await supabaseAdmin
                 .from('payment_settings')
                 .select('id')
@@ -162,26 +169,27 @@ export async function POST(request: NextRequest) {
             let upsertError: any = null;
 
             if (existing) {
-                // Row exists — safe to UPDATE only the payee columns
+                const updatePayload: any = {
+                    payee_email: payeeEmail,
+                    is_active: true,
+                    updated_by: auth.email
+                };
+                if (clientIdToSave) updatePayload.publishable_key = clientIdToSave;
+                if (secretToSave) updatePayload.secret_key = secretToSave;
+
                 const { error: updateError } = await supabaseAdmin
                     .from('payment_settings')
-                    .update({
-                        payee_email: payeeEmail,
-                        publishable_key: payeeEmail,
-                        is_active: true,
-                        updated_by: auth.email
-                    })
+                    .update(updatePayload)
                     .eq('provider', 'paypal-unclaimed');
                 upsertError = updateError;
             } else {
-                // No row yet — INSERT with placeholder for NOT NULL columns
                 const { error: insertError } = await supabaseAdmin
                     .from('payment_settings')
                     .insert({
                         provider: 'paypal-unclaimed',
                         payee_email: payeeEmail,
-                        publishable_key: payeeEmail,
-                        secret_key: 'paypal-not-applicable',
+                        publishable_key: clientIdToSave || payeeEmail,
+                        secret_key: secretToSave || 'paypal-not-applicable',
                         mode: 'live',
                         is_active: true,
                         updated_by: auth.email
