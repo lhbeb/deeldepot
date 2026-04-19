@@ -14,7 +14,7 @@ import type { Review } from '@/types/product';
 import ImageUploader, { ImageUploaderRef, UploadStatus } from '@/components/admin/ImageUploader';
 import AdminLayout from '@/components/AdminLayout';
 import AdminLoading from '@/components/AdminLoading';
-import { PRODUCT_CONDITIONS } from '@/lib/conditions';
+import { PRODUCT_CONDITIONS, normalizeConditionValue } from '@/lib/conditions';
 import AdminSellerReviewsEditor from '@/components/AdminSellerReviewsEditor';
 
 const slugify = (value: string) =>
@@ -154,7 +154,7 @@ export default function EditProductPage() {
         original_price: data.original_price?.toString() || data.originalPrice?.toString() || '',
         brand: data.brand || '',
         category: data.category || '',
-        condition: data.condition || '',
+        condition: normalizeConditionValue(data.condition || ''),
         payee_email: data.payeeEmail || data.payee_email || '',
         checkout_link: data.checkoutLink || data.checkout_link || '',
         checkout_flow: data.checkoutFlow || data.checkout_flow || 'buymeacoffee',
@@ -309,7 +309,7 @@ export default function EditProductPage() {
           original_price: formData.original_price ? parseFloat(formData.original_price) : null,
           brand: formData.brand || '',
           category: formData.category || '',
-          condition: formData.condition || '',
+          condition: normalizeConditionValue(formData.condition || ''),
           payee_email: formData.payee_email?.trim() || '',
           checkout_link: formData.checkout_link || '',
           checkout_flow: formData.checkout_flow,

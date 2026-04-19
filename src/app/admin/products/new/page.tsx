@@ -11,7 +11,7 @@ import {
 import ImageUploader, { ImageUploaderRef, UploadStatus } from '@/components/admin/ImageUploader';
 import AdminLayout from '@/components/AdminLayout';
 import AdminLoading from '@/components/AdminLoading';
-import { PRODUCT_CONDITIONS } from '@/lib/conditions';
+import { PRODUCT_CONDITIONS, normalizeConditionValue } from '@/lib/conditions';
 
 const slugify = (value: string) =>
   value.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
@@ -300,7 +300,7 @@ export default function NewProductPage() {
         original_price: formData.original_price ? parseFloat(formData.original_price) : null,
         brand: formData.brand,
         category: formData.category,
-        condition: formData.condition,
+        condition: normalizeConditionValue(formData.condition),
         payee_email: formData.payee_email,
         checkout_link: formData.checkout_link,
         checkout_flow: formData.checkout_flow,

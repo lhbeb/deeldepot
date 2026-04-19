@@ -15,7 +15,7 @@ import { ChevronLeft, ChevronRight, ChevronDown, ChevronUp, X, ShoppingCart, Zap
 import { useState, useEffect, useMemo } from 'react';
 import type { Product } from '@/types/product';
 import Image from 'next/image';
-import { getConditionTooltip } from '@/lib/conditions';
+import { getConditionDisplayLabel, getConditionTooltip } from '@/lib/conditions';
 
 interface ProductPageClientProps {
   product: Product | null;
@@ -404,17 +404,21 @@ export default function ProductPageClient({ product: initialProduct }: ProductPa
               <h1 className="text-3xl font-medium text-[#262626] mb-1">{title}</h1>
               <SellerBadge sellerId={product?.sellerId} size="md" />
               {condition && (
-                <div className="mt-3 relative flex items-center group cursor-help w-max">
-                  <div className="text-gray-600 font-medium bg-gray-100 px-3 py-1 rounded-full text-sm flex items-center gap-1.5 border border-gray-200">
-                    <Info className="h-4 w-4 text-gray-400 group-hover:text-[#003087] transition-colors" />
-                    {condition}
-                  </div>
-                  {getConditionTooltip(condition) && (
-                    <div className="absolute left-0 bottom-full mb-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible active:opacity-100 active:visible z-50 w-64 p-3 bg-[#090A28] text-white text-xs rounded-lg shadow-xl transition-all duration-200">
-                      {getConditionTooltip(condition)}
-                      <div className="absolute top-full left-6 -mt-px border-4 border-transparent border-t-[#090A28]"></div>
+                <div className="mt-3 w-fit max-w-full">
+                  <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-gray-500">
+                    Condition
+                  </p>
+                  <div className="group inline-flex max-w-full flex-col" tabIndex={0}>
+                    <div className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-gray-200 bg-gray-100 px-3 py-1 text-sm font-medium text-gray-700 transition-colors group-hover:border-[#003087]/30 group-hover:bg-[#003087]/5 group-focus-within:border-[#003087]/30 group-focus-within:bg-[#003087]/5">
+                      <Info className="h-4 w-4 flex-shrink-0 text-gray-400 transition-colors group-hover:text-[#003087] group-focus-within:text-[#003087]" />
+                      <span className="truncate">{getConditionDisplayLabel(condition)}</span>
                     </div>
-                  )}
+                    {getConditionTooltip(condition) && (
+                      <div className="mt-2 hidden max-w-xs rounded-xl border border-[#090A28]/10 bg-[#090A28] px-3 py-2 text-xs leading-5 text-white shadow-lg group-hover:block group-focus-within:block">
+                        {getConditionTooltip(condition)}
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
               {product && product.inStock === false && product.checkoutLink === '#' && (
