@@ -546,7 +546,7 @@ export default function EditProductPage() {
                   <option value="stripe">Stripe (Stripe Checkout - Professional payment processing)</option>
                   <option value="external">External (Custom payment provider)</option>
                   <option value="paypal-invoice">PayPal Invoice (On-site confirmation — invoice sent by email)</option>
-                  <option value="paypal-direct">PayPal Checkout (SDK — direct payment to your PayPal email)</option>
+                  <option value="paypal-direct">PayPal Redirect (PayPal Standard — direct payment to your PayPal email)</option>
                 </select>
                 <div className="mt-2 p-3 bg-blue-50 border border-blue-100 rounded-lg">
                   <p className="text-xs text-blue-800">
@@ -568,7 +568,7 @@ export default function EditProductPage() {
                       </>
                     ) : formData.checkout_flow === 'paypal-direct' ? (
                       <>
-                        <strong>PayPal Checkout:</strong> Native PayPal buttons load directly on your site. Buyer pays using PayPal — funds go to the email configured in Payment Settings.
+                        <strong>PayPal Redirect:</strong> Customer is redirected to PayPal Standard after address confirmation. Buyer pays the email configured in Payment Settings.
                       </>
                     ) : (
                       <>

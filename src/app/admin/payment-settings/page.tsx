@@ -3,10 +3,8 @@
 import { useState, useEffect } from 'react';
 import AdminLayout from '@/components/AdminLayout';
 import { CreditCard, Save, ShieldOff, Eye, EyeOff, AlertCircle, RefreshCw, CheckCircle2, XCircle } from 'lucide-react';
-import { useRouter } from 'next/navigation';
 
 export default function PaymentSettingsPage() {
-    const router = useRouter();
     const [adminRole, setAdminRole] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
@@ -18,11 +16,8 @@ export default function PaymentSettingsPage() {
     const [showSecret, setShowSecret] = useState(false);
     const [isConfigured, setIsConfigured] = useState(false);
     
-    // PayPal Direct Checkout state
+    // PayPal Direct redirect state
     const [paypalEmail, setPaypalEmail] = useState('');
-    const [paypalClientId, setPaypalClientId] = useState('');
-    const [paypalSecret, setPaypalSecret] = useState('');
-    const [showPaypalSecret, setShowPaypalSecret] = useState(false);
     const [isPaypalConfigured, setIsPaypalConfigured] = useState(false);
     const [isPaypalSaving, setIsPaypalSaving] = useState(false);
     
@@ -67,8 +62,6 @@ export default function PaymentSettingsPage() {
                 if (data.paypal?.isConfigured) {
                     setIsPaypalConfigured(true);
                     setPaypalEmail(data.paypal.payeeEmail || '');
-                    if (data.paypal.clientId) setPaypalClientId(data.paypal.clientId);
-                    if (data.paypal.hasSecret) setPaypalSecret('••••••••••••••••'); // masked
                 }
             } else if (res.status === 401) {
                 console.log("Unauthorized to fetch settings");
@@ -158,8 +151,6 @@ export default function PaymentSettingsPage() {
                 body: JSON.stringify({
                     provider: 'paypal-direct',
                     payeeEmail: paypalEmail,
-                    ...(paypalClientId.trim() && { clientId: paypalClientId.trim() }),
-                    ...(paypalSecret && !paypalSecret.includes('•') && { secretKey: paypalSecret }),
                 })
             });
 
@@ -187,7 +178,7 @@ export default function PaymentSettingsPage() {
     return (
         <AdminLayout
             title="Payment Settings"
-            subtitle="Manage Stripe API keys and payment configurations."
+            subtitle="Manage Stripe API keys and payment redirect settings."
         >
             {isLoading ? (
                 <div className="flex items-center justify-center py-24">
@@ -320,7 +311,7 @@ export default function PaymentSettingsPage() {
                                     </svg>
                                 </div>
                                 <div>
-                                    <h3 className="font-semibold text-[#262626] text-base">PayPal Checkout</h3>
+                                    <h3 className="font-semibold text-[#262626] text-base">PayPal Redirect Checkout</h3>
                                     <div className="flex items-center gap-2 mt-1">
                                         <div className={`w-2 h-2 rounded-full ${isPaypalConfigured ? 'bg-green-500' : 'bg-gray-300'}`}></div>
                                         <p className="text-sm text-gray-500">{isPaypalConfigured ? 'Active — Receiving Payments' : 'Not Configured'}</p>
@@ -340,7 +331,7 @@ export default function PaymentSettingsPage() {
                                     className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#090A28] focus:border-transparent text-sm"
                                     required
                                 />
-                                <p className="text-xs text-gray-500 mt-1.5 ml-1">Enter your verified PayPal Business or Personal account email. All buyer payments will be sent directly to this address.</p>
+                                <p className="text-xs text-gray-500 mt-1.5 ml-1">Enter the PayPal email that should receive buyer payments through the PayPal Standard redirect flow.</p>
                             </div>
 
                             <div className="pt-6 border-t border-gray-100 flex justify-end">
@@ -357,7 +348,7 @@ export default function PaymentSettingsPage() {
                                     ) : (
                                         <>
                                             <Save className="h-4 w-4" />
-                                            Save PayPal Email
+                                            Save PayPal Redirect Email
                                         </>
                                     )}
                                 </button>

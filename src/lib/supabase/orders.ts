@@ -344,6 +344,37 @@ export async function updateOrderStripeStatus(
   }
 }
 
+/**
+ * Update PayPal Standard redirect lifecycle status fields
+ */
+export async function updateOrderPaypalStatus(
+  orderId: string,
+  updates: {
+    status?: string;
+    full_order_data?: any;
+  }
+): Promise<boolean> {
+  try {
+    const { error } = await supabaseAdmin
+      .from('orders')
+      .update({
+        ...updates,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', orderId);
+
+    if (error) {
+      console.error('❌ [updateOrderPaypalStatus] Error:', error);
+      return false;
+    }
+
+    return true;
+  } catch (error) {
+    console.error('❌ [updateOrderPaypalStatus] Exception:', error);
+    return false;
+  }
+}
+
 
 /**
  * Get total orders count without fetching rows (bypasses 1000-row PostgREST limit)

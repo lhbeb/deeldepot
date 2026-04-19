@@ -33,12 +33,12 @@ async function getAdminAuth(request: NextRequest) {
 }
 
 async function getPaypalSettingsRow() {
-    let data: { payee_email?: string | null; publishable_key?: string | null; secret_key?: string | null; is_active?: boolean | null } | null = null;
+    let data: { payee_email?: string | null; publishable_key?: string | null; is_active?: boolean | null } | null = null;
     let error: any = null;
 
     const primaryResult = await supabaseAdmin
         .from('payment_settings')
-        .select('payee_email, publishable_key, secret_key, is_active')
+        .select('payee_email, publishable_key, is_active')
         .eq('provider', 'paypal-direct')
         .single();
 
@@ -49,23 +49,13 @@ async function getPaypalSettingsRow() {
     if (error && error.code === '42703') {
         const fallbackResult = await supabaseAdmin
             .from('payment_settings')
-            .select('publishable_key, secret_key, is_active')
+            .select('publishable_key, is_active')
             .eq('provider', 'paypal-direct')
             .single();
 
         data = fallbackResult.data;
         error = fallbackResult.error;
     }
-
-    return { data, error };
-}
-
-async function getMainPaypalSettingsRow() {
-    const { data, error } = await supabaseAdmin
-        .from('payment_settings')
-        .select('publishable_key, is_active')
-        .eq('provider', 'paypal')
-        .single();
 
     return { data, error };
 }
@@ -95,8 +85,6 @@ export async function GET(request: NextRequest) {
             console.error('Error fetching PayPal settings:', paypalError);
         }
 
-        const { data: mainPaypalData, error: mainPaypalError } = await getMainPaypalSettingsRow();
-
         const response: any = {
             stripe: null,
             paypal: null
@@ -120,16 +108,8 @@ export async function GET(request: NextRequest) {
             response.paypal = {
                 isConfigured: true,
                 payeeEmail: paypalData.payee_email || '',
-                clientId: paypalData.publishable_key && paypalData.publishable_key !== paypalData.payee_email
-                    ? paypalData.publishable_key
-                    : '',
-                hasSecret: Boolean(paypalData.secret_key && paypalData.secret_key !== 'paypal-not-applicable'),
                 isActive: paypalData.is_active
             };
-        }
-
-        if (mainPaypalError && mainPaypalError.code !== 'PGRST116') {
-            console.error('Error fetching main PayPal settings:', mainPaypalError);
         }
 
         return NextResponse.json(response);
@@ -148,16 +128,12 @@ export async function POST(request: NextRequest) {
         }
 
         const body = await request.json();
-        const { provider, publishableKey, secretKey, mode, payeeEmail, clientId } = body;
+        const { provider, publishableKey, secretKey, mode, payeeEmail } = body;
 
         if (provider === 'paypal-direct') {
             if (!payeeEmail) {
                 return NextResponse.json({ error: 'Missing Payee Email' }, { status: 400 });
             }
-
-            const secretToSave = secretKey && secretKey !== 'paypal-not-applicable' ? secretKey : undefined;
-            // Store clientId in publishable_key (separate from payee_email)
-            const clientIdToSave = clientId && clientId.trim() ? clientId.trim() : undefined;
 
             // Check if row already exists so we can UPDATE instead of INSERT
             const { data: existing } = await supabaseAdmin
@@ -171,11 +147,10 @@ export async function POST(request: NextRequest) {
             if (existing) {
                 const updatePayload: any = {
                     payee_email: payeeEmail,
+                    publishable_key: payeeEmail,
                     is_active: true,
                     updated_by: auth.email
                 };
-                if (clientIdToSave) updatePayload.publishable_key = clientIdToSave;
-                if (secretToSave) updatePayload.secret_key = secretToSave;
 
                 const { error: updateError } = await supabaseAdmin
                     .from('payment_settings')
@@ -188,8 +163,8 @@ export async function POST(request: NextRequest) {
                     .insert({
                         provider: 'paypal-direct',
                         payee_email: payeeEmail,
-                        publishable_key: clientIdToSave || payeeEmail,
-                        secret_key: secretToSave || 'paypal-not-applicable',
+                        publishable_key: payeeEmail,
+                        secret_key: 'paypal-not-applicable',
                         mode: 'live',
                         is_active: true,
                         updated_by: auth.email
@@ -204,52 +179,6 @@ export async function POST(request: NextRequest) {
 
             invalidatePaypalConfigCache();
             return NextResponse.json({ success: true, message: 'PayPal settings saved successfully.' });
-        }
-
-        if (provider === 'paypal') {
-            if (!clientId) {
-                return NextResponse.json({ error: 'Missing PayPal Client ID' }, { status: 400 });
-            }
-
-            const { data: existing } = await supabaseAdmin
-                .from('payment_settings')
-                .select('id')
-                .eq('provider', 'paypal')
-                .maybeSingle();
-
-            let paypalClientError: any = null;
-
-            if (existing) {
-                const { error: updateError } = await supabaseAdmin
-                    .from('payment_settings')
-                    .update({
-                        publishable_key: clientId,
-                        is_active: true,
-                        updated_by: auth.email
-                    })
-                    .eq('provider', 'paypal');
-                paypalClientError = updateError;
-            } else {
-                const { error: insertError } = await supabaseAdmin
-                    .from('payment_settings')
-                    .insert({
-                        provider: 'paypal',
-                        publishable_key: clientId,
-                        secret_key: 'paypal-not-applicable',
-                        mode: 'live',
-                        is_active: true,
-                        updated_by: auth.email
-                    });
-                paypalClientError = insertError;
-            }
-
-            if (paypalClientError) {
-                console.error('Error upserting main PayPal settings:', paypalClientError);
-                return NextResponse.json({ error: 'Failed to save PayPal client configuration' }, { status: 500 });
-            }
-
-            invalidatePaypalConfigCache();
-            return NextResponse.json({ success: true, message: 'PayPal client settings saved successfully.' });
         }
 
         // Default Stripe logic

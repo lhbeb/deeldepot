@@ -78,7 +78,6 @@ export async function getStripeConfig(): Promise<StripeConfig> {
 
 export interface PaypalConfig {
     payeeEmail: string;
-    clientId: string;
 }
 
 /**
@@ -92,8 +91,6 @@ export async function getPaypalDirectConfig(): Promise<PaypalConfig> {
     }
 
     let payeeEmail = '';
-    // Priority 1: Env variable
-    let clientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || '';
 
     try {
         // Fetch PayPal Direct Checkout email
@@ -106,11 +103,6 @@ export async function getPaypalDirectConfig(): Promise<PaypalConfig> {
 
         if (!primaryResult.error && primaryResult.data) {
             payeeEmail = primaryResult.data.payee_email || primaryResult.data.publishable_key || '';
-            
-            // If we don't have a clientId from env yet, see if publishable_key looks like a real Client ID (not an email)
-            if (!clientId && primaryResult.data.publishable_key && !primaryResult.data.publishable_key.includes('@')) {
-                clientId = primaryResult.data.publishable_key;
-            }
         } else if (primaryResult.error && primaryResult.error.code === '42703') {
             const fallbackResult = await supabaseAdmin
                 .from('payment_settings')
@@ -120,34 +112,13 @@ export async function getPaypalDirectConfig(): Promise<PaypalConfig> {
                 .single();
             if (!fallbackResult.error && fallbackResult.data) {
                 payeeEmail = fallbackResult.data.publishable_key || '';
-                if (!clientId && payeeEmail && !payeeEmail.includes('@')) {
-                    clientId = payeeEmail;
-                }
             }
         }
-
-        // Priority 2: Main PayPal Config (for client ID) - This row is created by admin panel
-        if (!clientId) {
-            const mainPaypalResult = await supabaseAdmin
-                .from('payment_settings')
-                .select('publishable_key')
-                .eq('provider', 'paypal')
-                .eq('is_active', true)
-                .single();
-
-            if (!mainPaypalResult.error && mainPaypalResult.data && mainPaypalResult.data.publishable_key) {
-                clientId = mainPaypalResult.data.publishable_key;
-            }
-        }
-
     } catch (err) {
         console.error('❌ [Payment Settings] Unexpected error fetching PayPal config:', err);
     }
 
-    // Final fallback to sandbox if absolutely nothing found
-    if (!clientId) clientId = 'sb';
-
-    cachedPaypalConfig = { payeeEmail, clientId };
+    cachedPaypalConfig = { payeeEmail };
     lastPaypalFetchTime = now;
     return cachedPaypalConfig;
 }

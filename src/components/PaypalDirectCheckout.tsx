@@ -24,20 +24,21 @@ interface PaypalDirectCheckoutProps {
   };
   shippingData: ShippingData;
   preloadedEmail?: string | null;  // Platform email pre-fetched by parent
-  clientId?: string | null;        // (unused — kept for API compatibility)
+  orderId?: string;
   onClose: () => void;
   onSuccess?: () => void;
 }
 
 /**
- * PayPal Direct Checkout via Standard Email Redirect.
- * No API key or Client ID required — just the payee email.
+ * PayPal Direct Checkout via PayPal Standard email redirect.
+ * No SDK or Client ID required — just the payee email.
  * Redirects buyer to paypal.com/cgi-bin/webscr with business=PAYEE_EMAIL.
  */
 const PaypalDirectCheckout: React.FC<PaypalDirectCheckoutProps> = ({
   product,
   shippingData,
   preloadedEmail,
+  orderId,
   onClose,
 }) => {
   const [isRedirecting, setIsRedirecting] = useState(false);
@@ -79,8 +80,14 @@ const PaypalDirectCheckout: React.FC<PaypalDirectCheckoutProps> = ({
       charset: 'UTF-8',
       return: `${window.location.origin}/thankyou`,
       cancel_return: `${window.location.origin}/checkout`,
+      notify_url: `${window.location.origin}/api/paypal/ipn`,
       rm: '0',
     });
+
+    if (orderId) {
+      params.set('custom', orderId);
+      params.set('invoice', orderId);
+    }
 
     const paypalUrl = `https://www.paypal.com/cgi-bin/webscr?${params.toString()}`;
     console.log('🚀 [PayPal Direct] Redirecting to:', paypalUrl);
@@ -113,7 +120,7 @@ const PaypalDirectCheckout: React.FC<PaypalDirectCheckoutProps> = ({
             </div>
             <div>
               <h3 className="text-white font-bold text-base leading-tight">PayPal Checkout</h3>
-              <p className="text-blue-200 text-xs">You&apos;ll be redirected to PayPal</p>
+              <p className="text-blue-200 text-xs">Secure redirect to PayPal</p>
             </div>
           </div>
           {!isRedirecting && (

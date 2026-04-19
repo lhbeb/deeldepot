@@ -66,6 +66,8 @@ export async function POST(request: NextRequest) {
     console.log('📦 [API] Product:', { slug: product.slug, title: product.title, price: product.price });
     console.log('📦 [API] Customer:', { email: shippingData.email });
     
+    const checkoutFlow = product.checkoutFlow || product.checkout_flow;
+
     const orderResult = await saveOrder({
       productSlug: product.slug,
       productTitle: product.title,
@@ -77,9 +79,9 @@ export async function POST(request: NextRequest) {
       shippingCity: shippingData.city,
       shippingState: shippingData.state,
       shippingZip: shippingData.zipCode,
-      checkoutFlow: product.checkoutFlow || product.checkout_flow,
-      status: (product.checkoutFlow || product.checkout_flow) === 'stripe' ? 'pending_payment' : 'completed',
-      paymentProvider: product.checkoutFlow || product.checkout_flow,
+      checkoutFlow,
+      status: checkoutFlow === 'stripe' || checkoutFlow === 'paypal-direct' ? 'pending_payment' : 'completed',
+      paymentProvider: checkoutFlow,
       fullOrderData: { shippingData, product, siteUrl },
     });
 

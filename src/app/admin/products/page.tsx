@@ -637,7 +637,7 @@ export default function AdminProductsPage() {
                   <option value="buymeacoffee">☕ Buy Me a Coffee</option>
                   <option value="external">🔗 External</option>
                   <option value="paypal-invoice">🔵 PayPal Invoice</option>
-                  <option value="paypal-direct">🔵 PayPal Checkout</option>
+                  <option value="paypal-direct">🔵 PayPal Redirect</option>
                 </select>
               </div>
             </div>
@@ -765,7 +765,7 @@ export default function AdminProductsPage() {
             {checkoutFilter === 'buymeacoffee' && ` (Buy Me a Coffee checkout)`}
             {checkoutFilter === 'external' && ` (External checkout)`}
             {checkoutFilter === 'paypal-invoice' && ` (PayPal Invoice checkout)`}
-            {checkoutFilter === 'paypal-direct' && ` (PayPal Checkout)`}
+            {checkoutFilter === 'paypal-direct' && ` (PayPal Redirect)`}
           </div>
         </div>
       )}
@@ -1068,12 +1068,12 @@ export default function AdminProductsPage() {
                         PayPal Invoice
                       </span>
                     ) : product.checkoutFlow === 'paypal-direct' ? (
-                      // PayPal Direct Checkout: Not clickable, just a badge
+                      // PayPal Direct redirect: Not clickable, just a badge
                       <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-sky-100 text-sky-700 text-sm font-semibold rounded-lg">
                         <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
                           <path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944 2.79A.859.859 0 0 1 5.79 2h7.832c2.585 0 4.383.56 5.392 1.68.476.523.806 1.105.985 1.75.19.68.19 1.377.003 2.092l-.01.04v.554l.44.248a3.09 3.09 0 0 1 .83.698c.44.528.714 1.201.817 2.002.106.82.067 1.81-.116 2.946-.21 1.3-.576 2.426-1.09 3.35-.47.858-1.073 1.56-1.793 2.09-.686.504-1.5.882-2.42 1.12-.887.23-1.896.346-3.003.346h-.715a1.717 1.717 0 0 0-1.7 1.453l-.09.503-.527 3.36-.024.135a.641.641 0 0 1-.633.545z" />
                         </svg>
-                        PayPal Direct Checkout
+                        PayPal Redirect
                       </span>
                     ) : product.checkoutLink ? (
                       // Ko-fi or Buy Me a Coffee: Clickable preview link

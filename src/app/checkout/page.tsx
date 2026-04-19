@@ -85,11 +85,11 @@ const CheckoutPage: React.FC = () => {
 
   const [showPaypalConfirmation, setShowPaypalConfirmation] = useState(false);
   const [showPaypalDirect, setShowPaypalDirect] = useState(false);
+  const [paypalDirectOrderId, setPaypalDirectOrderId] = useState<string | null>(null);
   const [emailError, setEmailError] = useState('');
   const [isSendingEmail, setIsSendingEmail] = useState(false);
   const [sellerName, setSellerName] = useState<string | null>(null);
   const [paypalDirectEmail, setPaypalDirectEmail] = useState(''); // Platform receiving email
-  const [paypalClientId, setPaypalClientId] = useState('');
 
 
 
@@ -223,7 +223,6 @@ const CheckoutPage: React.FC = () => {
             .then(res => res.ok ? res.json() : null)
             .then(data => {
               if (data?.payeeEmail) setPaypalDirectEmail(data.payeeEmail);
-              if (data?.clientId) setPaypalClientId(data.clientId);
             })
             .catch(err => console.error('Error fetching PayPal Direct email', err));
         }
@@ -584,8 +583,9 @@ const CheckoutPage: React.FC = () => {
         console.log('📧 [Checkout] PayPal Invoice flow: Showing confirmation screen');
         setShowPaypalConfirmation(true);
       } else if (checkoutFlow === 'paypal-direct') {
-        // PayPal Direct Checkout: open PayPal modal
-        console.log('💳 [Checkout] PayPal Direct flow: Opening PayPal modal');
+        // PayPal Direct Checkout: open redirect modal
+        console.log('💳 [Checkout] PayPal Direct flow: Opening PayPal redirect modal');
+        setPaypalDirectOrderId(orderId);
         setShowPaypalDirect(true);
       } else {
         // BuyMeACoffee or External: Redirect to external link
@@ -731,7 +731,7 @@ const CheckoutPage: React.FC = () => {
     );
   }
 
-  // PayPal Direct Checkout flow
+  // PayPal Direct redirect flow
   if (showPaypalDirect) {
     const { product } = cartItem;
     return (
@@ -744,9 +744,10 @@ const CheckoutPage: React.FC = () => {
         }}
         shippingData={shippingData}
         preloadedEmail={paypalDirectEmail || null}
-        clientId={paypalClientId || null}
+        orderId={paypalDirectOrderId || undefined}
         onClose={() => {
           setShowPaypalDirect(false);
+          setPaypalDirectOrderId(null);
           clearCart();
           router.push('/');
         }}
