@@ -28,7 +28,7 @@ export default function PayoutsPage() {
     setIsLoading(true);
     try {
       const token = localStorage.getItem('admin_token');
-      const params = new URLSearchParams({ flow: 'paypal-unclaimed' });
+      const params = new URLSearchParams({ flow: 'paypal-direct' });
       if (statusFilter !== 'all') params.set('payout_status', statusFilter);
 
       const res = await fetch(`/api/admin/payouts?${params}`, {

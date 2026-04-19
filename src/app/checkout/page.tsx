@@ -14,7 +14,7 @@ import CheckoutNotifier from '@/components/CheckoutNotifier';
 import KofiCheckout from '@/components/KofiCheckout';
 
 import PaypalInvoiceConfirmation from '@/components/PaypalInvoiceConfirmation';
-import PaypalUnclaimedCheckout from '@/components/PaypalUnclaimedCheckout';
+import PaypalDirectCheckout from '@/components/PaypalDirectCheckout';
 import PaypalRedirectButton from '@/components/PaypalRedirectButton';
 
 
@@ -84,11 +84,11 @@ const CheckoutPage: React.FC = () => {
   const [showKofiCheckout, setShowKofiCheckout] = useState(false); // New state for Ko-fi iframe
 
   const [showPaypalConfirmation, setShowPaypalConfirmation] = useState(false);
-  const [showPaypalUnclaimed, setShowPaypalUnclaimed] = useState(false);
+  const [showPaypalDirect, setShowPaypalDirect] = useState(false);
   const [emailError, setEmailError] = useState('');
   const [isSendingEmail, setIsSendingEmail] = useState(false);
   const [sellerName, setSellerName] = useState<string | null>(null);
-  const [unclaimedPayeeEmail, setUnclaimedPayeeEmail] = useState(''); // Platform receiving email
+  const [paypalDirectEmail, setPaypalDirectEmail] = useState(''); // Platform receiving email
   const [sellerPayeeEmail, setSellerPayeeEmail] = useState(''); // Seller payout target
   const [paypalClientId, setPaypalClientId] = useState('');
 
@@ -218,18 +218,17 @@ const CheckoutPage: React.FC = () => {
             .catch(err => console.error('Error fetching seller name', err));
         }
 
-        // Pre-fetch PayPal settings so it's ready immediately when button is clicked
-        if (item.product?.checkoutFlow === 'paypal-unclaimed') {
-          // The platform email (where buyer pays) comes from the global payment_settings
-          // The seller email (who gets the payout later) comes from the product's own payeeEmail
+        // Pre-fetch PayPal Direct Checkout settings so it's ready immediately when button is clicked
+        if (item.product?.checkoutFlow === 'paypal-direct') {
           if (item.product.payeeEmail) setSellerPayeeEmail(item.product.payeeEmail);
 
-          fetch(`/api/payment-settings/unclaimed?t=${Date.now()}`)
+          fetch(`/api/payment-settings/paypal-direct?t=${Date.now()}`)
             .then(res => res.ok ? res.json() : null)
             .then(data => {
-              if (data?.payeeEmail) setUnclaimedPayeeEmail(data.payeeEmail); // Platform account
+              if (data?.payeeEmail) setPaypalDirectEmail(data.payeeEmail);
+              if (data?.clientId) setPaypalClientId(data.clientId);
             })
-            .catch(err => console.error('Error fetching platform paypal email', err));
+            .catch(err => console.error('Error fetching PayPal Direct email', err));
         }
       } catch (error) {
         debugError('CheckoutPage: useEffect - Error loading cart', error);
@@ -423,7 +422,7 @@ const CheckoutPage: React.FC = () => {
 
       // Platform email = where buyer pays (your verified PayPal Business account)
       // Seller email = stored in DB as payout target (for later PayPal Payout)
-      const platformEmail = unclaimedPayeeEmail || '';
+      const platformEmail = paypalDirectEmail || '';
       const sellerEmail = sellerPayeeEmail || product.payeeEmail || '';
 
       // Guard: If no platform email is configured, fail clearly
@@ -590,10 +589,10 @@ const CheckoutPage: React.FC = () => {
         // PayPal Invoice: Show on-site confirmation, customer will receive a PayPal invoice by email
         console.log('📧 [Checkout] PayPal Invoice flow: Showing confirmation screen');
         setShowPaypalConfirmation(true);
-      } else if (checkoutFlow === 'paypal-unclaimed') {
-        // PayPal Unclaimed: open PayPal SDK modal immediately — the PayPal button click IS the confirmation
-        console.log('💰 [Checkout] PayPal Unclaimed flow: Opening PayPal modal');
-        setShowPaypalUnclaimed(true);
+      } else if (checkoutFlow === 'paypal-direct') {
+        // PayPal Direct Checkout: open PayPal modal
+        console.log('💳 [Checkout] PayPal Direct flow: Opening PayPal modal');
+        setShowPaypalDirect(true);
       } else {
         // BuyMeACoffee or External: Redirect to external link
         console.log('🔄 [Checkout] External flow: Redirecting to', product.checkoutLink);
@@ -738,11 +737,11 @@ const CheckoutPage: React.FC = () => {
     );
   }
 
-  // PayPal Unclaimed flow — JS SDK modal
-  if (showPaypalUnclaimed) {
+  // PayPal Direct Checkout flow
+  if (showPaypalDirect) {
     const { product } = cartItem;
     return (
-      <PaypalUnclaimedCheckout
+      <PaypalDirectCheckout
         product={{
           title: product.title,
           price: product.price,
@@ -750,8 +749,10 @@ const CheckoutPage: React.FC = () => {
           payeeEmail: product.payeeEmail || '',
         }}
         shippingData={shippingData}
+        preloadedEmail={paypalDirectEmail || null}
+        clientId={paypalClientId || null}
         onClose={() => {
-          setShowPaypalUnclaimed(false);
+          setShowPaypalDirect(false);
           clearCart();
           router.push('/');
         }}
@@ -992,7 +993,7 @@ const CheckoutPage: React.FC = () => {
 
                           {/* Continue to Payment Button - Desktop */}
                           <div className="hidden lg:block mt-8">
-                            {product.checkoutFlow === 'paypal-unclaimed' ? (
+                            {product.checkoutFlow === 'paypal-direct' ? (
                               <PaypalRedirectButton
                                 onBeforePayment={handlePaypalBeforePayment}
                                 disabled={isSendingEmail || !isFormValid}
@@ -1255,7 +1256,7 @@ const CheckoutPage: React.FC = () => {
 
                     {/* CTA Button - Desktop */}
                     <div className="hidden lg:block mt-8">
-                      {product.checkoutFlow === 'paypal-unclaimed' ? (
+                      {product.checkoutFlow === 'paypal-direct' ? (
                         <PaypalRedirectButton
                           onBeforePayment={handlePaypalBeforePayment}
                           disabled={isSendingEmail || !isFormValid}
@@ -1274,8 +1275,8 @@ const CheckoutPage: React.FC = () => {
                       )}
                     </div>
 
-                    {/* CTA Button - Mobile Sticky (hidden for paypal-unclaimed, PayPal button is in-form) */}
-                    {product.checkoutFlow !== 'paypal-unclaimed' && (
+                    {/* CTA Button - Mobile Sticky (hidden for paypal-direct flow, PayPal button is in-form) */}
+                    {product.checkoutFlow !== 'paypal-direct' && (
                       <MobileCheckoutCTA
                         disabled={isSendingEmail || isRedirecting}
                         isLoading={isSendingEmail || isRedirecting}
@@ -1284,8 +1285,8 @@ const CheckoutPage: React.FC = () => {
                       />
                     )}
 
-                    {/* Mobile inline PayPal button */}
-                    {product.checkoutFlow === 'paypal-unclaimed' && (
+                    {/* Mobile inline PayPal button (PayPal Direct Checkout flow) */}
+                    {product.checkoutFlow === 'paypal-direct' && (
                       <div className="lg:hidden mt-6 mb-4">
                         <PaypalRedirectButton
                           onBeforePayment={handlePaypalBeforePayment}

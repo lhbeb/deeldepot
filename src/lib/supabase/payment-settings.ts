@@ -82,9 +82,9 @@ export interface PaypalConfig {
 }
 
 /**
- * Fetches the global PayPal Unclaimed configuration and primary client ID from the database.
+ * Fetches the global PayPal Direct Checkout configuration from the database.
  */
-export async function getPaypalUnclaimedConfig(): Promise<PaypalConfig> {
+export async function getPaypalDirectConfig(): Promise<PaypalConfig> {
     const now = Date.now();
     
     if (cachedPaypalConfig && (now - lastPaypalFetchTime) < CACHE_TTL) {
@@ -96,11 +96,11 @@ export async function getPaypalUnclaimedConfig(): Promise<PaypalConfig> {
     let clientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || '';
 
     try {
-        // Fetch Unclaimed Payee Email
+        // Fetch PayPal Direct Checkout email
         const primaryResult = await supabaseAdmin
             .from('payment_settings')
             .select('payee_email, publishable_key')
-            .eq('provider', 'paypal-unclaimed')
+            .eq('provider', 'paypal-direct')
             .eq('is_active', true)
             .single();
 
@@ -115,7 +115,7 @@ export async function getPaypalUnclaimedConfig(): Promise<PaypalConfig> {
             const fallbackResult = await supabaseAdmin
                 .from('payment_settings')
                 .select('publishable_key')
-                .eq('provider', 'paypal-unclaimed')
+                .eq('provider', 'paypal-direct')
                 .eq('is_active', true)
                 .single();
             if (!fallbackResult.error && fallbackResult.data) {
@@ -153,8 +153,13 @@ export async function getPaypalUnclaimedConfig(): Promise<PaypalConfig> {
 }
 
 /**
+ * Backward-compatible alias.
+ * @deprecated Use getPaypalDirectConfig instead.
+ */
+export const getPaypalUnclaimedConfig = getPaypalDirectConfig;
+
+/**
  * Force invalidate the Stripe config cache.
- * Useful when saving new keys from the admin dashboard.
  */
 export function invalidateStripeConfigCache() {
     cachedConfig = null;

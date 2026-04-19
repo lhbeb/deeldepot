@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
     const { data: paypalSettings, error: settingsError } = await supabaseAdmin
       .from('payment_settings')
       .select('payee_email, publishable_key, secret_key')
-      .eq('provider', 'paypal-unclaimed')
+      .eq('provider', 'paypal-direct')
       .single();
 
     const clientId = paypalSettings?.publishable_key;
@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
 
     if (settingsError || !clientId || !clientSecret || clientSecret === 'paypal-not-applicable') {
       return NextResponse.json(
-        { error: 'PayPal API credentials not configured. Go to Admin → Payment Settings → PayPal Unclaimed and add your Client ID and Client Secret.' },
+        { error: 'PayPal API credentials not configured. Go to Admin → Payment Settings → PayPal Direct Checkout and add your Client ID and Client Secret.' },
         { status: 400 }
       );
     }

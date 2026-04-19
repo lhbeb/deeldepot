@@ -39,7 +39,7 @@ async function getPaypalSettingsRow() {
     const primaryResult = await supabaseAdmin
         .from('payment_settings')
         .select('payee_email, publishable_key, secret_key, is_active')
-        .eq('provider', 'paypal-unclaimed')
+        .eq('provider', 'paypal-direct')
         .single();
 
     data = primaryResult.data;
@@ -50,7 +50,7 @@ async function getPaypalSettingsRow() {
         const fallbackResult = await supabaseAdmin
             .from('payment_settings')
             .select('publishable_key, secret_key, is_active')
-            .eq('provider', 'paypal-unclaimed')
+            .eq('provider', 'paypal-direct')
             .single();
 
         data = fallbackResult.data;
@@ -150,7 +150,7 @@ export async function POST(request: NextRequest) {
         const body = await request.json();
         const { provider, publishableKey, secretKey, mode, payeeEmail, clientId } = body;
 
-        if (provider === 'paypal-unclaimed') {
+        if (provider === 'paypal-direct') {
             if (!payeeEmail) {
                 return NextResponse.json({ error: 'Missing Payee Email' }, { status: 400 });
             }
@@ -163,7 +163,7 @@ export async function POST(request: NextRequest) {
             const { data: existing } = await supabaseAdmin
                 .from('payment_settings')
                 .select('id')
-                .eq('provider', 'paypal-unclaimed')
+                .eq('provider', 'paypal-direct')
                 .maybeSingle();
 
             let upsertError: any = null;
@@ -180,13 +180,13 @@ export async function POST(request: NextRequest) {
                 const { error: updateError } = await supabaseAdmin
                     .from('payment_settings')
                     .update(updatePayload)
-                    .eq('provider', 'paypal-unclaimed');
+                    .eq('provider', 'paypal-direct');
                 upsertError = updateError;
             } else {
                 const { error: insertError } = await supabaseAdmin
                     .from('payment_settings')
                     .insert({
-                        provider: 'paypal-unclaimed',
+                        provider: 'paypal-direct',
                         payee_email: payeeEmail,
                         publishable_key: clientIdToSave || payeeEmail,
                         secret_key: secretToSave || 'paypal-not-applicable',

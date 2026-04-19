@@ -463,7 +463,7 @@ export default function ProductPageClient({ product: initialProduct }: ProductPa
                         {isAddingToCart ? <><div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>Adding to Cart...</> : <><ShoppingCart className="h-5 w-5 mr-2" />Add to Cart</>}
                       </button>
                     </div>
-                    {(product.checkoutFlow === 'paypal-invoice' || product.checkoutFlow === 'paypal-unclaimed') ? (
+                    {(product.checkoutFlow === 'paypal-invoice' || product.checkoutFlow === 'paypal-direct') ? (
                       <div className="hidden lg:flex flex-col gap-1.5">
                         <button
                           onClick={handleBuyNow}

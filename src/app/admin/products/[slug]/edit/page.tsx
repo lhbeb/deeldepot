@@ -113,7 +113,7 @@ export default function EditProductPage() {
   const [formData, setFormData] = useState({
     slug: '', title: '', description: '', price: '', original_price: '',
     brand: '', category: '', condition: '', payee_email: '', checkout_link: '',
-    checkout_flow: 'buymeacoffee' as 'buymeacoffee' | 'kofi' | 'external' | 'stripe' | 'paypal-invoice' | 'paypal-unclaimed' | 'lemon-squeezy',
+    checkout_flow: 'buymeacoffee' as 'buymeacoffee' | 'kofi' | 'external' | 'stripe' | 'paypal-invoice' | 'paypal-direct' | 'lemon-squeezy',
     currency: 'USD', images: '', rating: '0', review_count: '0',
     in_stock: true, is_featured: false, published: false, listed_by: '', seller_id: '',
     collections: [] as string[],
@@ -536,7 +536,7 @@ export default function EditProductPage() {
               <Field label="Checkout Flow" required hint="Select how customers will complete their purchase">
                 <select
                   value={formData.checkout_flow}
-                  onChange={(e) => updateField('checkout_flow', e.target.value as 'buymeacoffee' | 'kofi' | 'external' | 'stripe' | 'paypal-invoice' | 'paypal-unclaimed')}
+                  onChange={(e) => updateField('checkout_flow', e.target.value as 'buymeacoffee' | 'kofi' | 'external' | 'stripe' | 'paypal-invoice' | 'paypal-direct')}
                   className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#090A28] focus:border-[#090A28] outline-none transition-all bg-white"
                   required
                 >
@@ -545,7 +545,7 @@ export default function EditProductPage() {
                   <option value="stripe">Stripe (Stripe Checkout - Professional payment processing)</option>
                   <option value="external">External (Custom payment provider)</option>
                   <option value="paypal-invoice">PayPal Invoice (On-site confirmation — invoice sent by email)</option>
-                  <option value="paypal-unclaimed">PayPal Unclaimed (SDK — direct payment using email)</option>
+                  <option value="paypal-direct">PayPal Checkout (SDK — direct payment to your PayPal email)</option>
                 </select>
                 <div className="mt-2 p-3 bg-blue-50 border border-blue-100 rounded-lg">
                   <p className="text-xs text-blue-800">
@@ -563,11 +563,11 @@ export default function EditProductPage() {
                       </>
                     ) : formData.checkout_flow === 'paypal-invoice' ? (
                       <>
-                        <strong>PayPal Invoice:</strong> Customer sees an on-site &ldquo;Order Confirmed — Pending Payment&rdquo; screen. A PayPal invoice is sent to their email. No redirect or iframe needed — checkout link is not required.
+                        <strong>PayPal Invoice:</strong> Customer sees an on-site &ldquo;Order Confirmed — Pending Payment&rdquo; screen. A PayPal invoice is sent to their email.
                       </>
-                    ) : formData.checkout_flow === 'paypal-unclaimed' ? (
+                    ) : formData.checkout_flow === 'paypal-direct' ? (
                       <>
-                        <strong>PayPal Unclaimed:</strong> Payment buttons load directly on your site after address confirmation. Funds are sent to the global payee email configured in Payment Settings.
+                        <strong>PayPal Checkout:</strong> Native PayPal buttons load directly on your site. Buyer pays using PayPal — funds go to the email configured in Payment Settings.
                       </>
                     ) : (
                       <>

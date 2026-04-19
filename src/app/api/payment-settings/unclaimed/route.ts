@@ -1,26 +1,12 @@
-import { NextResponse } from 'next/server';
-import { getPaypalUnclaimedConfig } from '@/lib/supabase/payment-settings';
+import { NextResponse, NextRequest } from 'next/server';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
-    try {
-        const config = await getPaypalUnclaimedConfig();
-
-        if (!config.payeeEmail && !config.clientId) {
-            return NextResponse.json({ 
-                error: 'PayPal configuration not found',
-                configured: false 
-            }, { status: 404 });
-        }
-
-        return NextResponse.json({
-            configured: true,
-            payeeEmail: config.payeeEmail,
-            clientId: config.clientId || 'sb'
-        });
-    } catch (error) {
-        console.error('Error fetching public PayPal config:', error);
-        return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
-    }
+/**
+ * @deprecated This endpoint has been renamed to /api/payment-settings/paypal-direct
+ * This redirect shim exists for backward compatibility only.
+ */
+export async function GET(request: NextRequest) {
+  const redirectUrl = new URL('/api/payment-settings/paypal-direct', request.url);
+  return NextResponse.redirect(redirectUrl, { status: 308 }); // 308 = Permanent Redirect
 }

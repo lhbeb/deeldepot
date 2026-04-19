@@ -18,7 +18,7 @@ export default function PaymentSettingsPage() {
     const [showSecret, setShowSecret] = useState(false);
     const [isConfigured, setIsConfigured] = useState(false);
     
-    // PayPal Unclaimed state
+    // PayPal Direct Checkout state
     const [paypalEmail, setPaypalEmail] = useState('');
     const [paypalClientId, setPaypalClientId] = useState('');
     const [paypalSecret, setPaypalSecret] = useState('');
@@ -156,7 +156,7 @@ export default function PaymentSettingsPage() {
                     ...(token && { Authorization: `Bearer ${token}` }),
                 },
                 body: JSON.stringify({
-                    provider: 'paypal-unclaimed',
+                    provider: 'paypal-direct',
                     payeeEmail: paypalEmail,
                     ...(paypalClientId.trim() && { clientId: paypalClientId.trim() }),
                     ...(paypalSecret && !paypalSecret.includes('•') && { secretKey: paypalSecret }),
@@ -314,16 +314,16 @@ export default function PaymentSettingsPage() {
                     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                         <div className="p-6 border-b border-gray-100 flex items-center justify-between">
                             <div className="flex items-center gap-4">
-                                <div className="w-11 h-11 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center flex-shrink-0">
-                                    <svg className="h-5 w-5 fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M20.067 8.478c.492.21 1.05.51 1.05 1.442a5.577 5.577 0 01-1.05 3.32c-.99 1.44-2.73 1.44-3.57 1.44h-2.1l-.81 4.5h-3.69l1.62-9h3.69c.84 0 2.22 0 3.21.9zm-9.36.9h2.1a1.8 1.8 0 000-3.6h-2.1l-.65 3.6z" />
+                                <div className="w-11 h-11 rounded-xl bg-blue-50 text-blue-500 flex items-center justify-center flex-shrink-0">
+                                    <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287-.023.143-.047.288-.077.437-.983 5.05-4.349 6.797-8.647 6.797h-2.19c-.524 0-.968.382-1.05.9l-1.12 7.106zm14.146-14.42a3.35 3.35 0 0 0-.607-.541c-.013.076-.026.175-.041.254-.93 4.778-4.005 7.201-9.138 7.201h-2.19a.563.563 0 0 0-.556.479l-1.187 7.527h-.506l-.24 1.516a.56.56 0 0 0 .554.647h3.882c.46 0 .85-.334.922-.788.06-.26.76-4.852.816-5.09a.932.932 0 0 1 .92-.706h.58c3.76 0 6.705-1.528 7.565-5.946.36-1.847.174-3.388-.774-4.553z" fill="#003087"/>
                                     </svg>
                                 </div>
                                 <div>
-                                    <h3 className="font-semibold text-[#262626] text-base">PayPal Unclaimed settings</h3>
+                                    <h3 className="font-semibold text-[#262626] text-base">PayPal Checkout</h3>
                                     <div className="flex items-center gap-2 mt-1">
-                                        <div className={`w-2 h-2 rounded-full ${isPaypalConfigured ? 'bg-amber-500' : 'bg-gray-300'}`}></div>
-                                        <p className="text-sm text-gray-500">{isPaypalConfigured ? 'Global Email Active' : 'Not Configured'}</p>
+                                        <div className={`w-2 h-2 rounded-full ${isPaypalConfigured ? 'bg-green-500' : 'bg-gray-300'}`}></div>
+                                        <p className="text-sm text-gray-500">{isPaypalConfigured ? 'Active — Receiving Payments' : 'Not Configured'}</p>
                                     </div>
                                 </div>
                             </div>
@@ -331,59 +331,23 @@ export default function PaymentSettingsPage() {
 
                         <form onSubmit={handleSavePaypal} className="p-6 space-y-6">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Platform PayPal Email <span className="text-gray-400 font-normal">(receives all buyer payments)</span></label>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Your PayPal Email <span className="text-gray-400 font-normal">(receives all buyer payments)</span></label>
                                 <input
                                     type="email"
                                     value={paypalEmail}
                                     onChange={(e) => setPaypalEmail(e.target.value)}
-                                    placeholder="e.g. platform@yourdomain.com"
+                                    placeholder="e.g. me@paypal.com"
                                     className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#090A28] focus:border-transparent text-sm"
                                     required
                                 />
-                                <p className="text-xs text-gray-500 mt-1.5 ml-1">Your verified PayPal Business account. All buyer payments land here first — you then payout to sellers from the <strong>Payouts</strong> dashboard.</p>
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">PayPal API Client ID <span className="text-amber-600">(for Payouts)</span></label>
-                                <input
-                                    type="text"
-                                    value={paypalClientId}
-                                    onChange={(e) => setPaypalClientId(e.target.value)}
-                                    placeholder="AaBbCcDd... (from developer.paypal.com)"
-                                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#090A28] focus:border-transparent text-sm font-mono"
-                                />
-                                <p className="text-xs text-gray-500 mt-1.5 ml-1">Live Client ID from your PayPal REST app. Required together with the secret below to send payouts.</p>
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">PayPal API Client Secret <span className="text-amber-600">(for Payouts)</span></label>
-                                <div className="relative">
-                                    <input
-                                        type={showPaypalSecret ? 'text' : 'password'}
-                                        value={paypalSecret}
-                                        onChange={(e) => setPaypalSecret(e.target.value)}
-                                        placeholder="Paste your PayPal Client Secret here"
-                                        className="w-full px-4 py-2.5 pr-12 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#090A28] focus:border-transparent text-sm font-mono"
-                                    />
-                                    <button
-                                        type="button"
-                                        onClick={() => setShowPaypalSecret(!showPaypalSecret)}
-                                        className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600 rounded-md"
-                                    >
-                                        {showPaypalSecret ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                                    </button>
-                                </div>
-                                <p className="text-xs text-amber-600 mt-1.5 ml-1 flex items-center gap-1">
-                                    <AlertCircle className="h-3.5 w-3.5" />
-                                    Required to send PayPal Payouts to sellers. Get this from developer.paypal.com → Live credentials.
-                                </p>
+                                <p className="text-xs text-gray-500 mt-1.5 ml-1">Enter your verified PayPal Business or Personal account email. All buyer payments will be sent directly to this address.</p>
                             </div>
 
                             <div className="pt-6 border-t border-gray-100 flex justify-end">
                                 <button
                                     type="submit"
                                     disabled={isPaypalSaving}
-                                    className="inline-flex items-center gap-2 px-6 py-2.5 bg-[#090A28] text-white rounded-xl hover:bg-[#1c2070] transition-colors text-sm font-medium shadow-lg shadow-[#090A28]/25 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="inline-flex items-center gap-2 px-6 py-2.5 bg-[#003087] text-white rounded-xl hover:bg-[#001f5f] transition-colors text-sm font-medium shadow-lg shadow-blue-900/25 disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     {isPaypalSaving ? (
                                         <>
@@ -393,7 +357,7 @@ export default function PaymentSettingsPage() {
                                     ) : (
                                         <>
                                             <Save className="h-4 w-4" />
-                                            Save PayPal Settings
+                                            Save PayPal Email
                                         </>
                                     )}
                                 </button>

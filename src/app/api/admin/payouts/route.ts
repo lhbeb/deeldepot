@@ -21,7 +21,7 @@ async function getAdminAuth(request: NextRequest) {
 
 /**
  * GET /api/admin/payouts
- * Returns orders with paypal-unclaimed flow, optionally filtered by payout_status.
+ * Returns orders with paypal-direct flow, optionally filtered by payout_status.
  */
 export async function GET(request: NextRequest) {
   try {
@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url);
     const payoutStatus = searchParams.get('payout_status'); // 'pending' | 'sent' | null (all)
-    const flow = searchParams.get('flow') || 'paypal-unclaimed';
+    const flow = searchParams.get('flow') || 'paypal-direct';
 
     let query = supabaseAdmin
       .from('orders')

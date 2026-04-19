@@ -63,7 +63,7 @@ export async function saveOrder(orderData: OrderData): Promise<{ id: string; suc
       email_sent: false,
       email_error: null,
       seller_payee_email: orderData.sellerPayeeEmail || null,
-      payout_status: orderData.payoutStatus || (orderData.checkoutFlow === 'paypal-unclaimed' ? 'pending' : 'not_applicable'),
+      payout_status: orderData.payoutStatus || (orderData.checkoutFlow === 'paypal-direct' ? 'pending' : 'not_applicable'),
     };
 
     console.log('📦 [saveOrder] Inserting data:', JSON.stringify(insertData, null, 2));
@@ -225,15 +225,36 @@ export async function getOrderById(orderId: string) {
  */
 export async function getAllOrders() {
   try {
-    const { data: orders, error: ordersError } = await supabaseAdmin
-      .from('orders')
-      .select('*')
-      .order('created_at', { ascending: false });
+    // Supabase has a hard default cap of 1000 rows per query.
+    // We use range() in a loop to fetch ALL orders regardless of count.
+    const PAGE_SIZE = 1000;
+    let allOrders: any[] = [];
+    let from = 0;
+    let hasMore = true;
 
-    if (ordersError) {
-      console.error('Error fetching orders:', ordersError);
-      return [];
+    while (hasMore) {
+      const { data, error, count } = await supabaseAdmin
+        .from('orders')
+        .select('*', { count: 'exact' })
+        .order('created_at', { ascending: false })
+        .range(from, from + PAGE_SIZE - 1);
+
+      if (error) {
+        console.error('Error fetching orders page:', error);
+        break;
+      }
+
+      if (data && data.length > 0) {
+        allOrders = [...allOrders, ...data];
+        from += PAGE_SIZE;
+        // Stop if we got fewer rows than PAGE_SIZE — means we've reached the end
+        hasMore = data.length === PAGE_SIZE;
+      } else {
+        hasMore = false;
+      }
     }
+
+    const orders = allOrders;
 
     if (!orders || orders.length === 0) {
       return [];
@@ -258,7 +279,6 @@ export async function getAllOrders() {
       if (error) {
         productsError = error;
         console.error(`Error fetching products chunk ${i}:`, error);
-        // We'll continue with whatever products we fetched so far to prevent total failure
       } else if (data) {
         products = [...products, ...data];
       }
@@ -266,7 +286,6 @@ export async function getAllOrders() {
 
     if (productsError && products.length === 0) {
       console.error('Error fetching products for orders:', productsError);
-      // Return orders without listed_by if product fetch fails entirely
       return orders || [];
     }
 
@@ -282,7 +301,7 @@ export async function getAllOrders() {
       return {
         ...order,
         product_listed_by: listedBy,
-        product_checkout_flow: order.checkout_flow || null, // Use the snapshot from the order itself
+        product_checkout_flow: order.checkout_flow || null,
       };
     });
 

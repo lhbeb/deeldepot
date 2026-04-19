@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getPaypalUnclaimedConfig } from '@/lib/supabase/payment-settings';
+import { getPaypalDirectConfig } from '@/lib/supabase/payment-settings';
 
 // PayPal sandbox base URL — swap to https://api-m.paypal.com for live
 const PAYPAL_BASE = process.env.PAYPAL_ENV === 'live'
@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Get global payee email from DB
-        const config = await getPaypalUnclaimedConfig();
+        const config = await getPaypalDirectConfig();
         const payeeEmail = config.payeeEmail;
 
         if (!payeeEmail) {
