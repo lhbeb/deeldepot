@@ -636,8 +636,8 @@ export default function AdminProductsPage() {
                   <option value="kofi">☕ Ko-fi</option>
                   <option value="buymeacoffee">☕ Buy Me a Coffee</option>
                   <option value="external">🔗 External</option>
-                  <option value="paypal-invoice">🔵 PayPal Invoice</option>
-                  <option value="paypal-direct">🔵 PayPal Redirect</option>
+                  <option value="paypal-invoice">🔵 PayPal Invoice/Request (Telegram Chat)</option>
+                  <option value="paypal-direct">🔵 PayPal Checkout Direct</option>
                 </select>
               </div>
             </div>

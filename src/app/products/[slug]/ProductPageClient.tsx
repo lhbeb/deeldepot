@@ -414,9 +414,9 @@ export default function ProductPageClient({ product: initialProduct }: ProductPa
                       <Info className="h-4 w-4 flex-shrink-0 text-gray-400 transition-colors group-hover:text-[#003087] group-focus-within:text-[#003087]" />
                     </div>
                     {getConditionTooltip(condition) && (
-                      <div className="pointer-events-none absolute left-0 top-full z-50 mt-2 hidden w-72 max-w-[calc(100vw-2rem)] rounded-xl border border-[#090A28]/10 bg-[#090A28] px-3 py-2 text-xs leading-5 text-white shadow-xl group-hover:block group-focus-within:block">
+                      <div className="pointer-events-none absolute left-0 top-full z-50 mt-2 hidden w-72 max-w-[calc(100vw-2rem)] rounded-xl border border-[#090A28]/10 bg-[#090A28] px-3 py-2 text-xs leading-5 text-white shadow-xl group-hover:block group-focus-within:block md:left-auto md:right-full md:top-1/2 md:mr-3 md:mt-0 md:-translate-y-1/2">
                         {getConditionTooltip(condition)}
-                        <div className="absolute bottom-full left-5 border-4 border-transparent border-b-[#090A28]"></div>
+                        <div className="absolute bottom-full left-5 border-4 border-transparent border-b-[#090A28] md:bottom-auto md:left-auto md:right-[-8px] md:top-1/2 md:-translate-y-1/2 md:border-b-transparent md:border-l-[#090A28]"></div>
                       </div>
                     )}
                   </div>
