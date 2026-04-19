@@ -24,8 +24,7 @@ import {
   AlertTriangle,
   CreditCard,
   ChevronDown,
-  MoreHorizontal,
-  Send
+  MoreHorizontal
 } from 'lucide-react';
 import { useState, useEffect, useCallback } from 'react';
 import { lockScroll, unlockScroll } from '@/utils/scrollUtils';
@@ -44,7 +43,6 @@ const getMainNavItems = (ordersCount: number): NavItem[] => [
   { name: 'Products', path: '/admin/products', icon: Package, description: 'Manage inventory' },
   { name: 'Sellers', path: '/admin/sellers', icon: User, description: 'Manage sellers profiles' },
   { name: 'Orders', path: '/admin/orders', icon: ShoppingCart, description: 'View all orders', badge: ordersCount > 0 ? ordersCount : undefined },
-  { name: 'Payouts', path: '/admin/payouts', icon: Send, description: 'Send seller payouts' },
   { name: 'Analytics', path: '/admin/analytics', icon: BarChart2, description: 'Traffic & visitors' },
   { name: 'Mail Project', path: '/admin/mail-project', icon: Mail, description: 'Send & manage emails' },
   { name: 'Price Monitor', path: '/admin/price-monitor', icon: TrendingDown, description: 'Track product prices' },
@@ -507,4 +505,3 @@ export default function AdminSidebar() {
     </>
   );
 }
-

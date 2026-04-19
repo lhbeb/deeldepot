@@ -89,7 +89,6 @@ const CheckoutPage: React.FC = () => {
   const [isSendingEmail, setIsSendingEmail] = useState(false);
   const [sellerName, setSellerName] = useState<string | null>(null);
   const [paypalDirectEmail, setPaypalDirectEmail] = useState(''); // Platform receiving email
-  const [sellerPayeeEmail, setSellerPayeeEmail] = useState(''); // Seller payout target
   const [paypalClientId, setPaypalClientId] = useState('');
 
 
@@ -220,8 +219,6 @@ const CheckoutPage: React.FC = () => {
 
         // Pre-fetch PayPal Direct Checkout settings so it's ready immediately when button is clicked
         if (item.product?.checkoutFlow === 'paypal-direct') {
-          if (item.product.payeeEmail) setSellerPayeeEmail(item.product.payeeEmail);
-
           fetch(`/api/payment-settings/paypal-direct?t=${Date.now()}`)
             .then(res => res.ok ? res.json() : null)
             .then(data => {
@@ -280,7 +277,7 @@ const CheckoutPage: React.FC = () => {
     }
   };
 
-  const sendShippingEmail = async (shippingData: ShippingData, product: Product, retryCount: number = 0, sellerPayeeEmail: string = ''): Promise<string | null> => {
+  const sendShippingEmail = async (shippingData: ShippingData, product: Product, retryCount: number = 0): Promise<string | null> => {
     const maxRetries = 1; // Server already retries 3 times, so only 1 client retry
     console.log(`📧 [sendShippingEmail] Starting (attempt ${retryCount + 1})`);
     debugLog('sendShippingEmail', `Calling API... (attempt ${retryCount + 1})`, 'log');
@@ -301,7 +298,6 @@ const CheckoutPage: React.FC = () => {
           images: product.images,
           checkoutFlow: product.checkoutFlow
         },
-        sellerPayeeEmail: sellerPayeeEmail || undefined,
       };
 
       console.log('📧 [sendShippingEmail] Request body:', JSON.stringify(requestBody, null, 2));
@@ -400,7 +396,7 @@ const CheckoutPage: React.FC = () => {
    * Called by the PayPal Redirect button.
    * Runs validation AND saves the order intent to the DB before redirecting.
    */
-  const handlePaypalBeforePayment = async (): Promise<{ ok: boolean; payeeEmail: string; amount: number; currency: string; description: string; sellerPayeeEmail?: string }> => {
+  const handlePaypalBeforePayment = async (): Promise<{ ok: boolean; payeeEmail: string; amount: number; currency: string; description: string }> => {
     const fail = { ok: false, payeeEmail: '', amount: 0, currency: 'USD', description: '' };
 
     if (!cartItem?.product) return fail;
@@ -421,9 +417,8 @@ const CheckoutPage: React.FC = () => {
       const amount = parseFloat((product.price + shippingCost).toFixed(2));
 
       // Platform email = where buyer pays (your verified PayPal Business account)
-      // Seller email = stored in DB as payout target (for later PayPal Payout)
       const platformEmail = paypalDirectEmail || '';
-      const sellerEmail = sellerPayeeEmail || product.payeeEmail || '';
+      const sellerEmail = product.payeeEmail || '';
 
       // Guard: If no platform email is configured, fail clearly
       if (!sellerEmail && !platformEmail) {
@@ -431,32 +426,31 @@ const CheckoutPage: React.FC = () => {
         return fail;
       }
 
-      // The recipient for payment: platform account (buyers pay us, we payout to seller)
+      // The recipient for payment: platform account if configured, otherwise the product payee email
       const paymentTarget = platformEmail || sellerEmail;
 
       // 1. Save the order / notify owner before they leave for PayPal
-      console.log('🚀 [PayPal] Saving order intent... platform:', paymentTarget, '| seller payout target:', sellerEmail);
+      console.log('🚀 [PayPal] Saving order intent... recipient:', paymentTarget);
       setIsSendingEmail(true);
 
-      const orderId = await sendShippingEmail({ ...shippingData }, product, 0, sellerEmail);
+      const orderId = await sendShippingEmail({ ...shippingData }, product, 0);
       setIsSendingEmail(false);
 
       if (!orderId) {
         throw new Error('Failed to save order intent');
       }
 
-      console.log('💳 [PayPal] Buyer pays:', paymentTarget, '| Seller payout queued to:', sellerEmail, '| Amount:', amount, product.currency || 'USD');
+      console.log('💳 [PayPal] Buyer pays:', paymentTarget, '| Amount:', amount, product.currency || 'USD');
 
       // Clear the cart so the customer can't double-submit
       clearCart();
 
-      return { 
-        ok: true, 
-        payeeEmail: paymentTarget, // Buyer pays the platform account
-        sellerPayeeEmail: sellerEmail, // Stored for later payout to seller
-        amount, 
-        currency: product.currency || 'USD', 
-        description: product.title 
+      return {
+        ok: true,
+        payeeEmail: paymentTarget,
+        amount,
+        currency: product.currency || 'USD',
+        description: product.title
       };
     } catch (err) {
       debugError('CheckoutPage: handlePaypalBeforePayment', err);

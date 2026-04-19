@@ -408,14 +408,15 @@ export default function ProductPageClient({ product: initialProduct }: ProductPa
                   <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-gray-500">
                     Condition
                   </p>
-                  <div className="group inline-flex max-w-full flex-col" tabIndex={0}>
+                  <div className="group relative inline-flex max-w-full flex-col" tabIndex={0}>
                     <div className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-gray-200 bg-gray-100 px-3 py-1 text-sm font-medium text-gray-700 transition-colors group-hover:border-[#003087]/30 group-hover:bg-[#003087]/5 group-focus-within:border-[#003087]/30 group-focus-within:bg-[#003087]/5">
-                      <Info className="h-4 w-4 flex-shrink-0 text-gray-400 transition-colors group-hover:text-[#003087] group-focus-within:text-[#003087]" />
                       <span className="truncate">{getConditionDisplayLabel(condition)}</span>
+                      <Info className="h-4 w-4 flex-shrink-0 text-gray-400 transition-colors group-hover:text-[#003087] group-focus-within:text-[#003087]" />
                     </div>
                     {getConditionTooltip(condition) && (
-                      <div className="mt-2 hidden max-w-xs rounded-xl border border-[#090A28]/10 bg-[#090A28] px-3 py-2 text-xs leading-5 text-white shadow-lg group-hover:block group-focus-within:block">
+                      <div className="pointer-events-none absolute left-0 top-full z-50 mt-2 hidden w-72 max-w-[calc(100vw-2rem)] rounded-xl border border-[#090A28]/10 bg-[#090A28] px-3 py-2 text-xs leading-5 text-white shadow-xl group-hover:block group-focus-within:block">
                         {getConditionTooltip(condition)}
+                        <div className="absolute bottom-full left-5 border-4 border-transparent border-b-[#090A28]"></div>
                       </div>
                     )}
                   </div>

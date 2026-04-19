@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     console.log('📦 [API] Received request body:', JSON.stringify(body, null, 2));
     
-    const { shippingData, product, sellerPayeeEmail } = body;
+    const { shippingData, product } = body;
 
     // Validate required data
     if (!shippingData || !product) {
@@ -81,7 +81,6 @@ export async function POST(request: NextRequest) {
       status: (product.checkoutFlow || product.checkout_flow) === 'stripe' ? 'pending_payment' : 'completed',
       paymentProvider: product.checkoutFlow || product.checkout_flow,
       fullOrderData: { shippingData, product, siteUrl },
-      sellerPayeeEmail: sellerPayeeEmail || undefined,
     });
 
     console.log('📦 [API] Order save result:', { success: orderResult.success, orderId: orderResult.id, error: orderResult.error });
