@@ -271,7 +271,7 @@ const CheckoutPage: React.FC = () => {
         return;
       }
 
-      const regions = regionData[shippingData.country] || [];
+      const regions = allRegions;
       const filtered = regions.filter(region =>
         region.toLowerCase().includes(value.toLowerCase())
       );
@@ -400,7 +400,7 @@ const CheckoutPage: React.FC = () => {
    * Called by the PayPal Redirect button.
    * Runs validation AND saves the order intent to the DB before redirecting.
    */
-  const handlePaypalBeforePayment = async (): Promise<{ ok: boolean; payeeEmail: string; amount: number; currency: string; description: string }> => {
+  const handlePaypalBeforePayment = async (): Promise<{ ok: boolean; payeeEmail: string; amount: number; currency: string; description: string; sellerPayeeEmail?: string }> => {
     const fail = { ok: false, payeeEmail: '', amount: 0, currency: 'USD', description: '' };
 
     if (!cartItem?.product) return fail;
@@ -417,7 +417,7 @@ const CheckoutPage: React.FC = () => {
 
     try {
       // Pre-compute amounts and emails before async operations
-      const shippingCost = cartItem.shippingMethod?.price || 0;
+      const shippingCost = 0; // Free shipping standard
       const amount = parseFloat((product.price + shippingCost).toFixed(2));
 
       // Platform email = where buyer pays (your verified PayPal Business account)
