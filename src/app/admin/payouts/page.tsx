@@ -102,7 +102,7 @@ export default function PayoutsPage() {
         <div className="p-4 bg-blue-50 border border-blue-200 rounded-xl flex items-start gap-3">
           <AlertCircle className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
           <div className="text-sm text-blue-800">
-            <strong>How this works:</strong> Buyer paid your PayPal platform account. Click "Send Payout" to forward the seller's share to their email via PayPal Payouts. If the seller has no PayPal account, PayPal will email them to claim the funds.
+            <strong>How this works:</strong> Buyer paid your PayPal platform account. Click &quot;Send Payout&quot; to forward the seller&apos;s share to their email via PayPal Payouts. If the seller has no PayPal account, PayPal will email them to claim the funds.
           </div>
         </div>
 

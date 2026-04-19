@@ -11,10 +11,11 @@ import SellerBadge from '@/components/SellerBadge';
 import { addToCart } from '@/utils/cart';
 import { preventScrollOnClick } from '@/utils/scrollUtils';
 import { debugNavigation, debugError, debugLog } from '@/utils/debug';
-import { ChevronLeft, ChevronRight, ChevronDown, ChevronUp, X, ShoppingCart, Zap, Eye, ZoomIn } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ChevronDown, ChevronUp, X, ShoppingCart, Zap, Eye, ZoomIn, Info } from 'lucide-react';
 import { useState, useEffect, useMemo } from 'react';
 import type { Product } from '@/types/product';
 import Image from 'next/image';
+import { getConditionTooltip } from '@/lib/conditions';
 
 interface ProductPageClientProps {
   product: Product | null;
@@ -402,7 +403,20 @@ export default function ProductPageClient({ product: initialProduct }: ProductPa
             <div className="lg:max-h-[calc(100dvh-4rem)] lg:overflow-y-auto lg:pr-4 scrollbar-hide nested-scroll">
               <h1 className="text-3xl font-medium text-[#262626] mb-1">{title}</h1>
               <SellerBadge sellerId={product?.sellerId} size="md" />
-              <div className="mt-3 text-gray-600">{condition}</div>
+              {condition && (
+                <div className="mt-3 relative flex items-center group cursor-help w-max">
+                  <div className="text-gray-600 font-medium bg-gray-100 px-3 py-1 rounded-full text-sm flex items-center gap-1.5 border border-gray-200">
+                    <Info className="h-4 w-4 text-gray-400 group-hover:text-[#003087] transition-colors" />
+                    {condition}
+                  </div>
+                  {getConditionTooltip(condition) && (
+                    <div className="absolute left-0 bottom-full mb-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible active:opacity-100 active:visible z-50 w-64 p-3 bg-[#090A28] text-white text-xs rounded-lg shadow-xl transition-all duration-200">
+                      {getConditionTooltip(condition)}
+                      <div className="absolute top-full left-6 -mt-px border-4 border-transparent border-t-[#090A28]"></div>
+                    </div>
+                  )}
+                </div>
+              )}
               {product && product.inStock === false && product.checkoutLink === '#' && (
                 <div className="mt-4 bg-amber-50 border-2 border-amber-200 rounded-xl py-3 px-4">
                   <p className="text-sm text-amber-800 font-medium">

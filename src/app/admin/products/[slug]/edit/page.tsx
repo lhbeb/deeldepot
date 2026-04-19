@@ -14,6 +14,7 @@ import type { Review } from '@/types/product';
 import ImageUploader, { ImageUploaderRef, UploadStatus } from '@/components/admin/ImageUploader';
 import AdminLayout from '@/components/AdminLayout';
 import AdminLoading from '@/components/AdminLoading';
+import { PRODUCT_CONDITIONS } from '@/lib/conditions';
 import AdminSellerReviewsEditor from '@/components/AdminSellerReviewsEditor';
 
 const slugify = (value: string) =>
@@ -686,11 +687,11 @@ export default function EditProductPage() {
                   className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#090A28] focus:border-[#090A28] outline-none transition-all bg-white"
                 >
                   <option value="">Select</option>
-                  <option value="New">New</option>
-                  <option value="Like New">Like New</option>
-                  <option value="Excellent">Excellent</option>
-                  <option value="Good">Good</option>
-                  <option value="Fair">Fair</option>
+                  {PRODUCT_CONDITIONS.map((c) => (
+                    <option key={c.value} value={c.value}>
+                      {c.label}
+                    </option>
+                  ))}
                 </select>
               </Field>
             </div>
