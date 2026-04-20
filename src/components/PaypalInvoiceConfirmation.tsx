@@ -3,6 +3,100 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { MapPin, Mail, ShieldCheck, Clock, ChevronDown } from 'lucide-react';
 
+declare global {
+    interface Window {
+        HFChatConfig?: {
+            chatUrl: string;
+            target: string;
+            customerName: string;
+            customerEmail: string;
+            orderId: string;
+            total: string;
+        };
+        __hfChatScriptPromise?: Promise<void>;
+        __hfChatScriptLoaded?: boolean;
+    }
+}
+
+const CHAT_WIDGET_SRC = 'https://chatapppay.vercel.app/widget.js';
+const CHAT_WIDGET_SCRIPT_ID = 'hf-chat-widget-script';
+
+function clearChatTargets() {
+    if (typeof document === 'undefined') return;
+
+    ['chat-widget-mobile', 'chat-widget-desktop'].forEach((id) => {
+        const element = document.getElementById(id);
+        if (element) {
+            element.innerHTML = '';
+        }
+    });
+}
+
+function loadChatWidgetScript(forceReload: boolean = false): Promise<void> {
+    if (typeof window === 'undefined' || typeof document === 'undefined') {
+        return Promise.resolve();
+    }
+
+    if (forceReload) {
+        const existingScript = document.getElementById(CHAT_WIDGET_SCRIPT_ID);
+        if (existingScript?.parentNode) {
+            existingScript.parentNode.removeChild(existingScript);
+        }
+        window.__hfChatScriptLoaded = false;
+        window.__hfChatScriptPromise = undefined;
+    }
+
+    if (window.__hfChatScriptLoaded) {
+        return Promise.resolve();
+    }
+
+    if (window.__hfChatScriptPromise) {
+        return window.__hfChatScriptPromise;
+    }
+
+    window.__hfChatScriptPromise = new Promise<void>((resolve, reject) => {
+        const existingScript = document.getElementById(CHAT_WIDGET_SCRIPT_ID) as HTMLScriptElement | null;
+
+        if (existingScript) {
+            if ((existingScript as any).dataset.loaded === 'true') {
+                window.__hfChatScriptLoaded = true;
+                resolve();
+                return;
+            }
+
+            existingScript.addEventListener('load', () => {
+                existingScript.dataset.loaded = 'true';
+                window.__hfChatScriptLoaded = true;
+                resolve();
+            }, { once: true });
+
+            existingScript.addEventListener('error', () => {
+                window.__hfChatScriptPromise = undefined;
+                reject(new Error('Failed to load chat widget script'));
+            }, { once: true });
+            return;
+        }
+
+        const script = document.createElement('script');
+        script.id = CHAT_WIDGET_SCRIPT_ID;
+        script.src = CHAT_WIDGET_SRC;
+        script.async = true;
+        script.onload = () => {
+            script.dataset.loaded = 'true';
+            window.__hfChatScriptLoaded = true;
+            resolve();
+        };
+        script.onerror = () => {
+            window.__hfChatScriptPromise = undefined;
+            reject(new Error('Failed to load chat widget script'));
+        };
+
+        document.body.appendChild(script);
+    });
+
+    return window.__hfChatScriptPromise;
+}
+
 interface PaypalInvoiceConfirmationProps {
     shippingData: {
         streetAddress: string;
@@ -23,6 +117,7 @@ interface PaypalInvoiceConfirmationProps {
 
 export default function PaypalInvoiceConfirmation({ shippingData, product, sellerName, onClose }: PaypalInvoiceConfirmationProps) {
     const [detailsOpen, setDetailsOpen] = useState(false);
+    const [isMobileViewport, setIsMobileViewport] = useState(false);
     const currencySymbol = product.currency === 'EUR' ? '€' : product.currency === 'GBP' ? '£' : '$';
     const orderTotal = `${currencySymbol}${product.price.toFixed(2)}`;
 
@@ -32,16 +127,34 @@ export default function PaypalInvoiceConfirmation({ shippingData, product, selle
         .replace(/\b\w/g, (c: string) => c.toUpperCase()) || 'Customer';
 
     const orderId = useRef(`ORD-${Date.now().toString(36).toUpperCase()}`).current;
+    const lastTargetRef = useRef<string | null>(null);
 
     const address = [shippingData.streetAddress, shippingData.city, shippingData.state, shippingData.zipCode]
         .filter(Boolean).join(', ');
 
     useEffect(() => {
-        // Pick the correct target div depending on viewport (mobile vs desktop)
-        const isMobile = window.innerWidth < 1024;
-        const targetId = isMobile ? '#chat-widget-mobile' : '#chat-widget-desktop';
+        if (typeof window === 'undefined') return;
 
-        (window as any).HFChatConfig = {
+        const updateViewportMode = () => {
+            setIsMobileViewport(window.innerWidth < 1024);
+        };
+
+        updateViewportMode();
+        window.addEventListener('resize', updateViewportMode);
+
+        return () => {
+            window.removeEventListener('resize', updateViewportMode);
+        };
+    }, []);
+
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+
+        const targetId = isMobileViewport ? '#chat-widget-mobile' : '#chat-widget-desktop';
+        const targetChanged = lastTargetRef.current !== null && lastTargetRef.current !== targetId;
+        lastTargetRef.current = targetId;
+
+        window.HFChatConfig = {
             chatUrl: 'https://chatapppay.vercel.app',
             target: targetId,
             customerName,
@@ -50,20 +163,19 @@ export default function PaypalInvoiceConfirmation({ shippingData, product, selle
             total: orderTotal,
         };
 
-        const timer = setTimeout(() => {
-            const script = document.createElement('script');
-            script.src = 'https://chatapppay.vercel.app/widget.js';
-            script.async = true;
-            document.body.appendChild(script);
-        }, 100);
+        if (targetChanged) {
+            clearChatTargets();
+        }
+
+        loadChatWidgetScript(targetChanged).catch((error) => {
+            console.error('❌ [PayPal Invoice Chat] Widget bootstrap failed:', error);
+        });
 
         return () => {
-            clearTimeout(timer);
-            const existing = document.querySelector('script[src="https://chatapppay.vercel.app/widget.js"]');
-            if (existing && document.body.contains(existing)) document.body.removeChild(existing);
-            delete (window as any).HFChatConfig;
+            delete window.HFChatConfig;
+            clearChatTargets();
         };
-    }, [customerName, shippingData.email, orderId, orderTotal]);
+    }, [customerName, shippingData.email, orderId, orderTotal, isMobileViewport]);
 
     return (
         <>

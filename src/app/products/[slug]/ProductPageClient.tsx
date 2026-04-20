@@ -12,7 +12,7 @@ import { addToCart } from '@/utils/cart';
 import { preventScrollOnClick } from '@/utils/scrollUtils';
 import { debugNavigation, debugError, debugLog } from '@/utils/debug';
 import { ChevronLeft, ChevronRight, ChevronDown, ChevronUp, X, ShoppingCart, Zap, Eye, ZoomIn, Info } from 'lucide-react';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef, type CSSProperties } from 'react';
 import type { Product } from '@/types/product';
 import Image from 'next/image';
 import { getConditionDisplayLabel, getConditionTooltip } from '@/lib/conditions';
@@ -25,6 +25,7 @@ export default function ProductPageClient({ product: initialProduct }: ProductPa
   const [imgLoaded, setImgLoaded] = useState(false);
   const router = useRouter();
   const [product, setProduct] = useState<Product | null>(initialProduct);
+  const conditionTriggerRef = useRef<HTMLDivElement | null>(null);
   const [activeImage, setActiveImage] = useState(0);
   const [showFAQ, setShowFAQ] = useState(false);
   const [showZoom, setShowZoom] = useState(false);
@@ -34,6 +35,8 @@ export default function ProductPageClient({ product: initialProduct }: ProductPa
   const [zoomLevel, setZoomLevel] = useState(1);
   const [touchStart, setTouchStart] = useState<{ x: number; y: number } | null>(null);
   const [touchEnd, setTouchEnd] = useState<{ x: number; y: number } | null>(null);
+  const [isConditionTooltipVisible, setIsConditionTooltipVisible] = useState(false);
+  const [conditionTooltipStyle, setConditionTooltipStyle] = useState<CSSProperties>({});
 
   const faqItems = useMemo(() => [
     { question: "Are the items new or used?", answer: "We offer both new and second-hand items. Product condition is clearly listed in the description (e.g., Brand New, Like New, Refurbished, or Used – Good Condition)." },
@@ -94,6 +97,32 @@ export default function ProductPageClient({ product: initialProduct }: ProductPa
       unlockScroll();
     };
   }, [showZoom]);
+
+  useEffect(() => {
+    if (!isConditionTooltipVisible || !conditionTriggerRef.current || typeof window === 'undefined') return;
+
+    const tooltipWidth = 288;
+    const gap = 12;
+    const rect = conditionTriggerRef.current.getBoundingClientRect();
+    const isDesktop = window.innerWidth >= 768;
+
+    if (isDesktop) {
+      setConditionTooltipStyle({
+        position: 'fixed',
+        top: rect.top + rect.height / 2,
+        left: Math.max(16, rect.left - tooltipWidth - gap),
+        transform: 'translateY(-50%)',
+      });
+      return;
+    }
+
+    setConditionTooltipStyle({
+      position: 'fixed',
+      top: rect.bottom + gap,
+      left: Math.max(16, rect.left),
+      width: `min(${tooltipWidth}px, calc(100vw - 32px))`,
+    });
+  }, [isConditionTooltipVisible]);
 
   const handleAddToCart = async () => {
     debugLog('handleAddToCart', 'Function called', 'log');
@@ -408,13 +437,25 @@ export default function ProductPageClient({ product: initialProduct }: ProductPa
                   <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-gray-500">
                     Condition
                   </p>
-                  <div className="group relative inline-flex max-w-full flex-col" tabIndex={0}>
+                  <div
+                    ref={conditionTriggerRef}
+                    className="group relative inline-flex max-w-full flex-col"
+                    tabIndex={0}
+                    onMouseEnter={() => setIsConditionTooltipVisible(true)}
+                    onMouseLeave={() => setIsConditionTooltipVisible(false)}
+                    onFocus={() => setIsConditionTooltipVisible(true)}
+                    onBlur={() => setIsConditionTooltipVisible(false)}
+                    onClick={() => setIsConditionTooltipVisible((current) => !current)}
+                  >
                     <div className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-gray-200 bg-gray-100 px-3 py-1 text-sm font-medium text-gray-700 transition-colors group-hover:border-[#003087]/30 group-hover:bg-[#003087]/5 group-focus-within:border-[#003087]/30 group-focus-within:bg-[#003087]/5">
                       <span className="truncate">{getConditionDisplayLabel(condition)}</span>
                       <Info className="h-4 w-4 flex-shrink-0 text-gray-400 transition-colors group-hover:text-[#003087] group-focus-within:text-[#003087]" />
                     </div>
-                    {getConditionTooltip(condition) && (
-                      <div className="pointer-events-none absolute left-0 top-full z-50 mt-2 hidden w-72 max-w-[calc(100vw-2rem)] rounded-xl border border-[#090A28]/10 bg-[#090A28] px-3 py-2 text-xs leading-5 text-white shadow-xl group-hover:block group-focus-within:block md:left-auto md:right-full md:top-1/2 md:mr-3 md:mt-0 md:-translate-y-1/2">
+                    {getConditionTooltip(condition) && isConditionTooltipVisible && (
+                      <div
+                        className="pointer-events-none z-[70] w-72 max-w-[calc(100vw-2rem)] rounded-xl border border-[#090A28]/10 bg-[#090A28] px-3 py-2 text-xs leading-5 text-white shadow-xl"
+                        style={conditionTooltipStyle}
+                      >
                         {getConditionTooltip(condition)}
                         <div className="absolute bottom-full left-5 border-4 border-transparent border-b-[#090A28] md:bottom-auto md:left-auto md:right-[-8px] md:top-1/2 md:-translate-y-1/2 md:border-b-transparent md:border-l-[#090A28]"></div>
                       </div>
