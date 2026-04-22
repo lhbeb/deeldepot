@@ -30,20 +30,25 @@ async function getAdminAuth(request: NextRequest) {
   }
 }
 
-export async function GET(request: NextRequest) {
+export async function POST(request: NextRequest) {
   try {
     const auth = await getAdminAuth(request);
     if (!auth) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { searchParams } = new URL(request.url);
-    const baseDomain = searchParams.get('baseDomain') || '';
+    const body = await request.json();
+    const { slugs, baseDomain } = body;
 
-    // Fetch all products
+    if (!Array.isArray(slugs) || slugs.length === 0) {
+      return NextResponse.json({ error: 'No product slugs provided' }, { status: 400 });
+    }
+
+    // Fetch only the requested products
     const { data: products, error } = await supabaseAdmin
       .from('products')
       .select('slug, title, description, price, brand, listed_by')
+      .in('slug', slugs)
       .order('created_at', { ascending: false });
 
     if (error) throw new Error(error.message);
@@ -56,7 +61,7 @@ export async function GET(request: NextRequest) {
       product_display_name: p.title || '',
       short_note: (p.description || '').replace(/\r\n|\r|\n/g, ' ').trim().slice(0, 80),
       price_label: `$${Number(p.price || 0).toFixed(2)}`,
-      affiliate_link_url: `${baseDomain}/products/${p.slug}`,
+      affiliate_link_url: `${baseDomain || ''}/products/${p.slug}`,
       listed_by: p.listed_by || '',
     }));
 
