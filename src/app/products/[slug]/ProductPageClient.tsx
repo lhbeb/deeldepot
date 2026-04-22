@@ -110,7 +110,7 @@ export default function ProductPageClient({ product: initialProduct }: ProductPa
       setConditionTooltipStyle({
         position: 'fixed',
         top: rect.top + rect.height / 2,
-        left: Math.max(16, rect.left - tooltipWidth - gap),
+        left: Math.min(rect.right + gap, window.innerWidth - tooltipWidth - 16),
         transform: 'translateY(-50%)',
       });
       return;
@@ -457,7 +457,7 @@ export default function ProductPageClient({ product: initialProduct }: ProductPa
                         style={conditionTooltipStyle}
                       >
                         {getConditionTooltip(condition)}
-                        <div className="absolute bottom-full left-5 border-4 border-transparent border-b-[#090A28] md:bottom-auto md:left-auto md:right-[-8px] md:top-1/2 md:-translate-y-1/2 md:border-b-transparent md:border-l-[#090A28]"></div>
+                        <div className="absolute bottom-full left-5 border-4 border-transparent border-b-[#090A28] md:bottom-auto md:left-[-8px] md:right-auto md:top-1/2 md:-translate-y-1/2 md:border-b-transparent md:border-r-[#090A28] md:border-l-transparent"></div>
                       </div>
                     )}
                   </div>
