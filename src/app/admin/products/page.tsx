@@ -517,13 +517,13 @@ export default function AdminProductsPage() {
       const a = document.createElement('a');
       a.href = url;
       const date = new Date().toISOString().slice(0, 10);
-      a.download = `DeelDepot-affiliate-json-${date}.zip`;
+      a.download = `DeelDepot-affiliate-json-${date}.json`;
       document.body.appendChild(a);
       a.click();
       a.remove();
       window.URL.revokeObjectURL(url);
     } catch (err: any) {
-      setError(err.message || 'Failed to export products as JSON zip');
+      setError(err.message || 'Failed to export products as JSON');
       console.error('JSON export error:', err);
     } finally {
       setExportingJSON(false);

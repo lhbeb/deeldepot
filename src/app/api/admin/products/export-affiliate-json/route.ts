@@ -51,32 +51,23 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'No products found' }, { status: 404 });
     }
 
-    const zip = new AdmZip();
+    const affiliateData = products.map(p => ({
+      brand_name: p.brand || '',
+      product_display_name: p.title || '',
+      short_note: (p.description || '').replace(/\r\n|\r|\n/g, ' ').trim().slice(0, 80),
+      price_label: `$${Number(p.price || 0).toFixed(2)}`,
+      affiliate_link_url: `${baseDomain}/products/${p.slug}`,
+      listed_by: p.listed_by || '',
+    }));
 
-    for (const p of products) {
-      const affiliateData = {
-        brand_name: p.brand || '',
-        product_display_name: p.title || '',
-        short_note: (p.description || '').replace(/\r\n|\r|\n/g, ' ').trim().slice(0, 80),
-        price_label: `$${Number(p.price || 0).toFixed(2)}`,
-        affiliate_link_url: `${baseDomain}/products/${p.slug}`,
-        listed_by: p.listed_by || '',
-      };
-
-      // Each product gets its own .json file named by slug
-      const filename = `${p.slug}.json`;
-      zip.addFile(filename, Buffer.from(JSON.stringify(affiliateData, null, 2), 'utf8'));
-    }
-
-    const zipBuffer = zip.toBuffer();
+    const jsonContent = JSON.stringify(affiliateData, null, 2);
     const date = new Date().toISOString().slice(0, 10);
 
-    return new NextResponse(zipBuffer, {
+    return new NextResponse(jsonContent, {
       status: 200,
       headers: {
-        'Content-Type': 'application/zip',
-        'Content-Disposition': `attachment; filename="DeelDepot-affiliate-json-${date}.zip"`,
-        'Content-Length': String(zipBuffer.length),
+        'Content-Type': 'application/json',
+        'Content-Disposition': `attachment; filename="DeelDepot-affiliate-json-${date}.json"`,
       },
     });
   } catch (error: any) {
