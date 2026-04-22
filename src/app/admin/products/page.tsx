@@ -24,7 +24,7 @@ interface Product {
   inStock?: boolean;
   created_at: string;
   checkoutLink?: string;
-  checkoutFlow?: 'buymeacoffee' | 'kofi' | 'stripe' | 'external' | 'paypal-invoice' | 'paypal-direct';
+  checkoutFlow?: 'buymeacoffee' | 'kofi' | 'stripe' | 'external' | 'paypal-invoice' | 'paypal-unclaimed' | 'paypal-direct';
   isFeatured?: boolean;
   is_featured?: boolean;
   published?: boolean;
@@ -44,7 +44,7 @@ export default function AdminProductsPage() {
   const [featuredFilter, setFeaturedFilter] = useState<'all' | 'featured' | 'not_featured'>('all');
   const [stockFilter, setStockFilter] = useState<'all' | 'in_stock' | 'sold_out'>('all');
   const [listedByFilter, setListedByFilter] = useState<string>('all');
-  const [checkoutFilter, setCheckoutFilter] = useState<'all' | 'stripe' | 'kofi' | 'buymeacoffee' | 'external' | 'paypal-invoice' | 'paypal-direct'>('all');
+  const [checkoutFilter, setCheckoutFilter] = useState<'all' | 'stripe' | 'kofi' | 'buymeacoffee' | 'external' | 'paypal-invoice' | 'paypal-unclaimed' | 'paypal-direct'>('all');
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [currentPage, setCurrentPage] = useState(1);
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -55,6 +55,7 @@ export default function AdminProductsPage() {
   const [selectedProducts, setSelectedProducts] = useState<Set<string>>(new Set());
   const [exporting, setExporting] = useState(false);
   const [exportingCSV, setExportingCSV] = useState(false);
+  const [exportingJSON, setExportingJSON] = useState(false);
   const [adminRole, setAdminRole] = useState<string | null>(null);
   const FEATURE_LIMIT = 6;
   const itemsPerPage = 12;
@@ -492,6 +493,43 @@ export default function AdminProductsPage() {
     }
   };
 
+  const handleExportAffiliateJSON = async () => {
+    setExportingJSON(true);
+    setError('');
+
+    try {
+      const token = localStorage.getItem('admin_token');
+      const baseDomain = typeof window !== 'undefined'
+        ? `${window.location.protocol}//${window.location.host}`
+        : '';
+
+      const response = await fetch(`/api/admin/products/export-affiliate-json?baseDomain=${encodeURIComponent(baseDomain)}`, {
+        headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+      });
+
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(errData.error || 'Failed to export affiliate JSON');
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      const date = new Date().toISOString().slice(0, 10);
+      a.download = `DeelDepot-affiliate-json-${date}.zip`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err: any) {
+      setError(err.message || 'Failed to export products as JSON zip');
+      console.error('JSON export error:', err);
+    } finally {
+      setExportingJSON(false);
+    }
+  };
+
   const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
   const paginatedProducts = filteredProducts.slice(
     (currentPage - 1) * itemsPerPage,
@@ -568,83 +606,83 @@ export default function AdminProductsPage() {
             />
           </div>
 
-          {/* Filters & Actions Row */}
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-            
-            {/* Filters */}
-            <div className="flex flex-wrap items-center gap-2">
-              {/* Featured Filter */}
-              <div className="flex items-center gap-2">
-                <Filter className="h-5 w-5 text-gray-400" />
-                <select
-                  value={featuredFilter}
-                  onChange={(e) => setFeaturedFilter(e.target.value as 'all' | 'featured' | 'not_featured')}
-                  className="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#090A28] focus:border-transparent text-sm font-medium"
-                >
-                  <option value="all">All Products</option>
-                  <option value="featured">⭐ Featured Only</option>
-                  <option value="not_featured">Not Featured</option>
-                </select>
-              </div>
-
-              {/* Stock Filter */}
-              <div className="flex items-center gap-2">
-                <Filter className="h-5 w-5 text-gray-400" />
-                <select
-                  value={stockFilter}
-                  onChange={(e) => setStockFilter(e.target.value as 'all' | 'in_stock' | 'sold_out')}
-                  className="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#090A28] focus:border-transparent text-sm font-medium"
-                >
-                  <option value="all">All Stock Status</option>
-                  <option value="in_stock">✅ In Stock</option>
-                  <option value="sold_out">❌ Sold Out</option>
-                </select>
-              </div>
-
-              {/* Listed By Filter */}
-              <div className="flex items-center gap-2">
-                <Filter className="h-5 w-5 text-gray-400" />
-                <select
-                  value={listedByFilter}
-                  onChange={(e) => setListedByFilter(e.target.value)}
-                  className="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#090A28] focus:border-transparent text-sm font-medium"
-                >
-                  <option value="all">All Uploaders</option>
-                  <option value="walid">walid</option>
-                  <option value="abdo">abdo</option>
-                  <option value="jebbar">jebbar</option>
-                  <option value="amine">amine</option>
-                  <option value="mehdi">mehdi</option>
-                  <option value="othmane">othmane</option>
-                  <option value="janah">janah</option>
-                  <option value="youssef">youssef</option>
-                  <option value="yassine">yassine</option>
-                  <option value="none">Not Assigned</option>
-                </select>
-              </div>
-
-              {/* Checkout Flow Filter */}
-              <div className="flex items-center gap-2">
-                <Filter className="h-5 w-5 text-gray-400" />
-                <select
-                  value={checkoutFilter}
-                  onChange={(e) => setCheckoutFilter(e.target.value as 'all' | 'stripe' | 'kofi' | 'buymeacoffee' | 'external' | 'paypal-invoice' | 'paypal-direct')}
-                  className="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#090A28] focus:border-transparent text-sm font-medium"
-                >
-                  <option value="all">All Checkout Methods</option>
-                  <option value="stripe">💳 Stripe</option>
-                  <option value="kofi">☕ Ko-fi</option>
-                  <option value="buymeacoffee">☕ Buy Me a Coffee</option>
-                  <option value="external">🔗 External</option>
-                  <option value="paypal-invoice">🔵 PayPal Invoice/Request (Telegram Chat)</option>
-                  <option value="paypal-direct">🔵 PayPal Checkout Direct</option>
-                </select>
-              </div>
+          {/* ─── Filters + Actions layout ─── */}
+          {/* Row 1: Filters — allowed to wrap on smaller screens */}
+          <div className="flex flex-wrap items-center gap-2">
+            {/* Featured Filter */}
+            <div className="flex items-center gap-2">
+              <Filter className="h-5 w-5 text-gray-400 shrink-0" />
+              <select
+                value={featuredFilter}
+                onChange={(e) => setFeaturedFilter(e.target.value as 'all' | 'featured' | 'not_featured')}
+                className="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#090A28] focus:border-transparent text-sm font-medium"
+              >
+                <option value="all">All Products</option>
+                <option value="featured">⭐ Featured Only</option>
+                <option value="not_featured">Not Featured</option>
+              </select>
             </div>
 
-            {/* View Toggle & Actions */}
-            <div className="flex flex-wrap items-center gap-2 sm:gap-3 w-full sm:w-auto mt-2 sm:mt-0">
-              <div className="flex items-center bg-gray-100 rounded-lg p-1">
+            {/* Stock Filter */}
+            <div className="flex items-center gap-2">
+              <Filter className="h-5 w-5 text-gray-400 shrink-0" />
+              <select
+                value={stockFilter}
+                onChange={(e) => setStockFilter(e.target.value as 'all' | 'in_stock' | 'sold_out')}
+                className="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#090A28] focus:border-transparent text-sm font-medium"
+              >
+                <option value="all">All Stock Status</option>
+                <option value="in_stock">✅ In Stock</option>
+                <option value="sold_out">❌ Sold Out</option>
+              </select>
+            </div>
+
+            {/* Listed By Filter */}
+            <div className="flex items-center gap-2">
+              <Filter className="h-5 w-5 text-gray-400 shrink-0" />
+              <select
+                value={listedByFilter}
+                onChange={(e) => setListedByFilter(e.target.value)}
+                className="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#090A28] focus:border-transparent text-sm font-medium"
+              >
+                <option value="all">All Uploaders</option>
+                <option value="walid">walid</option>
+                <option value="abdo">abdo</option>
+                <option value="jebbar">jebbar</option>
+                <option value="amine">amine</option>
+                <option value="mehdi">mehdi</option>
+                <option value="othmane">othmane</option>
+                <option value="janah">janah</option>
+                <option value="youssef">youssef</option>
+                <option value="yassine">yassine</option>
+                <option value="none">Not Assigned</option>
+              </select>
+            </div>
+
+            {/* Checkout Flow Filter */}
+            <div className="flex items-center gap-2">
+              <Filter className="h-5 w-5 text-gray-400 shrink-0" />
+              <select
+                value={checkoutFilter}
+                onChange={(e) => setCheckoutFilter(e.target.value as 'all' | 'stripe' | 'kofi' | 'buymeacoffee' | 'external' | 'paypal-invoice' | 'paypal-unclaimed' | 'paypal-direct')}
+                className="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#090A28] focus:border-transparent text-sm font-medium"
+              >
+                <option value="all">All Checkout Methods</option>
+                <option value="stripe">💳 Stripe</option>
+                <option value="kofi">☕ Ko-fi</option>
+                <option value="buymeacoffee">☕ Buy Me a Coffee</option>
+                <option value="external">🔗 External</option>
+                <option value="paypal-invoice">🔵 PayPal Invoice/Request (Telegram Chat)</option>
+                <option value="paypal-unclaimed">🔵 PayPal Unclaimed</option>
+                <option value="paypal-direct">🔵 PayPal Checkout Direct</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Row 2: Action buttons — never wrap, overflow scrolls horizontally */}
+          <div className="flex items-center gap-2 overflow-x-auto pb-1 min-w-0">
+            {/* View toggle */}
+            <div className="flex items-center bg-gray-100 rounded-lg p-1 shrink-0">
               <button
                 onClick={() => setViewMode('grid')}
                 className={`p-2 rounded-md transition-colors ${viewMode === 'grid' ? 'bg-white shadow-sm' : 'hover:bg-gray-200'}`}
@@ -659,60 +697,67 @@ export default function AdminProductsPage() {
               </button>
             </div>
 
+            {/* Refresh */}
             <button
               onClick={fetchProducts}
-              className="p-2.5 bg-gray-50 border border-gray-200 rounded-xl hover:bg-gray-100 transition-colors"
+              className="p-2.5 bg-gray-50 border border-gray-200 rounded-xl hover:bg-gray-100 transition-colors shrink-0"
             >
               <RefreshCw className="h-4 w-4 text-gray-600" />
             </button>
 
-            {/* Export All as CSV — always visible, exports every product in the database */}
+            {/* Export All CSV */}
             <button
               onClick={handleExportAllCSV}
               disabled={exportingCSV}
-              className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition-colors shadow-lg shadow-emerald-500/25 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap text-sm sm:text-base"
-              title="Export all products as CSV (images as direct Supabase links)"
+              className="inline-flex items-center justify-center gap-2 px-3 py-2.5 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition-colors shadow-lg shadow-emerald-500/25 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap text-sm shrink-0"
+              title="Export all products as CSV"
             >
               {exportingCSV ? (
-                <RefreshCw className="h-4 w-4 animate-spin shrink-0" />
+                <RefreshCw className="h-4 w-4 animate-spin" />
               ) : (
-                <Download className="h-4 w-4 shrink-0" />
+                <Download className="h-4 w-4" />
               )}
-              <span className="font-medium hidden sm:inline">
-                {exportingCSV ? 'Exporting...' : 'Export All CSV'}
-              </span>
-              <span className="font-medium sm:hidden">
-                CSV
-              </span>
+              <span className="font-medium">{exportingCSV ? 'Exporting...' : 'Export CSV'}</span>
             </button>
 
+            {/* Affiliate JSON */}
+            <button
+              onClick={handleExportAffiliateJSON}
+              disabled={exportingJSON}
+              className="inline-flex items-center justify-center gap-2 px-3 py-2.5 bg-violet-600 text-white rounded-xl hover:bg-violet-700 transition-colors shadow-lg shadow-violet-500/25 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap text-sm shrink-0"
+              title="Export all products as Affiliate JSON"
+            >
+              {exportingJSON ? (
+                <RefreshCw className="h-4 w-4 animate-spin" />
+              ) : (
+                <Download className="h-4 w-4" />
+              )}
+              <span className="font-medium">{exportingJSON ? 'Exporting...' : 'Affiliate JSON'}</span>
+            </button>
+
+            {/* Export .zip (selection-dependent) */}
             {selectedProducts.size > 0 && (
               <button
                 onClick={handleExport}
                 disabled={exporting}
-                className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 bg-[#090A28] text-white rounded-xl hover:bg-[#1c2070] transition-colors shadow-lg shadow-blue-500/25 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap text-sm sm:text-base"
+                className="inline-flex items-center justify-center gap-2 px-3 py-2.5 bg-[#090A28] text-white rounded-xl hover:bg-[#1c2070] transition-colors shadow-lg shadow-blue-500/25 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap text-sm shrink-0"
               >
                 {exporting ? (
-                  <RefreshCw className="h-4 w-4 animate-spin shrink-0" />
+                  <RefreshCw className="h-4 w-4 animate-spin" />
                 ) : (
-                  <Download className="h-4 w-4 shrink-0" />
+                  <Download className="h-4 w-4" />
                 )}
-                <span className="font-medium hidden sm:inline">
-                  {exporting ? 'Exporting...' : `Export (${selectedProducts.size})`}
-                </span>
-                <span className="font-medium sm:hidden">
-                  ({selectedProducts.size})
-                </span>
+                <span className="font-medium">{exporting ? 'Exporting...' : `Export .zip (${selectedProducts.size})`}</span>
               </button>
             )}
 
+            {/* Add Product */}
             <Link
               href="/admin/products/new"
-              className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 bg-[#090A28] text-white rounded-xl hover:bg-[#1c2070] transition-colors shadow-lg shadow-[#090A28]/25 whitespace-nowrap text-sm sm:text-base"
+              className="inline-flex items-center justify-center gap-2 px-3 py-2.5 bg-[#090A28] text-white rounded-xl hover:bg-[#1c2070] transition-colors shadow-lg shadow-[#090A28]/25 whitespace-nowrap text-sm shrink-0"
             >
-              <Plus className="h-4 w-4 shrink-0" />
-              <span className="font-medium hidden sm:inline">Add Product</span>
-              <span className="font-medium sm:hidden">Add</span>
+              <Plus className="h-4 w-4" />
+              <span className="font-medium">Add Product</span>
             </Link>
           </div>
         </div>
@@ -765,6 +810,7 @@ export default function AdminProductsPage() {
             {checkoutFilter === 'buymeacoffee' && ` (Buy Me a Coffee checkout)`}
             {checkoutFilter === 'external' && ` (External checkout)`}
             {checkoutFilter === 'paypal-invoice' && ` (PayPal Invoice checkout)`}
+            {checkoutFilter === 'paypal-unclaimed' && ` (PayPal Unclaimed checkout)`}
             {checkoutFilter === 'paypal-direct' && ` (PayPal Redirect)`}
           </div>
         </div>
@@ -1066,6 +1112,13 @@ export default function AdminProductsPage() {
                           <path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944 2.79A.859.859 0 0 1 5.79 2h7.832c2.585 0 4.383.56 5.392 1.68.476.523.806 1.105.985 1.75.19.68.19 1.377.003 2.092l-.01.04v.554l.44.248a3.09 3.09 0 0 1 .83.698c.44.528.714 1.201.817 2.002.106.82.067 1.81-.116 2.946-.21 1.3-.576 2.426-1.09 3.35-.47.858-1.073 1.56-1.793 2.09-.686.504-1.5.882-2.42 1.12-.887.23-1.896.346-3.003.346h-.715a1.717 1.717 0 0 0-1.7 1.453l-.09.503-.527 3.36-.024.135a.641.641 0 0 1-.633.545z" />
                         </svg>
                         PayPal Invoice
+                      </span>
+                    ) : product.checkoutFlow === 'paypal-unclaimed' ? (
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-cyan-100 text-cyan-700 text-sm font-semibold rounded-lg">
+                        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944 2.79A.859.859 0 0 1 5.79 2h7.832c2.585 0 4.383.56 5.392 1.68.476.523.806 1.105.985 1.75.19.68.19 1.377.003 2.092l-.01.04v.554l.44.248a3.09 3.09 0 0 1 .83.698c.44.528.714 1.201.817 2.002.106.82.067 1.81-.116 2.946-.21 1.3-.576 2.426-1.09 3.35-.47.858-1.073 1.56-1.793 2.09-.686.504-1.5.882-2.42 1.12-.887.23-1.896.346-3.003.346h-.715a1.717 1.717 0 0 0-1.7 1.453l-.09.503-.527 3.36-.024.135a.641.641 0 0 1-.633.545z" />
+                        </svg>
+                        PayPal Unclaimed
                       </span>
                     ) : product.checkoutFlow === 'paypal-direct' ? (
                       // PayPal Direct redirect: Not clickable, just a badge

@@ -762,6 +762,7 @@ export default function AdminOrdersPage() {
                           'buymeacoffee': { label: '☕ Buy Me a Coffee', color: 'bg-amber-100 text-amber-700' },
                           'external': { label: '🔗 External', color: 'bg-gray-100 text-gray-600' },
                           'paypal-invoice': { label: '🔵 PayPal Invoice', color: 'bg-blue-100 text-blue-700' },
+                          'paypal-unclaimed': { label: '🔵 PayPal Unclaimed', color: 'bg-cyan-100 text-cyan-700' },
                         };
                         const { label, color } = flowLabels[flow] || { label: flow, color: 'bg-gray-100 text-gray-600' };
                         return (
@@ -950,6 +951,7 @@ export default function AdminOrdersPage() {
                             'buymeacoffee': { label: '☕ Buy Me a Coffee', color: 'bg-amber-100 text-amber-700' },
                             'external': { label: '🔗 External', color: 'bg-gray-100 text-gray-600' },
                             'paypal-invoice': { label: '🔵 PayPal Invoice', color: 'bg-blue-100 text-blue-700' },
+                            'paypal-unclaimed': { label: '🔵 PayPal Unclaimed', color: 'bg-cyan-100 text-cyan-700' },
                           };
                           const { label, color } = (flow ? flowLabels[flow] : undefined) || { label: flow || 'Not specified', color: 'bg-gray-100 text-gray-500' };
                           return (

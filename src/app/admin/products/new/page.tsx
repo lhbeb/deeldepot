@@ -126,7 +126,7 @@ export default function NewProductPage() {
     condition: '',
     checkout_link: '',
     payee_email: '',
-    checkout_flow: 'buymeacoffee' as 'buymeacoffee' | 'kofi' | 'external' | 'stripe' | 'paypal-invoice' | 'paypal-direct', // Checkout flow type
+    checkout_flow: 'buymeacoffee' as 'buymeacoffee' | 'kofi' | 'external' | 'stripe' | 'paypal-invoice' | 'paypal-unclaimed' | 'paypal-direct', // Checkout flow type
     currency: 'USD',
     images: '',
     rating: '0',
@@ -552,7 +552,7 @@ export default function NewProductPage() {
               <Field label="Checkout Flow" required hint="Select how customers will complete their purchase">
                 <select
                   value={formData.checkout_flow}
-                  onChange={(e) => updateField('checkout_flow', e.target.value as 'buymeacoffee' | 'kofi' | 'external' | 'stripe' | 'paypal-invoice' | 'paypal-direct')}
+                  onChange={(e) => updateField('checkout_flow', e.target.value as 'buymeacoffee' | 'kofi' | 'external' | 'stripe' | 'paypal-invoice' | 'paypal-unclaimed' | 'paypal-direct')}
                   className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#090A28] focus:border-[#090A28] outline-none transition-all bg-white"
                   required
                 >
@@ -561,6 +561,7 @@ export default function NewProductPage() {
                   <option value="stripe">Stripe (Stripe Checkout - Professional payment processing)</option>
                   <option value="external">External (Custom payment provider)</option>
                   <option value="paypal-invoice">PayPal Invoice (On-site confirmation — invoice sent by email)</option>
+                  <option value="paypal-unclaimed">PayPal Unclaimed (Same as invoice flow for now)</option>
                   <option value="paypal-direct">PayPal Redirect (PayPal Standard — direct payment to your PayPal email)</option>
                 </select>
                 <div className="mt-2 p-3 bg-blue-50 border border-blue-100 rounded-lg">
@@ -580,6 +581,10 @@ export default function NewProductPage() {
                     ) : formData.checkout_flow === 'paypal-invoice' ? (
                       <>
                         <strong>PayPal Invoice:</strong> Customer sees an on-site &ldquo;Order Confirmed — Pending Payment&rdquo; screen. A PayPal invoice is sent to their email.
+                      </>
+                    ) : formData.checkout_flow === 'paypal-unclaimed' ? (
+                      <>
+                        <strong>PayPal Unclaimed:</strong> Uses the same on-site invoice/request flow as PayPal Invoice for now.
                       </>
                     ) : formData.checkout_flow === 'paypal-direct' ? (
                       <>

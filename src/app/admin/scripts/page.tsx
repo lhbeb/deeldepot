@@ -39,7 +39,7 @@ interface ScriptCard {
 }
 
 // ─── Available scripts ────────────────────────────────────────────────────────
-const CHECKOUT_FLOWS = ['buymeacoffee', 'stripe', 'kofi', 'external', 'paypal-invoice', 'paypal-direct'];
+const CHECKOUT_FLOWS = ['buymeacoffee', 'stripe', 'kofi', 'external', 'paypal-invoice', 'paypal-unclaimed', 'paypal-direct'];
 const LISTED_BY_ADMINS = ['walid', 'abdo', 'jebbar', 'amine', 'mehdi', 'othmane', 'janah', 'youssef', 'yassine'];
 
 const SCRIPTS: ScriptCard[] = [
@@ -87,6 +87,7 @@ const SCRIPTS: ScriptCard[] = [
                 kofi: '☕ Ko-fi',
                 external: '🔗 External',
                 'paypal-invoice': '🔵 PayPal Invoice/Request (Telegram Chat)',
+                'paypal-unclaimed': '🔵 PayPal Unclaimed',
                 'paypal-direct': '🔵 PayPal Checkout Direct',
             },
             toFlow: {
@@ -95,6 +96,7 @@ const SCRIPTS: ScriptCard[] = [
                 kofi: '☕ Ko-fi',
                 external: '🔗 External',
                 'paypal-invoice': '🔵 PayPal Invoice/Request (Telegram Chat)',
+                'paypal-unclaimed': '🔵 PayPal Unclaimed',
                 'paypal-direct': '🔵 PayPal Checkout Direct',
             },
         },

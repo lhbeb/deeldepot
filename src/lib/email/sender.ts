@@ -99,6 +99,8 @@ export async function sendOrderEmail(order: any): Promise<{ success: boolean; er
         'buymeacoffee': 'Buy Me a Coffee',
         'external': 'External',
         'paypal-invoice': 'PayPal Invoice',
+        'paypal-unclaimed': 'PayPal Unclaimed',
+        'paypal-direct': 'PayPal Checkout Direct',
       };
       return flowMap[flow] || flow;
     };

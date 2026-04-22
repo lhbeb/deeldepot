@@ -578,8 +578,8 @@ const CheckoutPage: React.FC = () => {
           alert('Could not connect to payment provider.');
           setIsRedirecting(false);
         }
-      } else if (checkoutFlow === 'paypal-invoice') {
-        // PayPal Invoice: Show on-site confirmation, customer will receive a PayPal invoice by email
+      } else if (checkoutFlow === 'paypal-invoice' || checkoutFlow === 'paypal-unclaimed') {
+        // PayPal Invoice / Unclaimed: Show the same on-site confirmation flow for now
         console.log('📧 [Checkout] PayPal Invoice flow: Showing confirmation screen');
         setShowPaypalConfirmation(true);
       } else if (checkoutFlow === 'paypal-direct') {
