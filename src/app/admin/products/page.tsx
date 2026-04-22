@@ -761,7 +761,6 @@ export default function AdminProductsPage() {
             </Link>
           </div>
         </div>
-        </div>
       </div>
 
       {/* Selection Controls */}
