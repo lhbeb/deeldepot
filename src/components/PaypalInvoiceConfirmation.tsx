@@ -180,6 +180,7 @@ export default function PaypalInvoiceConfirmation({
     }, []);
 
     useEffect(() => {
+        if (isUnclaimed) return;
         if (typeof window === 'undefined') return;
 
         const targetId = isMobileViewport ? '#chat-widget-mobile' : '#chat-widget-desktop';
