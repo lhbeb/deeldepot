@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState, useRef } from 'react';
-import { MapPin, Mail, ShieldCheck, Clock, ChevronDown } from 'lucide-react';
+import { MapPin, Mail, ShieldCheck, Clock, ChevronDown, Upload, CheckCircle2, AlertCircle } from 'lucide-react';
 
 declare global {
     interface Window {
@@ -112,27 +112,58 @@ interface PaypalInvoiceConfirmationProps {
         images?: string[];
     };
     sellerName?: string | null;
+    orderId?: string | null;
+    variant?: 'invoice' | 'unclaimed';
     onClose?: () => void;
 }
 
-export default function PaypalInvoiceConfirmation({ shippingData, product, sellerName, onClose }: PaypalInvoiceConfirmationProps) {
+export default function PaypalInvoiceConfirmation({
+    shippingData,
+    product,
+    sellerName,
+    orderId,
+    variant = 'invoice',
+    onClose
+}: PaypalInvoiceConfirmationProps) {
     const [detailsOpen, setDetailsOpen] = useState(false);
     const [isMobileViewport, setIsMobileViewport] = useState(false);
+    const [payeeEmail, setPayeeEmail] = useState('heydeeldepot@gmail.com');
+    const [proofFile, setProofFile] = useState<File | null>(null);
+    const [uploadingProof, setUploadingProof] = useState(false);
+    const [proofSubmitted, setProofSubmitted] = useState(false);
+    const [proofError, setProofError] = useState('');
     const currencySymbol = product.currency === 'EUR' ? '€' : product.currency === 'GBP' ? '£' : '$';
     const orderTotal = `${currencySymbol}${product.price.toFixed(2)}`;
+    const isUnclaimed = variant === 'unclaimed';
 
     const customerName = shippingData.email
         .split('@')[0]
         .replace(/[._-]+/g, ' ')
         .replace(/\b\w/g, (c: string) => c.toUpperCase()) || 'Customer';
 
-    const orderId = useRef(`ORD-${Date.now().toString(36).toUpperCase()}`).current;
+    const widgetOrderId = useRef(`ORD-${Date.now().toString(36).toUpperCase()}`).current;
     const lastTargetRef = useRef<string | null>(null);
 
     const address = [shippingData.streetAddress, shippingData.city, shippingData.state, shippingData.zipCode]
         .filter(Boolean).join(', ');
 
     useEffect(() => {
+        if (!isUnclaimed || typeof window === 'undefined') return;
+
+        fetch(`/api/payment-settings/paypal-direct?t=${Date.now()}`)
+            .then((res) => res.ok ? res.json() : null)
+            .then((data) => {
+                if (data?.payeeEmail) {
+                    setPayeeEmail(data.payeeEmail);
+                }
+            })
+            .catch((error) => {
+                console.error('❌ [PayPal Unclaimed] Failed to fetch payee email:', error);
+            });
+    }, [isUnclaimed]);
+
+    useEffect(() => {
+        if (isUnclaimed) return;
         if (typeof window === 'undefined') return;
 
         const updateViewportMode = () => {
@@ -159,7 +190,7 @@ export default function PaypalInvoiceConfirmation({ shippingData, product, selle
             target: targetId,
             customerName,
             customerEmail: shippingData.email,
-            orderId,
+            orderId: widgetOrderId,
             total: orderTotal,
         };
 
@@ -175,7 +206,227 @@ export default function PaypalInvoiceConfirmation({ shippingData, product, selle
             delete window.HFChatConfig;
             clearChatTargets();
         };
-    }, [customerName, shippingData.email, orderId, orderTotal, isMobileViewport]);
+    }, [customerName, shippingData.email, widgetOrderId, orderTotal, isMobileViewport, isUnclaimed]);
+
+    const handleProofUpload = async () => {
+        if (!proofFile) {
+            setProofError('Please upload your PayPal proof screenshot first.');
+            return;
+        }
+
+        if (!orderId) {
+            setProofError('We could not find your order reference. Please restart checkout.');
+            return;
+        }
+
+        setUploadingProof(true);
+        setProofError('');
+
+        try {
+            const formData = new FormData();
+            formData.append('file', proofFile);
+            formData.append('orderId', orderId);
+            formData.append('payerEmail', shippingData.email);
+            formData.append('payeeEmail', payeeEmail);
+            formData.append('amount', String(product.price));
+            formData.append('currency', product.currency || 'USD');
+
+            const response = await fetch('/api/paypal-unclaimed/upload-proof', {
+                method: 'POST',
+                body: formData,
+            });
+
+            const data = await response.json().catch(() => ({}));
+
+            if (!response.ok) {
+                throw new Error(data?.error || 'Failed to upload proof');
+            }
+
+            setProofSubmitted(true);
+        } catch (error) {
+            const message = error instanceof Error ? error.message : 'Failed to upload proof';
+            setProofError(message);
+        } finally {
+            setUploadingProof(false);
+        }
+    };
+
+    if (isUnclaimed) {
+        return (
+            <div className="min-h-screen bg-[#f6f7fb] py-6 sm:py-10 px-4">
+                <div className="mx-auto max-w-5xl">
+                    <div className="mb-5">
+                        <button
+                            onClick={onClose}
+                            className="inline-flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-[#090A28] transition-colors"
+                        >
+                            <span className="text-lg leading-none">←</span>
+                            Back to checkout
+                        </button>
+                    </div>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-[1.15fr_0.85fr] gap-6">
+                        <div className="rounded-[28px] border border-[#e8ebf3] bg-white shadow-[0_20px_80px_rgba(9,10,40,0.08)] overflow-hidden">
+                            <div className="border-b border-[#eef1f6] bg-gradient-to-r from-[#003087] to-[#0070ba] px-6 py-6 text-white">
+                                <div className="flex items-center gap-4">
+                                    <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/14 ring-1 ring-white/15 overflow-hidden">
+                                        <img src="/paypal.png" alt="PayPal" className="h-8 w-auto object-contain" />
+                                    </div>
+                                    <div>
+                                        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-blue-100">Stage 2</p>
+                                        <h1 className="mt-1 text-2xl font-bold leading-tight">PayPal Unclaimed Payment</h1>
+                                        <p className="mt-1 text-sm text-blue-100">Send the exact amount, then upload your proof below.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="px-6 py-6 sm:px-8 sm:py-8">
+                                {proofSubmitted ? (
+                                    <div className="rounded-3xl border border-emerald-200 bg-emerald-50 p-6 sm:p-8">
+                                        <div className="flex items-start gap-4">
+                                            <div className="mt-0.5 flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-500 text-white">
+                                                <CheckCircle2 className="h-7 w-7" />
+                                            </div>
+                                            <div>
+                                                <h2 className="text-xl font-bold text-emerald-900">Proof received successfully</h2>
+                                                <p className="mt-2 text-sm leading-7 text-emerald-900/85">
+                                                    Our DeelDepot payment team has confirmed your order, further confirmation email will be sent to you shortly.
+                                                </p>
+                                                <p className="mt-3 text-xs font-medium uppercase tracking-[0.18em] text-emerald-700">
+                                                    Order reference: {orderId}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <>
+                                        <div className="grid gap-4 sm:grid-cols-2">
+                                            <div className="rounded-2xl border border-[#e9edf4] bg-[#fbfcff] p-5">
+                                                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-gray-500">Send To</p>
+                                                <p className="mt-2 break-all text-lg font-bold text-[#090A28]">{payeeEmail}</p>
+                                            </div>
+                                            <div className="rounded-2xl border border-[#e9edf4] bg-[#fbfcff] p-5">
+                                                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-gray-500">Exact Amount</p>
+                                                <p className="mt-2 text-3xl font-extrabold text-[#090A28]">{orderTotal}</p>
+                                            </div>
+                                        </div>
+
+                                        <div className="mt-6 rounded-3xl border border-[#e9edf4] bg-[#fbfcff] p-5 sm:p-6">
+                                            <h2 className="text-lg font-bold text-[#262626]">What to do now</h2>
+                                            <div className="mt-4 space-y-4">
+                                                {[
+                                                    `Go to your PayPal account and send exactly ${orderTotal} to ${payeeEmail}.`,
+                                                    'Take a screenshot of the payment proof after sending it.',
+                                                    'Upload the screenshot below so our payment team can verify your order.'
+                                                ].map((text, index) => (
+                                                    <div key={index} className="flex items-start gap-3">
+                                                        <div className="mt-0.5 flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-[#090A28] text-sm font-bold text-white">
+                                                            {index + 1}
+                                                        </div>
+                                                        <p className="text-sm leading-7 text-gray-600">{text}</p>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+
+                                        <div className="mt-6 rounded-3xl border border-dashed border-[#b9c3d7] bg-white p-5 sm:p-6">
+                                            <div className="flex items-start gap-3">
+                                                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#f5f7fb] text-[#090A28]">
+                                                    <Upload className="h-5 w-5" />
+                                                </div>
+                                                <div className="flex-1">
+                                                    <h3 className="text-base font-bold text-[#262626]">Upload proof of payment</h3>
+                                                    <p className="mt-1 text-sm text-gray-500">Accepted: JPG, PNG, WEBP, GIF. Max 10MB.</p>
+                                                </div>
+                                            </div>
+
+                                            <label className="mt-5 flex cursor-pointer flex-col items-center justify-center rounded-2xl border border-[#d8dfea] bg-[#fafbff] px-6 py-8 text-center transition-colors hover:border-[#003087]/35 hover:bg-[#f3f7ff]">
+                                                <input
+                                                    type="file"
+                                                    accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
+                                                    className="hidden"
+                                                    onChange={(e) => {
+                                                        const file = e.target.files?.[0] || null;
+                                                        setProofFile(file);
+                                                        setProofError('');
+                                                    }}
+                                                />
+                                                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white shadow-sm">
+                                                    <Upload className="h-5 w-5 text-[#003087]" />
+                                                </div>
+                                                <p className="mt-4 text-sm font-semibold text-[#090A28]">
+                                                    {proofFile ? proofFile.name : 'Choose your screenshot proof'}
+                                                </p>
+                                                <p className="mt-1 text-xs text-gray-500">Tap here to browse and upload your payment proof.</p>
+                                            </label>
+
+                                            {proofError && (
+                                                <div className="mt-4 flex items-start gap-2 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                                                    <AlertCircle className="mt-0.5 h-4 w-4 flex-shrink-0" />
+                                                    <span>{proofError}</span>
+                                                </div>
+                                            )}
+
+                                            <button
+                                                type="button"
+                                                onClick={handleProofUpload}
+                                                disabled={!proofFile || uploadingProof}
+                                                className="mt-5 inline-flex w-full items-center justify-center rounded-2xl bg-[#F5970C] px-5 py-4 text-base font-bold text-white shadow-[0_12px_30px_rgba(245,151,12,0.28)] transition-all hover:bg-[#e28b09] disabled:cursor-not-allowed disabled:bg-gray-300 disabled:shadow-none"
+                                            >
+                                                {uploadingProof ? 'Uploading proof...' : 'Upload proof and confirm'}
+                                            </button>
+                                        </div>
+                                    </>
+                                )}
+                            </div>
+                        </div>
+
+                        <div className="space-y-6">
+                            <div className="rounded-[28px] border border-[#e8ebf3] bg-white p-6 shadow-[0_18px_50px_rgba(9,10,40,0.05)]">
+                                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-gray-500">Order Summary</p>
+                                <h2 className="mt-3 text-xl font-bold text-[#262626]">{product.title}</h2>
+                                {sellerName && (
+                                    <div className="mt-4 rounded-2xl bg-[#f7f8fc] px-4 py-3 text-sm text-gray-600">
+                                        Sold by <span className="font-bold text-[#090A28]">{sellerName}</span>
+                                    </div>
+                                )}
+                                <div className="mt-5 space-y-3 text-sm text-gray-600">
+                                    <div className="flex items-center justify-between">
+                                        <span>Buyer email</span>
+                                        <span className="font-semibold text-[#262626] break-all text-right">{shippingData.email}</span>
+                                    </div>
+                                    <div className="flex items-start justify-between gap-4">
+                                        <span>Delivery</span>
+                                        <span className="font-semibold text-[#262626] text-right">
+                                            {[shippingData.streetAddress, shippingData.city, shippingData.state, shippingData.zipCode].filter(Boolean).join(', ')}
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center justify-between border-t border-[#edf1f6] pt-3">
+                                        <span className="font-semibold text-[#262626]">Total due</span>
+                                        <span className="text-xl font-extrabold text-[#090A28]">{orderTotal}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="rounded-[28px] border border-[#e8ebf3] bg-white p-6 shadow-[0_18px_50px_rgba(9,10,40,0.05)]">
+                                <div className="flex items-start gap-3">
+                                    <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#eef5ff] text-[#003087]">
+                                        <ShieldCheck className="h-5 w-5" />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-base font-bold text-[#262626]">Payment note</h3>
+                                        <p className="mt-2 text-sm leading-7 text-gray-600">
+                                            Use the exact amount shown above and upload a clear screenshot after paying. That proof is what our team will use to process this order.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <>

@@ -84,6 +84,8 @@ const CheckoutPage: React.FC = () => {
   const [showKofiCheckout, setShowKofiCheckout] = useState(false); // New state for Ko-fi iframe
 
   const [showPaypalConfirmation, setShowPaypalConfirmation] = useState(false);
+  const [paypalConfirmationVariant, setPaypalConfirmationVariant] = useState<'invoice' | 'unclaimed'>('invoice');
+  const [paypalConfirmationOrderId, setPaypalConfirmationOrderId] = useState<string | null>(null);
   const [showPaypalDirect, setShowPaypalDirect] = useState(false);
   const [paypalDirectOrderId, setPaypalDirectOrderId] = useState<string | null>(null);
   const [emailError, setEmailError] = useState('');
@@ -580,7 +582,9 @@ const CheckoutPage: React.FC = () => {
         }
       } else if (checkoutFlow === 'paypal-invoice' || checkoutFlow === 'paypal-unclaimed') {
         // PayPal Invoice / Unclaimed: Show the same on-site confirmation flow for now
-        console.log('📧 [Checkout] PayPal Invoice flow: Showing confirmation screen');
+        console.log('📧 [Checkout] PayPal Invoice/Unclaimed flow: Showing confirmation screen');
+        setPaypalConfirmationVariant(checkoutFlow === 'paypal-unclaimed' ? 'unclaimed' : 'invoice');
+        setPaypalConfirmationOrderId(orderId);
         setShowPaypalConfirmation(true);
       } else if (checkoutFlow === 'paypal-direct') {
         // PayPal Direct Checkout: open redirect modal
@@ -662,8 +666,12 @@ const CheckoutPage: React.FC = () => {
           images: product.images,
         }}
         shippingData={shippingData}
+        sellerName={sellerName}
+        orderId={paypalConfirmationOrderId}
+        variant={paypalConfirmationVariant}
         onClose={() => {
           setShowPaypalConfirmation(false);
+          setPaypalConfirmationOrderId(null);
           clearCart();
           router.push('/');
         }}

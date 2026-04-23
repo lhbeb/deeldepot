@@ -1,7 +1,16 @@
 import 'server-only';
 import { cookies } from 'next/headers';
-import { supabaseAdmin } from './server';
-import { isAdmin } from './auth';
+import { jwtVerify } from 'jose';
+
+const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
+const getSecretKey = () => new TextEncoder().encode(JWT_SECRET);
+
+interface AdminJwtPayload {
+  id: string;
+  email: string;
+  role: string;
+  isActive: boolean;
+}
 
 /**
  * Get the current admin session from cookies/headers
@@ -16,22 +25,16 @@ export async function getAdminSession(): Promise<{ email: string; userId: string
       return null;
     }
 
-    // Verify the token with Supabase
-    const { data: { user }, error } = await supabaseAdmin.auth.getUser(token);
+    const { payload } = await jwtVerify(token, getSecretKey());
+    const decoded = payload as Partial<AdminJwtPayload>;
 
-    if (error || !user) {
-      return null;
-    }
-
-    // Check if user is admin
-    const adminStatus = await isAdmin(user.email || '');
-    if (!adminStatus) {
+    if (!decoded.id || !decoded.email || decoded.isActive !== true) {
       return null;
     }
 
     return {
-      email: user.email || '',
-      userId: user.id,
+      email: decoded.email,
+      userId: decoded.id,
     };
   } catch (error) {
     console.error('Error getting admin session:', error);
@@ -52,4 +55,3 @@ export async function requireAdmin(): Promise<{ email: string; userId: string }>
   
   return session;
 }
-

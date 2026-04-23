@@ -126,6 +126,12 @@ export default function ProductPageClient({ product: initialProduct }: ProductPa
     });
   }, [isConditionTooltipVisible]);
 
+  // Must live before any early returns — React Hooks rules
+  const productImages = product?.images;
+  useEffect(() => {
+    setImgLoaded(false);
+  }, [activeImage, productImages]);
+
   const handleAddToCart = async () => {
     debugLog('handleAddToCart', 'Function called', 'log');
 
@@ -344,10 +350,6 @@ export default function ProductPageClient({ product: initialProduct }: ProductPa
   }
 
   const { slug, title, description, price, images, condition, reviews } = product || {};
-
-  useEffect(() => {
-    setImgLoaded(false);
-  }, [activeImage, images]);
 
   // Safety checks
   if (!slug || !title || !images || images.length === 0) {

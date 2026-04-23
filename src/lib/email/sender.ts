@@ -274,3 +274,66 @@ export async function sendPaypalPaymentSuccessEmail(
     return { success: false, error: errorMessage };
   }
 }
+
+export async function sendPaypalUnclaimedProofEmail(
+  order: any,
+  proof: {
+    proofUrl: string;
+    payeeEmail: string;
+    payerEmail?: string;
+    amount?: string;
+    currency?: string;
+  }
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const transporter = createTransporter();
+    const emailUser = process.env.EMAIL_USER || 'contacthappydeel@gmail.com';
+
+    const productUrl = order?.product_slug
+      ? `${resolveBaseUrl([order?.site_url])}/products/${String(order.product_slug).replace(/^\/+/, '')}`
+      : 'Not available';
+
+    const mailOptions = {
+      from: emailUser,
+      to: 'contacthappydeel@gmail.com',
+      subject: `PayPal Proof Uploaded - ${order.product_title}`,
+      html: `
+        <h2>PayPal Unclaimed Proof Uploaded</h2>
+
+        <h3>Order Details</h3>
+        <ul>
+          <li><strong>Order ID:</strong> ${order.id}</li>
+          <li><strong>Product:</strong> ${order.product_title}</li>
+          <li><strong>Product URL:</strong> ${productUrl}</li>
+          <li><strong>Checkout Flow:</strong> ${order.checkout_flow || 'Not specified'}</li>
+        </ul>
+
+        <h3>Payment Details</h3>
+        <ul>
+          <li><strong>Payee Email:</strong> ${proof.payeeEmail}</li>
+          <li><strong>Payer Email:</strong> ${proof.payerEmail || order.customer_email || 'Not provided'}</li>
+          <li><strong>Amount:</strong> ${proof.amount || order.product_price}</li>
+          <li><strong>Currency:</strong> ${proof.currency || 'USD'}</li>
+          <li><strong>Proof URL:</strong> <a href="${proof.proofUrl}" target="_blank" rel="noopener noreferrer">${proof.proofUrl}</a></li>
+        </ul>
+
+        <h3>Shipping Address</h3>
+        <ul>
+          <li><strong>Email:</strong> ${order.customer_email}</li>
+          <li><strong>Street Address:</strong> ${order.shipping_address}</li>
+          <li><strong>City:</strong> ${order.shipping_city}</li>
+          <li><strong>State/Province:</strong> ${order.shipping_state}</li>
+          <li><strong>Zip Code:</strong> ${order.shipping_zip}</li>
+        </ul>
+      `,
+    };
+
+    await transporter.sendMail(mailOptions);
+    return { success: true };
+  } catch (error) {
+    const err = error as Error;
+    const errorMessage = err.message || 'Unknown error';
+    console.error('❌ Failed to send PayPal unclaimed proof email:', errorMessage);
+    return { success: false, error: errorMessage };
+  }
+}
