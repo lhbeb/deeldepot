@@ -210,10 +210,13 @@ const ProductReviews: React.FC<ProductReviewsProps> = ({
               <div className="flex items-start gap-4">
                 <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100 flex items-center justify-center border border-gray-200">
                   {typeof review.avatar === 'string' && review.avatar.length > 0 ? (
-                    // Use plain <img> to support both https:// URLs and data: base64 strings
-                    <img
+                    // Use next/image with unoptimized=true for arbitrary external/base64 avatars
+                    <Image
                       src={review.avatar}
                       alt={review.author}
+                      width={48}
+                      height={48}
+                      unoptimized={true}
                       className="w-12 h-12 object-cover"
                     />
                   ) : (

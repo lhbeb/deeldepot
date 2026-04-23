@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState, useRef } from 'react';
+import Image from 'next/image';
 import { MapPin, Mail, ShieldCheck, Clock, ChevronDown, Upload, CheckCircle2, AlertCircle } from 'lucide-react';
 
 declare global {
@@ -270,7 +271,7 @@ export default function PaypalInvoiceConfirmation({
                             <div className="border-b border-[#eef1f6] bg-gradient-to-r from-[#003087] to-[#0070ba] px-6 py-6 text-white">
                                 <div className="flex items-center gap-4">
                                     <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/14 ring-1 ring-white/15 overflow-hidden">
-                                        <img src="/paypal.png" alt="PayPal" className="h-8 w-auto object-contain" />
+                                        <Image src="/paypal.png" alt="PayPal" width={100} height={32} className="h-8 w-auto object-contain" />
                                     </div>
                                     <div>
                                         <p className="text-xs font-semibold uppercase tracking-[0.24em] text-blue-100">Stage 2</p>
@@ -443,7 +444,7 @@ export default function PaypalInvoiceConfirmation({
                         className="w-full px-4 py-3 flex items-center gap-3 text-left"
                     >
                         <div className="w-9 h-9 rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center flex-shrink-0 overflow-hidden">
-                            <img src="/paypal-incoice.webp" alt="PayPal" className="w-6 h-6 object-contain" />
+                            <Image src="/paypal-incoice.webp" alt="PayPal" width={24} height={24} className="w-6 h-6 object-contain" />
                         </div>
                         <div className="flex-1 min-w-0">
                             <p className="text-sm font-bold text-[#262626] leading-tight">Order Reserved</p>
@@ -502,7 +503,7 @@ export default function PaypalInvoiceConfirmation({
 
                             <div className="flex items-center gap-3 mb-6">
                                 <div className="w-11 h-11 rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center flex-shrink-0 overflow-hidden">
-                                    <img src="/paypal-incoice.webp" alt="PayPal" className="w-7 h-7 object-contain" />
+                                    <Image src="/paypal-incoice.webp" alt="PayPal" width={28} height={28} className="w-7 h-7 object-contain" />
                                 </div>
                                 <div>
                                     <h1 className="text-xl font-extrabold text-[#262626] leading-tight">Order Reserved</h1>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { Plus, Search, Edit2, Trash2, User, MapPin, Eye, Calendar, Star, Users } from 'lucide-react';
 import AdminLayout from '@/components/AdminLayout';
@@ -136,7 +137,7 @@ export default function SellersPage() {
                 {/* Avatar */}
                 <div className="w-12 h-12 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0 flex items-center justify-center border border-gray-200 shadow-sm">
                   {seller.avatarUrl ? (
-                    <img src={seller.avatarUrl} alt={seller.name} className="w-full h-full object-cover" />
+                    <Image src={seller.avatarUrl} alt={seller.name} width={48} height={48} unoptimized={true} className="w-full h-full object-cover" />
                   ) : (
                     <User className="h-5 w-5 text-gray-400" />
                   )}

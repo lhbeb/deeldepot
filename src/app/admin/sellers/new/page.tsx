@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from 'react';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
@@ -177,7 +178,7 @@ export default function NewSellerPage() {
                 <div className="relative group w-20 h-20">
                   <div className="w-20 h-20 rounded-2xl overflow-hidden bg-gradient-to-br from-[#090A28]/10 to-[#090A28]/5 border-2 border-gray-200 flex items-center justify-center">
                     {formData.avatar_url ? (
-                      <img src={formData.avatar_url} alt="Avatar preview" className="w-full h-full object-cover" />
+                      <Image src={formData.avatar_url} alt="Avatar preview" width={80} height={80} unoptimized={true} className="w-full h-full object-cover" />
                     ) : (
                       <span className="text-2xl font-bold text-[#090A28]/30">{avatarInitials}</span>
                     )}

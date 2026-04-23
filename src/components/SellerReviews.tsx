@@ -178,12 +178,14 @@ export default function SellerReviews({
             <div key={`${review.id}-${index}`} className="p-6">
               <div className="flex items-start gap-4">
                 {/* Avatar */}
-                <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100 flex items-center justify-center border border-gray-200">
                   {typeof review.avatar === 'string' && review.avatar.length > 0 ? (
-                    <img
+                    <Image
                       src={review.avatar}
                       alt={review.author}
+                      width={48}
+                      height={48}
                       className="w-12 h-12 object-cover"
+                      unoptimized={true}
                     />
                   ) : (
                     <svg className="w-7 h-7 text-gray-400" fill="currentColor" viewBox="0 0 24 24">

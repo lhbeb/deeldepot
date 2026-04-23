@@ -553,10 +553,12 @@ export default function ProductPageClient({ product: initialProduct }: ProductPa
                           {isBuyingNow ? (
                             <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#003087]" />
                           ) : (
-                            <img
+                            <Image
                               src="/PayPal-checkout.png"
                               alt="PayPal Checkout"
-                              className="h-6 object-contain"
+                              width={150}
+                              height={24}
+                              className="h-6 w-auto object-contain"
                             />
                           )}
                         </button>
@@ -656,6 +658,7 @@ export default function ProductPageClient({ product: initialProduct }: ProductPa
                 fill
                 priority
                 quality={100}
+                unoptimized={true}
                 sizes="100vw"
                 className="object-contain transition-transform duration-200"
                 style={{ transform: `scale(${zoomLevel})` }}

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
+import Image from 'next/image';
 import { Loader2, CheckCircle, AlertCircle, X, Lock } from 'lucide-react';
 
 interface ShippingData {
@@ -182,10 +183,13 @@ const PaypalDirectCheckout: React.FC<PaypalDirectCheckoutProps> = ({
                 style={{ backgroundColor: '#EFC154' }}
                 aria-label="Pay with PayPal"
               >
-                <img
+                <Image
                   src="https://www.paypalobjects.com/webstatic/mktg/Logo/pp-logo-100px.png"
                   alt="PayPal"
-                  className="h-5 object-contain"
+                  width={100}
+                  height={26}
+                  unoptimized={true}
+                  className="h-5 w-auto object-contain"
                   onError={(e) => {
                     (e.target as HTMLImageElement).style.display = 'none';
                   }}

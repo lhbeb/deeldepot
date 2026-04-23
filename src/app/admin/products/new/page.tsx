@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from 'react';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
@@ -916,7 +917,7 @@ export default function NewProductPage() {
                   <div key={review.id || i} className="flex items-start gap-3 p-3 bg-gray-50 rounded-xl group">
                     <div className="w-9 h-9 rounded-full flex-shrink-0 overflow-hidden bg-gray-200 flex items-center justify-center">
                       {typeof review.avatar === 'string' && review.avatar.length > 0 ? (
-                        <img src={review.avatar} alt={review.author} className="w-full h-full object-cover" />
+                        <Image src={review.avatar} alt={review.author} width={36} height={36} unoptimized={true} className="w-full h-full object-cover" />
                       ) : (
                         <div className="w-9 h-9 bg-gradient-to-br from-[#090A28] to-purple-600 rounded-full flex items-center justify-center text-white text-sm font-medium">
                           {review.author?.charAt(0)?.toUpperCase()}
@@ -977,7 +978,7 @@ export default function NewProductPage() {
                 <label className="relative cursor-pointer group flex-shrink-0">
                   <div className="w-16 h-16 rounded-full overflow-hidden bg-gray-100 border-2 border-dashed border-gray-300 group-hover:border-[#090A28] transition-colors flex items-center justify-center">
                     {typeof editingReview.data.avatar === 'string' && editingReview.data.avatar.length > 0 ? (
-                      <img src={editingReview.data.avatar} alt="Avatar" className="w-full h-full object-cover" />
+                      <Image src={editingReview.data.avatar} alt="Avatar" width={64} height={64} unoptimized={true} className="w-full h-full object-cover" />
                     ) : (
                       <svg className="w-8 h-8 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z" />
