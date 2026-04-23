@@ -178,6 +178,7 @@ export default function SellerReviews({
             <div key={`${review.id}-${index}`} className="p-6">
               <div className="flex items-start gap-4">
                 {/* Avatar */}
+                <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100 flex items-center justify-center border border-gray-200">
                   {typeof review.avatar === 'string' && review.avatar.length > 0 ? (
                     <Image
                       src={review.avatar}
