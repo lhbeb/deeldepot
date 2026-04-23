@@ -21,6 +21,8 @@ interface ProductPageClientProps {
   product: Product | null;
 }
 
+const PRODUCT_IMAGE_QUALITY = 95;
+
 export default function ProductPageClient({ product: initialProduct }: ProductPageClientProps) {
   const [imgLoaded, setImgLoaded] = useState(false);
   const router = useRouter();
@@ -343,6 +345,10 @@ export default function ProductPageClient({ product: initialProduct }: ProductPa
 
   const { slug, title, description, price, images, condition, reviews } = product || {};
 
+  useEffect(() => {
+    setImgLoaded(false);
+  }, [activeImage, images]);
+
   // Safety checks
   if (!slug || !title || !images || images.length === 0) {
     return (
@@ -376,10 +382,12 @@ export default function ProductPageClient({ product: initialProduct }: ProductPa
                       </div>
                     )}
                     <Image
+                      key={images[activeImage]}
                       src={images[activeImage]}
                       alt={`${title || 'Product'} - Image ${activeImage + 1}`}
                       fill
                       priority
+                      quality={PRODUCT_IMAGE_QUALITY}
                       sizes="(max-width: 1024px) 100vw, 50vw"
                       className={`object-cover rounded-md transition-opacity duration-300 ${imgLoaded ? 'opacity-100' : 'opacity-0'}`}
                       onError={(e) => {
@@ -407,10 +415,18 @@ export default function ProductPageClient({ product: initialProduct }: ProductPa
                         onClick={() => setActiveImage(idx)}
                         className={`relative flex-shrink-0 w-20 h-20 rounded-md overflow-hidden ${activeImage === idx ? 'ring-2 ring-[#090A28]' : 'ring-1 ring-gray-200'}`}
                       >
-                        <Image src={image} alt={`${title || 'Product'} thumbnail ${idx + 1}`} fill sizes="80px" className="object-cover" onError={(e) => {
-                          console.error('Thumbnail failed to load:', image);
-                          (e.target as HTMLImageElement).src = '/placeholder.png';
-                        }} unoptimized />
+                        <Image
+                          src={image}
+                          alt={`${title || 'Product'} thumbnail ${idx + 1}`}
+                          fill
+                          quality={90}
+                          sizes="80px"
+                          className="object-cover"
+                          onError={(e) => {
+                            console.error('Thumbnail failed to load:', image);
+                            (e.target as HTMLImageElement).src = '/placeholder.png';
+                          }}
+                        />
                         {activeImage === idx && <div className="absolute inset-0 bg-white/10"></div>}
                       </button>
                     ) : null
@@ -631,7 +647,18 @@ export default function ProductPageClient({ product: initialProduct }: ProductPa
           </div>
           <div className="absolute inset-0 flex items-center justify-center p-4" onClick={(e) => e.stopPropagation()} onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd}>
             <div className="relative w-full h-full">
-              <Image src={images[activeImage]} alt={`${title} - Image ${activeImage + 1}`} fill sizes="100vw" className="object-contain transition-transform duration-200" style={{ transform: `scale(${zoomLevel})` }} onClick={(e) => e.stopPropagation()} />
+              <Image
+                key={`zoom-${images[activeImage]}`}
+                src={images[activeImage]}
+                alt={`${title} - Image ${activeImage + 1}`}
+                fill
+                priority
+                quality={100}
+                sizes="100vw"
+                className="object-contain transition-transform duration-200"
+                style={{ transform: `scale(${zoomLevel})` }}
+                onClick={(e) => e.stopPropagation()}
+              />
               {images.length > 1 && (
                 <>
                   <button onClick={(e) => { e.stopPropagation(); setActiveImage((prev) => (prev > 0 ? prev - 1 : images.length - 1)); setZoomLevel(1); }} className="absolute left-4 top-1/2 -translate-y-1/2 transform bg-white/10 hover:bg-[#090A28] p-3 rounded-full text-white transition-colors duration-200" aria-label="Previous image"><ChevronLeft className="h-8 w-8" /></button>
