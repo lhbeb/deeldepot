@@ -70,7 +70,13 @@ const PaypalDirectCheckout: React.FC<PaypalDirectCheckoutProps> = ({
 
     setIsRedirecting(true);
 
-    const params = new URLSearchParams({
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = 'https://www.paypal.com/cgi-bin/webscr';
+    form.style.display = 'none';
+    form.target = '_top';
+
+    const fields: Record<string, string> = {
       cmd: '_xclick',
       business: resolvedPayeeEmail.trim(),
       item_name: product.title.substring(0, 127).trim(),
@@ -83,16 +89,25 @@ const PaypalDirectCheckout: React.FC<PaypalDirectCheckoutProps> = ({
       cancel_return: `${window.location.origin}/checkout`,
       notify_url: `${window.location.origin}/api/paypal/ipn`,
       rm: '0',
-    });
+      bn: 'DeelDepot_BuyNow_WPS_US',
+    };
 
     if (orderId) {
-      params.set('custom', orderId);
-      params.set('invoice', orderId);
+      fields.custom = orderId;
+      fields.invoice = orderId;
     }
 
-    const paypalUrl = `https://www.paypal.com/cgi-bin/webscr?${params.toString()}`;
-    console.log('🚀 [PayPal Direct] Redirecting to:', paypalUrl);
-    window.location.href = paypalUrl;
+    Object.entries(fields).forEach(([name, value]) => {
+      const input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = name;
+      input.value = value;
+      form.appendChild(input);
+    });
+
+    document.body.appendChild(form);
+    console.log('🚀 [PayPal Direct] Submitting PayPal Standard form POST');
+    form.submit();
 
     // Safety reset in case browser blocks navigation
     setTimeout(() => setIsRedirecting(false), 10000);

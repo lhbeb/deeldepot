@@ -397,8 +397,8 @@ const CheckoutPage: React.FC = () => {
    * Called by the PayPal Redirect button.
    * Runs validation AND saves the order intent to the DB before redirecting.
    */
-  const handlePaypalBeforePayment = async (): Promise<{ ok: boolean; payeeEmail: string; amount: number; currency: string; description: string }> => {
-    const fail = { ok: false, payeeEmail: '', amount: 0, currency: 'USD', description: '' };
+  const handlePaypalBeforePayment = async (): Promise<{ ok: boolean; payeeEmail: string; amount: number; currency: string; description: string; orderId?: string }> => {
+    const fail = { ok: false, payeeEmail: '', amount: 0, currency: 'USD', description: '', orderId: undefined };
 
     if (!cartItem?.product) return fail;
     const product = cartItem.product;
@@ -451,7 +451,8 @@ const CheckoutPage: React.FC = () => {
         payeeEmail: paymentTarget,
         amount,
         currency: product.currency || 'USD',
-        description: product.title
+        description: product.title,
+        orderId
       };
     } catch (err) {
       debugError('CheckoutPage: handlePaypalBeforePayment', err);

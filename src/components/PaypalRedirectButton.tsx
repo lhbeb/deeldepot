@@ -5,7 +5,7 @@ import Image from 'next/image';
 
 interface PaypalRedirectButtonProps {
   /** Called before redirect — run validation + save order. Return false to abort. */
-  onBeforePayment: () => Promise<{ ok: boolean; payeeEmail: string; amount: number; currency: string; description: string }>;
+  onBeforePayment: () => Promise<{ ok: boolean; payeeEmail: string; amount: number; currency: string; description: string; orderId?: string }>;
   disabled?: boolean;
   className?: string;
 }
@@ -36,11 +36,16 @@ const PaypalRedirectButton: React.FC<PaypalRedirectButtonProps> = ({
         return; 
       }
 
-      // 2. Build the PayPal URL and redirect immediately.
-      // We use a GET redirect (window.location.href) rather than a form POST
-      // because after an async await, the browser may have already started
-      // destroying the React tree, making DOM form submissions unreliable.
-      const params = new URLSearchParams({
+      // PayPal Payments Standard expects a form POST to /cgi-bin/webscr.
+      // We create and submit the form programmatically so we avoid nesting forms
+      // inside the checkout form while still following PayPal's expected flow.
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = 'https://www.paypal.com/cgi-bin/webscr';
+      form.style.display = 'none';
+      form.target = '_top';
+
+      const fields: Record<string, string> = {
         cmd: '_xclick',
         business: result.payeeEmail.trim(),
         item_name: result.description.substring(0, 127).trim(),
@@ -51,13 +56,27 @@ const PaypalRedirectButton: React.FC<PaypalRedirectButtonProps> = ({
         charset: 'UTF-8',
         return: `${window.location.origin}/thankyou`,
         cancel_return: `${window.location.origin}/checkout`,
+        notify_url: `${window.location.origin}/api/paypal/ipn`,
         rm: '0',
+        bn: 'DeelDepot_BuyNow_WPS_US',
+      };
+
+      if (result.orderId) {
+        fields.custom = result.orderId;
+        fields.invoice = result.orderId;
+      }
+
+      Object.entries(fields).forEach(([name, value]) => {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = name;
+        input.value = value;
+        form.appendChild(input);
       });
 
-      const paypalUrl = `https://www.paypal.com/cgi-bin/webscr?${params.toString()}`;
-      console.log('🚀 [PayPal] Redirecting to PayPal:', paypalUrl);
-      
-      window.location.href = paypalUrl;
+      document.body.appendChild(form);
+      console.log('🚀 [PayPal] Submitting PayPal Standard form POST');
+      form.submit();
 
       // Safety reset in case navigation is blocked by the browser
       setTimeout(() => setIsLoading(false), 10000);
