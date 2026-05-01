@@ -197,19 +197,46 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Invalid Secret Key signature' }, { status: 400 });
         }
 
-        const { error } = await supabaseAdmin
+        // Check if a Stripe row already exists so we can UPDATE instead of INSERT.
+        // We avoid .upsert({ onConflict: 'provider' }) because the DB uses a
+        // *partial* unique index (WHERE is_active = true), which PostgreSQL does
+        // not accept for ON CONFLICT resolution.
+        const { data: existingStripe } = await supabaseAdmin
             .from('payment_settings')
-            .upsert({
-                provider: 'stripe',
-                publishable_key: publishableKey,
-                secret_key: secretKey,
-                mode: mode,
-                is_active: true,
-                updated_by: auth.email
-            }, { onConflict: 'provider' });
+            .select('id')
+            .eq('provider', 'stripe')
+            .maybeSingle();
 
-        if (error) {
-            console.error('Error upserting Stripe settings:', error);
+        let stripeError: any = null;
+
+        if (existingStripe) {
+            const { error: updateError } = await supabaseAdmin
+                .from('payment_settings')
+                .update({
+                    publishable_key: publishableKey,
+                    secret_key: secretKey,
+                    mode: mode,
+                    is_active: true,
+                    updated_by: auth.email
+                })
+                .eq('provider', 'stripe');
+            stripeError = updateError;
+        } else {
+            const { error: insertError } = await supabaseAdmin
+                .from('payment_settings')
+                .insert({
+                    provider: 'stripe',
+                    publishable_key: publishableKey,
+                    secret_key: secretKey,
+                    mode: mode,
+                    is_active: true,
+                    updated_by: auth.email
+                });
+            stripeError = insertError;
+        }
+
+        if (stripeError) {
+            console.error('Error saving Stripe settings:', stripeError);
             return NextResponse.json({ error: 'Failed to save configuration' }, { status: 500 });
         }
 
