@@ -89,6 +89,7 @@ const CheckoutPage: React.FC = () => {
   const [showPaypalDirect, setShowPaypalDirect] = useState(false);
   const [paypalDirectOrderId, setPaypalDirectOrderId] = useState<string | null>(null);
   const [emailError, setEmailError] = useState('');
+  const [checkoutError, setCheckoutError] = useState('');
   const [isSendingEmail, setIsSendingEmail] = useState(false);
   const [sellerName, setSellerName] = useState<string | null>(null);
   const [paypalDirectEmail, setPaypalDirectEmail] = useState(''); // Platform receiving email
@@ -522,6 +523,7 @@ const CheckoutPage: React.FC = () => {
     console.log('👤 [Checkout] Shipping data:', { email: shippingData.email });
 
     setIsSendingEmail(true);
+    setCheckoutError('');
 
     try {
       // Send shipping information to email
@@ -572,13 +574,13 @@ const CheckoutPage: React.FC = () => {
           if (data.url) {
             window.location.href = data.url;
           } else {
-            console.error('❌ [Checkout] Missing URL in Stripe response:', data);
-            alert('Failed to initialize payment. Please try again.');
+            console.error('❌ [Checkout] Stripe session creation failed:', data);
+            setCheckoutError(data.error || 'Failed to initialize payment. Please try again.');
             setIsRedirecting(false);
           }
         } catch (e) {
           console.error('❌ [Checkout] Failed connecting to Stripe:', e);
-          alert('Could not connect to payment provider.');
+          setCheckoutError('Could not connect to payment provider. Please check your connection and try again.');
           setIsRedirecting(false);
         }
       } else if (checkoutFlow === 'paypal-invoice' || checkoutFlow === 'paypal-unclaimed') {
@@ -1278,6 +1280,17 @@ const CheckoutPage: React.FC = () => {
                         </button>
                       )}
                     </div>
+
+                    {/* Checkout error banner */}
+                    {checkoutError && (
+                      <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-xl flex items-start gap-3">
+                        <svg className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        <div>
+                          <p className="text-sm font-medium text-red-800">{checkoutError}</p>
+                          <button onClick={() => setCheckoutError('')} className="text-xs text-red-600 underline mt-1">Dismiss</button>
+                        </div>
+                      </div>
+                    )}
 
                     {/* CTA Button - Mobile Sticky (hidden for paypal-direct flow, PayPal button is in-form) */}
                     {product.checkoutFlow !== 'paypal-direct' && (
