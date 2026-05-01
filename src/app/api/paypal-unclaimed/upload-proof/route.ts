@@ -37,8 +37,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Order not found.' }, { status: 404 });
     }
 
-    if (order.checkout_flow !== 'paypal-unclaimed') {
-      return NextResponse.json({ error: 'This order does not support PayPal proof upload.' }, { status: 400 });
+    const allowedFlows = ['paypal-unclaimed', 'paypal-direct'];
+    if (!allowedFlows.includes(order.checkout_flow)) {
+      console.error('❌ [PayPal Unclaimed Proof] Invalid checkout_flow:', order.checkout_flow, 'for order:', orderId);
+      return NextResponse.json({ error: `This order does not support PayPal proof upload. Flow: ${order.checkout_flow}` }, { status: 400 });
     }
 
     const extension = file.name.split('.').pop()?.toLowerCase() || 'jpg';
@@ -55,8 +57,13 @@ export async function POST(request: NextRequest) {
       });
 
     if (uploadError) {
-      console.error('❌ [PayPal Unclaimed Proof] Storage upload failed:', uploadError);
-      return NextResponse.json({ error: 'Failed to store proof image.' }, { status: 500 });
+      console.error('❌ [PayPal Unclaimed Proof] Storage upload failed:', {
+        message: uploadError.message,
+        name: (uploadError as any).name,
+        statusCode: (uploadError as any).statusCode,
+        error: JSON.stringify(uploadError),
+      });
+      return NextResponse.json({ error: `Failed to store proof image: ${uploadError.message}` }, { status: 500 });
     }
 
     const {
