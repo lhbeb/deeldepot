@@ -67,8 +67,17 @@ export async function POST(request: NextRequest) {
 
         // Get the base URL for success/cancel redirects
         const origin = request.headers.get('origin') || process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+        const shippingAddress = {
+            line1: shippingData.streetAddress,
+            city: shippingData.city,
+            state: shippingData.state,
+            postal_code: shippingData.zipCode,
+        };
 
-        // Create Stripe Checkout Session with expiration
+        // Create Stripe Checkout Session with expiration.
+        // The delivery address is already collected and saved in our checkout flow,
+        // so do not enable shipping_address_collection here. Asking again in Stripe
+        // adds friction and can lower conversion.
         const session = await stripe.checkout.sessions.create({
             payment_method_types: ['card'],
             line_items: [
@@ -89,8 +98,11 @@ export async function POST(request: NextRequest) {
             success_url: `${origin}/thankyou?session_id={CHECKOUT_SESSION_ID}`,
             cancel_url: `${origin}/checkout`,
             customer_email: shippingData.email,
-            shipping_address_collection: {
-                allowed_countries: ['US', 'CA', 'GB', 'AU', 'DE', 'FR', 'IT', 'ES', 'NL', 'BE', 'AT', 'CH', 'SE', 'NO', 'DK', 'FI', 'IE', 'PT', 'GR', 'PL', 'CZ', 'HU', 'RO', 'BG', 'HR', 'SK', 'SI', 'LT', 'LV', 'EE', 'CY', 'MT', 'LU'],
+            payment_intent_data: {
+                shipping: {
+                    name: shippingData.email,
+                    address: shippingAddress,
+                },
             },
             // Stripe requires expires_at to be at least 30 minutes from now
             expires_at: Math.floor(Date.now() / 1000) + (30 * 60), // 30 minutes from now
@@ -99,6 +111,10 @@ export async function POST(request: NextRequest) {
                 product_slug: product.slug,
                 product_id: product.id,
                 customer_email: shippingData.email,
+                shipping_address: shippingData.streetAddress,
+                shipping_city: shippingData.city,
+                shipping_state: shippingData.state,
+                shipping_zip: shippingData.zipCode,
             },
         });
 

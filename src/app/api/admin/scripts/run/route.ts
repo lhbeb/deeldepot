@@ -40,6 +40,33 @@ interface FlowResult {
     updated: boolean;
 }
 
+interface BmcSellerStockResult {
+    slug: string;
+    title: string;
+    sellerUsername: string;
+    checkoutLink: string;
+    oldStock: string;
+    newStock: string;
+    updated: boolean;
+}
+
+function normalizeBmcSellerUsername(input: string): string {
+    const value = (input || '').trim();
+    if (!value) return '';
+
+    try {
+        const parsed = new URL(value.startsWith('http') ? value : `https://buymeacoffee.com/${value}`);
+        const segments = parsed.pathname.split('/').filter(Boolean);
+        return (segments[0] || '').trim().toLowerCase();
+    } catch {
+        return value
+            .replace(/^https?:\/\/(www\.)?buymeacoffee\.com\//i, '')
+            .split('/')[0]
+            .trim()
+            .toLowerCase();
+    }
+}
+
 /**
  * Script: replace-bmc-username
  * Replaces a BuyMeACoffee username segment in checkout_link across all products.
@@ -215,6 +242,62 @@ async function runBulkMarkSoldOut(
         const { error: updateError } = await updateQuery;
         if (updateError) {
             console.error('❌ Bulk stock update failed:', updateError.message);
+        } else {
+            affected.forEach(item => (item.updated = true));
+        }
+    }
+
+    return { affected: affected.length, results: affected };
+}
+
+/**
+ * Script: sold-out-bmc-seller-products
+ * Finds products with checkout_flow=buymeacoffee and a checkout_link for one
+ * BuyMeACoffee seller, then marks those products as sold out.
+ */
+async function runSoldOutBmcSellerProducts(
+    sellerUsernameInput: string,
+    dryRun: boolean
+): Promise<{ affected: number; results: BmcSellerStockResult[] }> {
+    const sellerUsername = normalizeBmcSellerUsername(sellerUsernameInput);
+
+    if (!sellerUsername) {
+        throw new Error('sellerUsername is required');
+    }
+
+    if (!/^[a-z0-9_-]+$/i.test(sellerUsername)) {
+        throw new Error('sellerUsername can only contain letters, numbers, underscores, and hyphens');
+    }
+
+    const checkoutLinkPattern = `%buymeacoffee.com/${sellerUsername}/extras/checkout/%`;
+    const { data, error } = await supabaseAdmin
+        .from('products')
+        .select('slug, title, checkout_link, checkout_flow, in_stock')
+        .eq('checkout_flow', 'buymeacoffee')
+        .ilike('checkout_link', checkoutLinkPattern);
+
+    if (error) throw new Error(`Failed to fetch products: ${error.message}`);
+
+    const products = data || [];
+    const affected: BmcSellerStockResult[] = products.map(p => ({
+        slug: p.slug,
+        title: p.title,
+        sellerUsername,
+        checkoutLink: p.checkout_link || '',
+        oldStock: p.in_stock === false ? 'sold out' : 'available',
+        newStock: 'sold out',
+        updated: false,
+    }));
+
+    if (!dryRun && affected.length > 0) {
+        const { error: updateError } = await supabaseAdmin
+            .from('products')
+            .update({ in_stock: false, updated_at: new Date().toISOString() })
+            .eq('checkout_flow', 'buymeacoffee')
+            .ilike('checkout_link', checkoutLinkPattern);
+
+        if (updateError) {
+            console.error('❌ BMC seller sold-out update failed:', updateError.message);
         } else {
             affected.forEach(item => (item.updated = true));
         }
@@ -401,6 +484,30 @@ export async function POST(request: NextRequest) {
                     message: dryRun
                         ? `Preview: ${result.affected} product(s) would be marked as ${actionLabel}`
                         : `Done: ${result.results.filter(r => r.updated).length} product(s) marked as ${actionLabel}`,
+                });
+            }
+
+            case 'sold-out-bmc-seller-products': {
+                const sellerUsername = params.sellerUsername || '';
+                const normalizedSellerUsername = normalizeBmcSellerUsername(sellerUsername);
+
+                if (!normalizedSellerUsername) {
+                    return NextResponse.json(
+                        { error: 'sellerUsername is required' },
+                        { status: 400 }
+                    );
+                }
+
+                const result = await runSoldOutBmcSellerProducts(normalizedSellerUsername, dryRun);
+
+                return NextResponse.json({
+                    scriptId,
+                    dryRun,
+                    affected: result.affected,
+                    results: result.results,
+                    message: dryRun
+                        ? `Preview: ${result.affected} BuyMeACoffee product(s) for "${normalizedSellerUsername}" would be marked sold out`
+                        : `Done: ${result.results.filter(r => r.updated).length} BuyMeACoffee product(s) for "${normalizedSellerUsername}" marked sold out`,
                 });
             }
 

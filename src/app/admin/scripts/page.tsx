@@ -126,6 +126,23 @@ const SCRIPTS: ScriptCard[] = [
         },
     },
     {
+        id: 'sold-out-bmc-seller-products',
+        name: 'Sold Out Products by BuyMeACoffee Seller',
+        description:
+            'Finds products whose checkout_flow is Buy Me a Coffee and whose checkout link belongs to the seller username you enter. ' +
+            'Preview first to count and inspect the matching products, then run to mark only those products as sold out. Checkout links are never changed.',
+        danger: true,
+        params: {
+            sellerUsername: '',
+        },
+        paramLabels: {
+            sellerUsername: 'BuyMeACoffee seller username',
+        },
+        paramPlaceholders: {
+            sellerUsername: 'e.g. finsteramberrene',
+        },
+    },
+    {
         id: 'bulk-assign-seller-by-admin',
         name: 'Bulk Assign Seller by Admin',
         description:
@@ -385,6 +402,12 @@ function ScriptCardComponent({ script }: { script: ScriptCard }) {
                                                 <th className="text-left px-4 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Previous Seller</th>
                                                 <th className="text-left px-4 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">New Seller ID</th>
                                             </>
+                                        ) : 'checkoutLink' in (response.results[0] ?? {}) ? (
+                                            <>
+                                                <th className="text-left px-4 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Seller</th>
+                                                <th className="text-left px-4 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Stock Status</th>
+                                                <th className="text-left px-4 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Checkout Link</th>
+                                            </>
                                         ) : 'oldFlow' in (response.results[0] ?? {}) ? (
                                             <>
                                                 <th className="text-left px-4 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Old Flow</th>
@@ -421,7 +444,23 @@ function ScriptCardComponent({ script }: { script: ScriptCard }) {
                                                     </span>
                                                 </td>
                                             </>
-                                        ) : 'oldFlow' in row ? (
+                                        ) : 'checkoutLink' in row ? (
+                                                <>
+                                                    <td className="px-4 py-3">
+                                                        <span className="inline-block px-2 py-0.5 bg-[#090A28]/10 text-[#090A28] rounded text-xs font-mono">
+                                                            {row.sellerUsername}
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-4 py-3">
+                                                        <span className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${row.oldStock === 'sold out' ? 'bg-red-50 text-red-700' : 'bg-green-50 text-green-700'}`}>
+                                                            {row.oldStock} → {row.newStock}
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-4 py-3 text-gray-500 font-mono text-xs max-w-[260px] truncate" title={row.checkoutLink}>
+                                                        {row.checkoutLink}
+                                                    </td>
+                                                </>
+                                            ) : 'oldFlow' in row ? (
                                                 <>
                                                     <td className="px-4 py-3">
                                                         <span className="inline-block px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-xs font-mono">{row.oldFlow}</span>
